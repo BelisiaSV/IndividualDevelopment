@@ -106,8 +106,13 @@ async function init(){
     sb.token=tok;
     const usr=JSON.parse(localStorage.getItem('sb_usr')||'{}');
     sb.userId=usr.id;
+    // Always verify token is still valid with Supabase
     const check=await sb.me();
-    if(check.id){await bootApp();return;}
+    if(check.id){
+      // Update localStorage with fresh user data
+      localStorage.setItem('sb_usr',JSON.stringify(check));
+      await bootApp();return;
+    }
     localStorage.removeItem('sb_tok');localStorage.removeItem('sb_usr');
   }
   document.getElementById('loading').style.display='none';
@@ -119,10 +124,17 @@ async function bootApp(){
   document.getElementById('authWrap').style.display='none';
   const usr=JSON.parse(localStorage.getItem('sb_usr')||'{}');
   S.user=usr;
-  // Profile
+  // Always fetch fresh profile from Supabase (never trust cache for role)
   const {data:profs}=await sb.q('profiles').eq('id',sb.userId).get();
-  S.profile=profs[0]||{id:sb.userId,name:usr.user_metadata?.name||usr.email,role:'player'};
-  if(!profs[0]) await sb.q('profiles').insert({id:sb.userId,name:usr.user_metadata?.name||usr.email,role:'player'});
+  if(profs[0]){
+    S.profile=profs[0];
+    // Update cached user with fresh role
+    const freshUsr={...usr,_role:profs[0].role};
+    localStorage.setItem('sb_usr',JSON.stringify(freshUsr));
+  } else {
+    S.profile={id:sb.userId,name:usr.user_metadata?.name||usr.email,role:'player'};
+    await sb.q('profiles').insert({id:sb.userId,name:usr.user_metadata?.name||usr.email,role:'player'});
+  }
   // Load all data in parallel
   await Promise.all([loadPlayers(),loadKpis(),loadPrincipes(),loadWeekSessions(),loadCoachData(),loadOefenvormen()]);
   document.getElementById('loading').style.display='none';
