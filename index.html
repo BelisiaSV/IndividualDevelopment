@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belisia SV — Performance Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{--f:'Barlow',sans-serif;--fc:'Barlow Condensed',sans-serif;--blue:#4FA8D1;--bg:#F2F4F6;--txt:#161F2B;--t2:#4A5568;--t3:#94A3B8;--brd:#DDE3EA;--green:#2EAA6A;--red:#E05252;--amber:#D4860A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;line-height:1.5;}
+.app{display:flex;min-height:100vh;}
+#sidebar{width:240px;min-width:240px;background:var(--txt);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
+.main{flex:1;margin-left:240px;overflow:auto;display:flex;flex-direction:column;}
+.sbi{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:2px;}
+.sbi:hover{background:rgba(255,255,255,.08);color:#fff;}
+.sbi.active{background:var(--blue);color:#fff;}
+.sbi svg{width:16px;height:16px;flex-shrink:0;opacity:.8;}
+.sbl{font-size:10px;font-weight:600;letter-spacing:.08em;color:rgba(255,255,255,.3);padding:6px 10px 3px;text-transform:uppercase;}
+.sbadge{margin-left:auto;font-size:10px;background:rgba(255,255,255,.15);padding:1px 6px;border-radius:10px;color:rgba(255,255,255,.7);}
+.topbar{background:#fff;border-bottom:1px solid var(--brd);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;flex-shrink:0;position:sticky;top:0;z-index:50;}
+#topTitle{font-family:var(--fc);font-size:20px;font-weight:700;flex:1;}
+.content{padding:24px;flex:1;}
+.page{display:none;}.page.active{display:block;}
+.card{background:#fff;border:1px solid var(--brd);border-radius:10px;padding:20px;}
+.ctitle{font-family:var(--fc);font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat{background:#fff;border:1px solid var(--brd);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--blue);}
+.slbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.sval{font-family:var(--fc);font-size:28px;font-weight:700;line-height:1;}
+.ssub{font-size:11px;color:var(--t3);margin-top:4px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--brd);margin-bottom:20px;}
+.tab{padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--t3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tp{display:none;}.tp.active{display:block;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{text-align:left;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;border-bottom:2px solid var(--brd);}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--brd);font-size:13px;vertical-align:middle;}
+.tbl tr:hover td{background:var(--bg);}
+.tbl tr:last-child td{border:none;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--f);transition:all .15s;}
+.bp{background:var(--blue);color:#fff;}.bp:hover{background:#2B7FA8;}
+.bg{background:transparent;color:var(--t2);border:1px solid var(--brd);}.bg:hover{background:var(--bg);color:var(--blue);border-color:var(--blue);}
+.sm{padding:5px 10px;font-size:12px;}.xs{padding:3px 8px;font-size:11px;}
+.fsel{padding:7px 10px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:8px;background:#fff;color:var(--txt);}
+.sinput{padding:7px 12px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:8px;background:#fff;color:var(--txt);}
+.sinput:focus,.fsel:focus{outline:none;border-color:var(--blue);}
+.bdg{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+.blue{background:#E6F4FB;color:#2B7FA8;}.green{background:#D1FAE5;color:#065F46;}.red{background:#FEE2E2;color:#991B1B;}.amber{background:#FEF3C7;color:#92400E;}.gray{background:var(--bg);color:var(--t3);border:1px solid var(--brd);}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;cursor:grab;user-select:none;}
+.chip-blue{background:#E6F4FB;color:#2B7FA8;border:1px solid #A8D8EF;}
+.chip-green{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
+.chip-amber{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;}
+.pres{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;border:1px solid transparent;cursor:pointer;}
+.pres-p{background:#D1FAE5;color:#065F46;border-color:#6EE7B7;}
+.pres-a{background:#FEE2E2;color:#991B1B;border-color:#FECACA;}
+.pres-i{background:#FEF3C7;color:#92400E;border-color:#FCD34D;}
+.pres-m{background:#E6F4FB;color:#2B7FA8;border-color:#A8D8EF;}
+.modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
+.modal-wrap.open{display:flex;}
+.modal{background:#fff;border-radius:12px;padding:24px;width:480px;max-width:96vw;max-height:92vh;overflow-y:auto;}
+.mtitle{font-family:var(--fc);font-size:18px;font-weight:700;margin-bottom:16px;}
+.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.ff{margin-bottom:12px;}
+.ff label{font-size:12px;font-weight:600;color:var(--t2);display:block;margin-bottom:4px;}
+.ff input,.ff select,.ff textarea{width:100%;padding:9px 12px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:8px;background:var(--bg);color:var(--txt);}
+.ff input:focus,.ff select:focus,.ff textarea:focus{outline:none;border-color:var(--blue);}
+.ff textarea{min-height:70px;resize:vertical;}
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--txt);padding:20px;}
+.auth-box{background:#fff;border-radius:16px;padding:40px;width:400px;max-width:100%;}
+.auth-err{font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:12px;display:none;}
+.auth-btn{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;font-family:var(--f);cursor:pointer;margin-top:4px;}
+.auth-btn:hover{background:#2B7FA8;}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.92);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;}
+.spinner{width:40px;height:40px;border:3px solid var(--brd);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#notif{position:fixed;bottom:20px;right:20px;background:var(--txt);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;z-index:2000;display:none;align-items:center;gap:8px;border-left:4px solid var(--green);}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-thumb{background:var(--brd);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading"><div class="spinner"></div><div style="font-size:14px;color:var(--t2)">Platform laden...</div></div>
+
+<!-- AUTH -->
+<div class="auth-wrap" id="authWrap" style="display:none">
+  <div class="auth-box">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
+      <div style="width:46px;height:46px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--fc);font-size:20px;font-weight:700;color:#fff">BSV</div>
+      <div><div style="font-family:var(--fc);font-size:20px;font-weight:700">Belisia SV</div><div style="font-size:12px;color:var(--t3)">Performance Platform</div></div>
+    </div>
+    <div id="loginView">
+      <div style="font-family:var(--fc);font-size:22px;font-weight:700;margin-bottom:4px">Inloggen</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:20px">Gebruik je e-mail en wachtwoord.</div>
+      <div id="lErr" class="auth-err"></div>
+      <div class="ff"><label>E-mailadres</label><input type="email" id="lEmail" placeholder="naam@belisia.be" autocomplete="email"></div>
+      <div class="ff"><label>Wachtwoord</label><input type="password" id="lPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="auth-btn" onclick="doLogin()">Inloggen</button>
+      <div style="text-align:center;font-size:13px;color:var(--t3);margin-top:14px">Geen account? <a style="color:var(--blue);cursor:pointer;font-weight:600" onclick="showReg()">Registreren</a></div>
+    </div>
+    <div id="regView" style="display:none">
+      <div style="font-family:var(--fc);font-size:22px;font-weight:700;margin-bottom:4px">Account aanmaken</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:8px">Coach wijst achteraf je rol toe.</div>
+      <div style="background:#E6F4FB;border:1px solid #A8D8EF;border-radius:8px;padding:8px 12px;font-size:12px;color:#2B7FA8;margin-bottom:16px">Na registratie: bevestig je e-mail, daarna inloggen.</div>
+      <div id="rErr" class="auth-err"></div>
+      <div class="ff"><label>Naam</label><input id="rName" placeholder="Voornaam Achternaam"></div>
+      <div class="ff"><label>E-mailadres</label><input type="email" id="rEmail" placeholder="naam@belisia.be"></div>
+      <div class="ff"><label>Wachtwoord</label><input type="password" id="rPass" placeholder="Min. 8 tekens"></div>
+      <button class="auth-btn" onclick="doRegister()">Account aanmaken</button>
+      <div style="text-align:center;font-size:13px;color:var(--t3);margin-top:14px">Al een account? <a style="color:var(--blue);cursor:pointer;font-weight:600" onclick="showLog()">Inloggen</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app" style="display:none">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div class="topbar">
+      <div id="topTitle"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px">
+          <div id="syncDot" style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>
+          <span id="syncLbl">Opgeslagen</span>
+        </div>
+        <div id="topActs" style="display:flex;gap:8px"></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="page active" id="pg-dashboard"></div>
+      <div class="page" id="pg-spelers"></div>
+      <div class="page" id="pg-speler-detail"></div>
+      <div class="page" id="pg-werkpunten"></div>
+      <div class="page" id="pg-pop"></div>
+      <div class="page" id="pg-fysiek"></div>
+      <div class="page" id="pg-kpibeheer"></div>
+      <div class="page" id="pg-training"></div>
+      <div class="page" id="pg-oefenvormen"></div>
+      <div class="page" id="pg-export"></div>
+      <div class="page" id="pg-portfolio"></div>
+      <div class="page" id="pg-licentie"></div>
+    </div>
+  </div>
+</div>
+
+<div id="modals"></div>
+<div id="notif"></div>
+
+<!-- SUPABASE CONFIG: vervang deze twee waarden -->
+<script>
+window.SUPABASE_URL = 'https://JOUW-PROJECT-ID.supabase.co';
+window.SUPABASE_KEY = 'JOUW-ANON-KEY';
+</script>
+
+<!-- APP CODE (4 bestanden samengebracht) -->
+<script src="app_part1.js"></script>
+<script src="app_part2.js"></script>
+<script src="app_part3.js"></script>
+<script src="app_part4.js"></script>
+
+<script>
+// Start de app + render modals
+renderModals();
+init();
+</script>
+</body>
+</html>
