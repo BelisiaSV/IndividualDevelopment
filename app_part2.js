@@ -88,21 +88,11 @@ function renderDashboard(){
           ${top.map(([l,v])=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:3px"><span>${l}</span><span>${v}</span></div><div style="height:7px;background:var(--bg);border-radius:4px;overflow:hidden"><div style="height:100%;background:#4FA8D1;width:${Math.round(v/S.players.length*100)}%"></div></div></div>`).join('')||'<div style="color:var(--t3);font-size:13px">Nog geen principes.</div>'}
         </div>
       </div>`;
-  } else {
+    } else {
     const me=S.players.find(p=>p.profile_id===S.profile?.id);
-    el.innerHTML=me?`
-      <div style="background:var(--txt);border-radius:10px;padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:14px">
-        <div style="width:52px;height:52px;border-radius:50%;background:${me.color};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff">${ini(me.name)}</div>
-        <div><div style="font-size:22px;font-weight:700;color:#fff;font-family:var(--fc)">${me.name}</div><div style="font-size:13px;color:rgba(255,255,255,.5)">${me.pos} · ${me.age} jaar</div></div>
-      </div>
-      ${(me.werkpunten||[]).map(w=>`<div class="card" style="margin-bottom:12px"><div class="ctitle">${w.text} <span class="bdg blue">${w.cat}</span></div>
-        ${(w.acties||[]).map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--brd);font-size:13px"><div style="width:18px;height:18px;border-radius:5px;border:2px solid var(--brd);display:flex;align-items:center;justify-content:center;flex-shrink:0;${a.done?'background:#2EAA6A;border-color:#2EAA6A;color:#fff':''}">${a.done?'✓':''}</div><span style="${a.done?'text-decoration:line-through;opacity:.5':''}; flex:1">${a.t}</span><span style="font-size:11px;padding:1px 7px;border-radius:20px;background:var(--bg);border:1px solid var(--brd);color:var(--t3)">${a.p}</span></div>`).join('')}
-        ${w.feedback?`<div style="margin-top:8px;background:#E6F4FB;border-radius:7px;padding:10px;font-size:13px;color:#2B7FA8"><strong>Coach:</strong> ${w.feedback}</div>`:''}
-      </div>`).join('')||'<div class="card" style="color:var(--t3);font-size:13px">Nog geen werkpunten van je coach.</div>'}`
-    :`<div class="card"><div style="color:var(--t3);font-size:13px">Je account is nog niet gekoppeld aan een spelersprofiel. Vraag je coach om dit te doen via Kern → speler bewerken.</div></div>`;
+    el.innerHTML=me ? renderPlayerDashboard(me) : `<div class="card"><div style="color:var(--t3);font-size:13px">Je account is nog niet gekoppeld aan een spelersprofiel. Vraag je coach om dit te doen via Kern → speler bewerken.</div></div>`;
   }
 }
-
 // ============================================================
 // SPELERS
 // ============================================================
@@ -272,3 +262,163 @@ async function saveKpiVals(){const pid=document.getElementById('ekf').dataset.pi
 // DB save helpers
 async function savPl(p){syncing(true);await sb.q('players').update({name:p.name,pos:p.pos,age:p.age,weight_kg:(p.weight||[])[(p.weight||[]).length-1]?.w,kpis:p.kpis,presence:p.presence,color:p.color,injury:p.injury},p.id);syncing(false);}
 async function savWP(w,pid){syncing(true);const pay={player_id:pid,text:w.text,cat:w.cat,principes:w.principes,acties:w.acties,feedback:w.feedback};if(w.id&&String(w.id).indexOf('local_')===-1)await sb.q('werkpunten').update(pay,w.id);else{const{data}=await sb.q('werkpunten').insert(pay);if(data?.id)w.id=data.id;}syncing(false);}
+
+
+// ============================================================
+// PLAYER DASHBOARD — vervangt renderDashboard() voor spelers
+// Plak dit onderaan app_part2.js, na de bestaande renderDashboard functie
+// Of vervang de huidige player-sectie in renderDashboard()
+// ============================================================
+
+function renderPlayerDashboard(me) {
+  const att = Math.round((me.presence||[]).filter(x=>x==='present').length / Math.max((me.presence||[]).length,1) * 100);
+  const lastW = (me.weight||[])[(me.weight||[]).length-1]?.w || '—';
+  const prevW = (me.weight||[]).length > 1 ? (me.weight||[])[me.weight.length-2]?.w : null;
+  const wDiff = prevW ? (lastW - prevW).toFixed(1) : null;
+  const actiesDone = (me.werkpunten||[]).reduce((a,w)=>(w.acties||[]).filter(x=>x.done).length+a, 0);
+  const actiesTotal = (me.werkpunten||[]).reduce((a,w)=>(w.acties||[]).length+a, 0);
+  const maxW = Math.max(...(me.weight||[{w:75}]).map(x=>x.w));
+  const minW = Math.min(...(me.weight||[{w:75}]).map(x=>x.w));
+  const intColors = {laag:'#2EAA6A', middel:'#D4860A', hoog:'#E05252', max:'#7C5CBF'};
+
+  return `
+    <!-- HEADER KAART -->
+    <div style="background:var(--txt);border-radius:12px;padding:24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;right:0;bottom:0;width:5px;background:#4FA8D1"></div>
+      <div style="width:72px;height:72px;border-radius:50%;background:${me.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;color:#fff;flex-shrink:0;border:3px solid rgba(255,255,255,.15)">${ini(me.name)}</div>
+      <div style="flex:1">
+        <div style="font-family:var(--fc);font-size:26px;font-weight:700;color:#fff;line-height:1.1">${me.name}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap">
+          <span>⚽ ${me.pos||'—'}</span>
+          <span>🎂 ${me.age||'—'} jaar</span>
+          ${me.number ? `<span>👕 #${me.number}</span>` : ''}
+          <span>⚖️ ${lastW} kg ${wDiff ? `<span style="color:${wDiff>0?'#F87171':'#4ADE80'}">(${wDiff>0?'+':''}${wDiff} kg)</span>` : ''}</span>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+          <span style="background:${att>=75?'#2EAA6A':att>=60?'#D4860A':'#E05252'};color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600">${att}% aanwezigheid</span>
+          <span style="background:#4FA8D1;color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600">${(me.werkpunten||[]).length} werkpunten</span>
+          ${me.injury?'<span style="background:#E05252;color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600">⚠️ Blessure actief</span>':''}
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      ${[
+        ['Aanwezigheid', att+'%', att>=75?'#2EAA6A':att>=60?'#D4860A':'#E05252', `${(me.presence||[]).filter(x=>x==='present').length} van ${(me.presence||[]).length} sessies`],
+        ['Gewicht', lastW+' kg', '#4FA8D1', wDiff ? `${wDiff>0?'↑':'↓'} ${Math.abs(wDiff)} kg vs vorige meting` : 'Laatste meting'],
+        ['Actiepunten', actiesDone+'/'+actiesTotal, '#7C5CBF', 'Voltooid deze periode'],
+        ['POP gesprekken', (me.popHistory||[]).length+'', '#D4860A', 'Dit seizoen']
+      ].map(([l,v,c,s])=>`
+        <div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c}"></div>
+          <div style="font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">${l}</div>
+          <div style="font-family:var(--fc);font-size:26px;font-weight:700;color:${c};line-height:1">${v}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:3px">${s}</div>
+        </div>`).join('')}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <!-- WERKPUNTEN & ACTIES -->
+      <div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:18px">
+        <div style="font-family:var(--fc);font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px">
+          🎯 Mijn werkpunten
+          <span style="font-size:11px;background:var(--bg);border:1px solid var(--brd);border-radius:20px;padding:2px 8px;color:var(--t3);font-family:var(--f)">${(me.werkpunten||[]).length} actief</span>
+        </div>
+        ${(me.werkpunten||[]).length ? (me.werkpunten||[]).map(w => {
+          const wDone = (w.acties||[]).filter(a=>a.done).length;
+          const wTot = (w.acties||[]).length;
+          const pct = wTot ? Math.round(wDone/wTot*100) : 0;
+          return `<div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:10px;border-left:3px solid #4FA8D1">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px">${w.text}</div>
+            <div style="font-size:11px;color:var(--t3);margin-bottom:8px">${w.cat}</div>
+            ${wTot ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <div style="flex:1;height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden">
+                <div style="height:100%;background:${pct===100?'#2EAA6A':'#4FA8D1'};width:${pct}%;transition:width .4s"></div>
+              </div>
+              <span style="font-size:11px;color:var(--t3);white-space:nowrap">${wDone}/${wTot} klaar</span>
+            </div>` : ''}
+            ${(w.acties||[]).map(a=>`
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);font-size:12px">
+                <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${a.done?'#2EAA6A':' var(--brd)'};background:${a.done?'#2EAA6A':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:10px">${a.done?'✓':''}</div>
+                <span style="${a.done?'text-decoration:line-through;opacity:.5':''}flex:1">${a.t}</span>
+                <span style="font-size:10px;padding:1px 6px;border-radius:20px;background:var(--bg);border:1px solid var(--brd);color:var(--t3);margin-left:auto;flex-shrink:0">${a.p}</span>
+              </div>`).join('')}
+            ${w.feedback ? `<div style="margin-top:8px;background:#E6F4FB;border-radius:6px;padding:8px 10px;font-size:12px;color:#2B7FA8;line-height:1.5"><strong>💬 Coach:</strong> ${w.feedback}</div>` : ''}
+            ${(w.principes||[]).length ? `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${(w.principes||[]).map(pr=>`<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:#E6F4FB;color:#2B7FA8;border:1px solid #A8D8EF">${pr}</span>`).join('')}</div>` : ''}
+          </div>`;
+        }).join('') : '<div style="font-size:13px;color:var(--t3);padding:8px 0">Je coach heeft nog geen werkpunten voor je aangemaakt.</div>'}
+      </div>
+
+      <!-- RECHTER KOLOM -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <!-- KPI -->
+        <div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:16px">
+          <div style="font-family:var(--fc);font-size:16px;font-weight:700;margin-bottom:12px">📊 Mijn KPI's</div>
+          ${S.kpis.map(k=>`
+            <div style="margin-bottom:10px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:3px;font-weight:500">
+                <span>${k.name}</span>
+                <span style="font-weight:700;color:var(--txt)">${me.kpis?.[k.id]||k.default_val}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</span>
+              </div>
+              <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--brd)">
+                <div style="height:100%;background:#4FA8D1;border-radius:4px;width:${Math.min(100,k.unit==='km'?(me.kpis?.[k.id]||k.default_val)/12*100:(me.kpis?.[k.id]||k.default_val))}%;transition:width .6s"></div>
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <!-- GEWICHT GRAFIEK -->
+        <div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:16px">
+          <div style="font-family:var(--fc);font-size:16px;font-weight:700;margin-bottom:10px">⚖️ Gewichtsevolutie</div>
+          <div style="display:flex;align-items:flex-end;gap:6px;height:64px">
+            ${(me.weight||[]).slice(-6).map(w=>{
+              const h = maxW===minW ? 40 : Math.round(14+((w.w-minW)/(maxW-minW))*46);
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
+                <div style="width:100%;background:#4FA8D1;border-radius:3px 3px 0 0;height:${h}px;position:relative">
+                  <span style="position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:#2B7FA8;white-space:nowrap">${w.w}</span>
+                </div>
+                <div style="font-size:8px;color:var(--t3);text-align:center">${w.d}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- AANWEZIGHEID KALENDER -->
+        <div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:16px">
+          <div style="font-family:var(--fc);font-size:16px;font-weight:700;margin-bottom:8px">📅 Aanwezigheid</div>
+          <div style="display:flex;gap:8px;font-size:10px;margin-bottom:6px;flex-wrap:wrap">
+            ${[['#D1FAE5','Aanwezig'],['#FEE2E2','Afwezig'],['#E6F4FB','Wedstrijd'],['#FEF3C7','Blessure']].map(([bg,l])=>`<span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:${bg};display:inline-block"></span>${l}</span>`).join('')}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">
+            ${(me.presence||[]).slice(-14).map((s,i)=>{
+              const bg = s==='present'?'#D1FAE5':s==='absent'?'#FEE2E2':s==='injury'?'#FEF3C7':'#E6F4FB';
+              const c = s==='present'?'#065F46':s==='absent'?'#991B1B':s==='injury'?'#92400E':'#2B7FA8';
+              return `<div style="aspect-ratio:1;border-radius:4px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:${c}">${i%2===0?'T':'W'}</div>`;
+            }).join('')}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- POP/PAP GESCHIEDENIS -->
+    ${(me.popHistory||[]).length ? `
+    <div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:18px">
+      <div style="font-family:var(--fc);font-size:16px;font-weight:700;margin-bottom:14px">💬 POP/PAP gesprekken</div>
+      ${(me.popHistory||[]).slice(0,3).map(h=>`
+        <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:12px;font-weight:700">${h.date||''}</span>
+            <span style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:${h.type==='POP'?'#E6F4FB':h.type==='PAP'?'#D1FAE5':'#F3F4F6'};color:${h.type==='POP'?'#2B7FA8':h.type==='PAP'?'#065F46':'#6B7280'}">${h.type}</span>
+          </div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.6">
+            ${h.goed?`<div style="margin-bottom:4px">✅ <strong>Sterk:</strong> ${h.goed}</div>`:''}
+            ${h.werkpunten?`<div style="margin-bottom:4px">🎯 <strong>Werkpunten:</strong> ${h.werkpunten}</div>`:''}
+            ${h.acties?`<div>📋 <strong>Afspraken:</strong> ${h.acties}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>` : ''}
+  `;
+}
