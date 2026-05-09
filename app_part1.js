@@ -142,18 +142,31 @@ async function doLogout(){
 // BOOT — altijd rol ophalen uit Supabase, nooit uit cache
 // ============================================================
 async function init(){
-  const tok=localStorage.getItem('sb_tok');
-  const uid=localStorage.getItem('sb_uid');
-  if(tok && uid){
-    sb.token=tok;
-    sb.userId=uid;
-    // Verify token still valid
-    const check=await sb.me();
+  // Support both old (sb_usr) and new (sb_uid) localStorage formats
+  const tok = localStorage.getItem('sb_tok');
+  let uid = localStorage.getItem('sb_uid');
+  
+  // Fallback: try to get uid from old sb_usr key
+  if(!uid){
+    try {
+      const oldUsr = JSON.parse(localStorage.getItem('sb_usr')||'null');
+      if(oldUsr?.id) uid = oldUsr.id;
+    } catch(e){}
+  }
+
+  if(tok){
+    sb.token = tok;
+    // Always get fresh user data from Supabase auth
+    const check = await sb.me();
     if(check.id){
+      sb.userId = check.id;
+      // Store in both formats for compatibility
+      localStorage.setItem('sb_uid', check.id);
+      localStorage.setItem('sb_tok', tok);
       await bootApp();
       return;
     }
-    // Token expired — clear and show login
+    // Token expired
     await sb.signOut();
   }
   document.getElementById('loading').style.display='none';
@@ -164,18 +177,45 @@ async function bootApp(){
   document.getElementById('loading').style.display='flex';
   document.getElementById('authWrap').style.display='none';
 
-  // STAP 1: Haal altijd vers profiel op uit Supabase — NOOIT uit cache
-  // Dit garandeert dat rolewijzigingen in Supabase meteen zichtbaar zijn
-  const {data:profs} = await sb.q('profiles').eq('id', sb.userId).get();
+  // STAP 1: Haal vers profiel op via directe REST call met huidige token
+  let profileLoaded = false;
+  
+  try {
+    const profUrl = `${SUPABASE_URL}/rest/v1/profiles?id=eq.${sb.userId}&select=*`;
+    const profResp = await fetch(profUrl, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${sb.token}`,
+        'Accept': 'application/json'
+      }
+    });
+    const profData = await profResp.json();
+    if(Array.isArray(profData) && profData.length > 0){
+      S.profile = profData[0];
+      profileLoaded = true;
+    }
+  } catch(e){}
 
-  if(profs && profs.length > 0){
-    S.profile = profs[0];
-  } else {
-    // Nieuw profiel aanmaken
-    const name = localStorage.getItem('sb_name') || 'Gebruiker';
-    const newProf = {id: sb.userId, name, role: 'player'};
-    const {data:created} = await sb.q('profiles').insert(newProf);
-    S.profile = created || newProf;
+  if(!profileLoaded){
+    // Profiel aanmaken als het niet bestaat
+    const meData = await sb.me();
+    const name = meData.user_metadata?.name || meData.email || 'Gebruiker';
+    try {
+      const insResp = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${sb.token}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({id: sb.userId, name, role: 'player'})
+      });
+      const insData = await insResp.json();
+      S.profile = Array.isArray(insData) ? insData[0] : insData;
+    } catch(e){
+      S.profile = {id: sb.userId, name: 'Gebruiker', role: 'player'};
+    }
   }
 
   // STAP 2: Laad alle data
