@@ -266,6 +266,111 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
 
 <div class="notification" id="notif"></div>
 
+<!-- OEFENVORM MODAL -->
+<div class="modal" id="oefModal">
+  <div class="modalBox" style="width:540px;max-width:96vw">
+    <div class="modalTitle" id="oefMTitle">Oefenvorm toevoegen</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="ff"><label>Naam</label><input id="oefMName" placeholder="bv. Pressing 4v4"></div>
+      <div class="ff"><label>Categorie</label><select id="oefMCat"><option>Passing</option><option>Finishing</option><option>Pressing</option><option>Positiespel</option><option>Conditie</option><option>Kracht</option><option>Herstel</option></select></div>
+      <div class="ff"><label>Duur (min)</label><input type="number" id="oefMDur"></div>
+      <div class="ff"><label>Terrein</label><input id="oefMField" placeholder="30x20m"></div>
+      <div class="ff"><label>Spelers</label><input id="oefMPlayers" placeholder="8+GK"></div>
+      <div class="ff"><label>Intensiteit</label><select id="oefMIntens"><option value="laag">Laag</option><option value="middel" selected>Middel</option><option value="hoog">Hoog</option><option value="max">Maximaal</option></select></div>
+    </div>
+    <div class="ff"><label>Omschrijving</label><textarea id="oefMDesc" rows="2" placeholder="Coachingpunten..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:7px">LOAD DATA (van tracker)</div>
+        <div class="ff"><label>Afstand (km)</label><input type="number" id="oefMDist" step="0.1"></div>
+        <div class="ff"><label>HSR (m)</label><input type="number" id="oefMHsr"></div>
+        <div class="ff"><label>Sprints (#)</label><input type="number" id="oefMSpr"></div>
+        <div class="ff"><label>Max snelheid (km/h)</label><input type="number" id="oefMSpd" step="0.1"></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:7px">FYSIOLOGIE</div>
+        <div class="ff"><label>RPE (1-10)</label><input type="number" id="oefMRpe" min="1" max="10"></div>
+        <div class="ff"><label>Gem. hartslag (bpm)</label><input type="number" id="oefMHr"></div>
+        <div class="ff"><label>Video URL</label><input id="oefMVidUrl" placeholder="YouTube/Vimeo URL"></div>
+        <div class="ff"><label>OF MP4 uploaden</label>
+          <div style="border:1px dashed var(--brd);border-radius:7px;padding:8px;text-align:center;cursor:pointer;background:var(--bg);font-size:12px;color:var(--t3)" onclick="document.getElementById('oefVidFile').click()">
+            <span id="oefVidLbl">📹 Klik om MP4 te selecteren</span>
+          </div>
+          <input type="file" id="oefVidFile" accept="video/*" style="display:none" onchange="handleOefVid(this)">
+        </div>
+      </div>
+    </div>
+    <div class="modalFoot"><button class="btn btnG" onclick="closeModal('oefModal')">Annuleer</button><button class="btn btnP" onclick="saveOef()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- PORTFOLIO MODALS -->
+<div class="modal" id="editHeaderModal">
+  <div class="modalBox">
+    <div class="modalTitle">Portfolio header bewerken</div>
+    <div class="ff"><label>Naam</label><input id="hName" placeholder="Jordy Hermans"></div>
+    <div class="ff"><label>Titel / kwalificaties</label><input id="hTitle" placeholder="UEFA B · Performance & Individuele Ontwikkeling"></div>
+    <div class="ff"><label>Club / organisatie</label><input id="hClub" placeholder="Belisia SV — Seniorenvoetbal"></div>
+    <div class="modalFoot"><button class="btn btnG" onclick="closeModal('editHeaderModal')">Annuleer</button><button class="btn btnP" onclick="saveHeaderFields()">Opslaan</button></div>
+  </div>
+</div>
+
+<div class="modal" id="carrModal">
+  <div class="modalBox">
+    <div class="modalTitle">Carrièrepunt</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="ff"><label>Jaar / periode</label><input id="carrYear" placeholder="2024 – heden"></div>
+      <div class="ff"><label>Club / organisatie</label><input id="carrClub" placeholder="Belisia SV"></div>
+    </div>
+    <div class="ff"><label>Functie / titel</label><input id="carrTitle" placeholder="Performance Coach"></div>
+    <div class="ff"><label>Beschrijving (optioneel)</label><textarea id="carrDesc" rows="2" placeholder="..."></textarea></div>
+    <div class="modalFoot"><button class="btn btnG" onclick="closeModal('carrModal')">Annuleer</button><button class="btn btnP" onclick="saveCarr()">Opslaan</button></div>
+  </div>
+</div>
+
+<!-- LICENTIE MODALS -->
+<div class="modal" id="topicModal">
+  <div class="modalBox">
+    <div class="modalTitle">Nieuw topic</div>
+    <div class="ff"><label>Naam</label><input id="topicName" placeholder="bv. Tactische periodisering"></div>
+    <div class="ff"><label>Beschrijving</label><textarea id="topicDesc" rows="2"></textarea></div>
+    <div class="modalFoot"><button class="btn btnG" onclick="closeModal('topicModal')">Annuleer</button><button class="btn btnP" onclick="saveTopic()">Toevoegen</button></div>
+  </div>
+</div>
+
+<div class="modal" id="vidModal">
+  <div class="modalBox">
+    <div class="modalTitle">Video / Link toevoegen</div>
+    <div class="ff"><label>Titel</label><input id="vidTitle" placeholder="bv. Pressing analyse"></div>
+    <div class="ff"><label>URL (YouTube, Vimeo, ...)</label><input id="vidUrl" placeholder="https://..."></div>
+    <div class="ff"><label>Notitie</label><textarea id="vidNote" rows="2" placeholder="Wat laat dit zien?"></textarea></div>
+    <div class="modalFoot"><button class="btn btnG" onclick="closeModal('vidModal')">Annuleer</button><button class="btn btnP" onclick="saveVid()">Toevoegen</button></div>
+  </div>
+</div>
+
+<div class="modal" id="leerlogModal">
+  <div class="modalBox">
+    <div class="modalTitle">Leerlog toevoegen</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="ff"><label>Datum</label><input type="date" id="llDate"></div>
+      <div class="ff"><label>Topic / thema</label><input id="llTopic" placeholder="bv. Pressing methodiek"></div>
+    </div>
+    <div class="ff"><label>Wat heb je geleerd / gedaan?</label><textarea id="llWat" rows="3" placeholder="Beschrijf wat je geleerd of toegepast hebt..."></textarea></div>
+    <div class="ff"><label>Hoe toegepast?</label><textarea id="llHoe" rows="2" placeholder="Optioneel..."></textarea></div>
+    <div class="ff"><label>Resultaat / observatie</label><textarea id="llResultaat" rows="2" placeholder="Optioneel..."></textarea></div>
+    <div class="modalFoot"><button class="btn btnG" onclick="closeModal('leerlogModal')">Annuleer</button><button class="btn btnP" onclick="saveLeerlog()">Opslaan</button></div>
+  </div>
+</div>
+
+<div class="modal" id="refModal">
+  <div class="modalBox">
+    <div class="modalTitle">Reflectie toevoegen</div>
+    <div class="ff"><label>Datum</label><input type="date" id="refDate"></div>
+    <div class="ff"><label>Reflectie</label><textarea id="refText" rows="5" placeholder="Wat leerde je? Hoe evolueer je als coach?"></textarea></div>
+    <div class="modalFoot"><button class="btn btnG" onclick="closeModal('refModal')">Annuleer</button><button class="btn btnP" onclick="saveRef()">Opslaan</button></div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // CONFIG
@@ -836,8 +941,105 @@ function getWeekDates() {
 }
 
 function renderOefenvormen() {
-  document.getElementById('pgOefenvormen').innerHTML = '<div class="card"><p style="color:var(--t3)">Oefenvormen module — coming soon in volgende update.</p></div>';
+  document.getElementById('topActions').innerHTML = `<button class="btn btnP sm" onclick="openOefModal()">+ Oefenvorm</button>`;
+  document.getElementById('pgOefenvormen').innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <input id="oefQ" placeholder="Zoeken..." style="padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:#fff;min-width:160px">
+      <select id="oefCat" style="padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:#fff">
+        <option value="">Alle categorieën</option>
+        ${['Passing','Finishing','Pressing','Positiespel','Conditie','Kracht','Herstel'].map(c=>`<option>${c}</option>`).join('')}
+      </select>
+      <span style="font-size:12px;color:var(--t2);display:flex;align-items:center;gap:4px">Afstand:
+        <input type="number" id="oefMin" step="0.1" placeholder="min" style="width:55px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:6px;background:#fff">–
+        <input type="number" id="oefMax" step="0.1" placeholder="max" style="width:55px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:6px;background:#fff"> km
+        <button class="btn btnP sm" onclick="filterOef()">Filter</button>
+      </span>
+    </div>
+    <div id="oefGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:12px"></div>`;
+  document.getElementById('oefQ').addEventListener('input', filterOef);
+  document.getElementById('oefCat').addEventListener('change', filterOef);
+  loadAndFilterOef();
 }
+
+async function loadAndFilterOef() {
+  if (!window.OEFENVORMEN) {
+    const data = await sbGet('oefenvormen','&order=created_at.asc');
+    window.OEFENVORMEN = data||[];
+  }
+  filterOef();
+}
+
+function filterOef() {
+  const q=(document.getElementById('oefQ')?.value||'').toLowerCase();
+  const cat=document.getElementById('oefCat')?.value||'';
+  const minD=parseFloat(document.getElementById('oefMin')?.value)||0;
+  const maxD=parseFloat(document.getElementById('oefMax')?.value)||999;
+  const filtered=(window.OEFENVORMEN||[]).filter(o=>(!q||o.name.toLowerCase().includes(q))&&(!cat||o.cat===cat)&&(o.load?.dist||0)>=minD&&(o.load?.dist||0)<=maxD);
+  const ic={laag:'green',middel:'blue',hoog:'amber',max:'red'};
+  const grid=document.getElementById('oefGrid');
+  if(!grid)return;
+  grid.innerHTML=filtered.map(o=>`<div style="background:#fff;border:1px solid var(--brd);border-radius:10px;overflow:hidden;cursor:pointer" onmouseenter="this.style.borderColor='#4FA8D1'" onmouseleave="this.style.borderColor='var(--brd)'" onclick="viewOef('${o.id}')">
+    <div style="height:95px;background:var(--txt);display:flex;align-items:center;justify-content:center;position:relative">
+      ${o.video_url?`<video src="${o.video_url}" style="width:100%;height:100%;object-fit:cover;opacity:.7"></video>`:'<div style="font-size:26px;opacity:.2">🎬</div>'}
+      <span class="bdg ${ic[o.intens]||'gray'}" style="position:absolute;top:6px;left:6px">${o.intens||'—'}</span>
+      <span class="bdg blue" style="position:absolute;top:6px;right:6px">${o.cat||'—'}</span>
+    </div>
+    <div style="padding:11px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:6px">${o.name}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px">
+        ${[['Afstand',(o.load?.dist||0)+' km'],['HSR',(o.load?.hsr||0)+' m'],['Sprints',(o.load?.spr||0)+'x']].map(([l,v])=>`<div style="background:var(--bg);border-radius:5px;padding:4px 6px"><div style="font-size:9px;color:var(--t3)">${l}</div><div style="font-size:12px;font-weight:700">${v}</div></div>`).join('')}
+      </div>
+      <div style="display:flex;gap:5px">
+        <button class="btn btnP sm" onclick="event.stopPropagation();editOef('${o.id}')">✏ Bewerken</button>
+        <button class="btn btnD sm" onclick="event.stopPropagation();delOef('${o.id}')">✕</button>
+      </div>
+    </div>
+  </div>`).join('')||'<div style="color:var(--t3);font-size:13px">Geen oefenvormen.</div>';
+}
+
+function viewOef(id) {
+  const o=(window.OEFENVORMEN||[]).find(x=>x.id==id);if(!o)return;
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>${o.name}</title><style>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}h1{font-size:20px;margin-bottom:5px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}@media print{button{display:none}}</style></head><body>
+    <h1>${o.name}</h1><p style="color:#94A3B8">${o.cat} · ${o.intens} · ${o.dur||'—'} min · ${o.field||'—'}</p>
+    ${o.video_url?`<video src="${o.video_url}" controls style="width:100%;border-radius:8px;margin:10px 0;max-height:240px;background:#000"></video>`:''}
+    <p style="margin:10px 0;line-height:1.6;font-size:14px">${o.description||'Geen omschrijving.'}</p>
+    <h3 style="font-size:14px;margin-bottom:6px">Load data</h3>
+    <div class="grid">${[['Afstand',(o.load?.dist||0)+' km'],['HSR',(o.load?.hsr||0)+' m'],['Sprints',(o.load?.spr||0)+'x'],['Max snelh.',(o.load?.spd||0)+' km/h'],['RPE',(o.load?.rpe||0)+'/10'],['Hartslag',(o.load?.hr||0)+' bpm']].map(([l,v])=>`<div class="box"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join('')}</div>
+    <button onclick="window.print()" style="margin-top:14px;padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer">🖨 Print/PDF</button>
+    </body></html>`);
+  w.document.close();
+}
+
+let _editOefId=null,_oefVidData=null;
+function openOefModal(id) {
+  _editOefId=id||null;
+  const o=id?(window.OEFENVORMEN||[]).find(x=>x.id==id):null;
+  ['oefMName','oefMDur','oefMField','oefMPlayers','oefMDesc','oefMDist','oefMHsr','oefMSpr','oefMSpd','oefMRpe','oefMHr','oefMVidUrl'].forEach(fid=>{
+    const map={oefMName:'name',oefMDur:'dur',oefMField:'field',oefMPlayers:'players',oefMDesc:'description'};
+    const lmap={oefMDist:'dist',oefMHsr:'hsr',oefMSpr:'spr',oefMSpd:'spd',oefMRpe:'rpe',oefMHr:'hr'};
+    const el=document.getElementById(fid);if(!el)return;
+    if(map[fid])el.value=o?.[map[fid]]||'';
+    else if(lmap[fid])el.value=o?.load?.[lmap[fid]]||'';
+    else if(fid==='oefMVidUrl')el.value=o?.video_url||'';
+  });
+  document.getElementById('oefMCat').value=o?.cat||'Passing';
+  document.getElementById('oefMIntens').value=o?.intens||'middel';
+  document.getElementById('oefMTitle').textContent=id?'Oefenvorm bewerken':'Oefenvorm toevoegen';
+  _oefVidData=null;
+  openModal('oefModal');
+}
+function editOef(id){openOefModal(id);}
+function handleOefVid(input){if(!input.files[0])return;const r=new FileReader();r.onload=e=>{_oefVidData=e.target.result;document.getElementById('oefVidLbl').textContent='✓ '+input.files[0].name;};r.readAsDataURL(input.files[0]);}
+async function saveOef(){
+  const name=document.getElementById('oefMName').value.trim();if(!name){notify('Naam verplicht','#E05252');return;}
+  const load={dist:parseFloat(document.getElementById('oefMDist').value)||0,hsr:parseFloat(document.getElementById('oefMHsr').value)||0,spr:parseFloat(document.getElementById('oefMSpr').value)||0,spd:parseFloat(document.getElementById('oefMSpd').value)||0,rpe:parseFloat(document.getElementById('oefMRpe').value)||0,hr:parseFloat(document.getElementById('oefMHr').value)||0};
+  const pay={name,cat:document.getElementById('oefMCat').value,dur:parseInt(document.getElementById('oefMDur').value)||0,field:document.getElementById('oefMField').value,players:document.getElementById('oefMPlayers').value,intens:document.getElementById('oefMIntens').value,description:document.getElementById('oefMDesc').value,load,principes:[],video_url:_oefVidData||document.getElementById('oefMVidUrl').value||null};
+  if(_editOefId){await sbUpdate('oefenvormen',_editOefId,pay);const idx=(window.OEFENVORMEN||[]).findIndex(o=>o.id==_editOefId);if(idx>=0)(window.OEFENVORMEN||[])[idx]={...(window.OEFENVORMEN||[])[idx],...pay};}
+  else{const d=await sbInsert('oefenvormen',pay);if(!window.OEFENVORMEN)window.OEFENVORMEN=[];window.OEFENVORMEN.push({...pay,id:d?.id});}
+  _oefVidData=null;closeModal('oefModal');filterOef();notify('Oefenvorm opgeslagen');
+}
+async function delOef(id){if(!confirm('Verwijderen?'))return;await sbDelete('oefenvormen',id);window.OEFENVORMEN=(window.OEFENVORMEN||[]).filter(o=>o.id!=id);filterOef();notify('Verwijderd');}
 
 function renderExport() {
   document.getElementById('pgExport').innerHTML = `<div class="card"><div class="cardTitle">Export</div>
@@ -867,12 +1069,7 @@ function printExport() {
   w.document.close();
 }
 
-function renderPortfolio() {
-  document.getElementById('pgPortfolio').innerHTML = '<div class="card"><p style="color:var(--t3)">Portfolio module — coming soon.</p></div>';
-}
-function renderLicentie() {
-  document.getElementById('pgLicentie').innerHTML = '<div class="card"><p style="color:var(--t3)">Pro License module — coming soon.</p></div>';
-}
+
 
 // ============================================================
 // PLAYER ACTIONS
@@ -1116,6 +1313,114 @@ function saveLogo() {
   CLUB_NAME=name; localStorage.setItem('clubName',name);
   closeModal('logoModal'); buildSidebar(); notify('Logo opgeslagen');
 }
+
+// ============================================================
+// PORTFOLIO
+// ============================================================
+let CARRIERE=[];let COMPETENTIES=[];
+let PORTFOLIO_NAME=localStorage.getItem('pName')||'';
+let PORTFOLIO_TITLE=localStorage.getItem('pTitle')||'UEFA B · Performance & Individuele Ontwikkeling';
+let PORTFOLIO_CLUB=localStorage.getItem('pClub')||'';
+let COACH_PHOTO=localStorage.getItem('coachPhoto')||null;
+
+async function renderPortfolio(){
+  document.getElementById('topActions').innerHTML=`<button class="btn btnP sm" onclick="document.getElementById('carrYear').dataset.editIdx='';openModal('carrModal')">+ Carrièrepunt</button>`;
+  if(!CARRIERE.length){const[carr,comp]=await Promise.all([sbGet('carriere','&order=sort_order.asc'),sbGet('competenties','&order=created_at.asc')]);CARRIERE=carr||[];COMPETENTIES=(comp||[]).map(c=>c.name);}
+  const name=PORTFOLIO_NAME||PROFILE?.name||'Performance Coach';
+  const club=PORTFOLIO_CLUB||CLUB_NAME||'Belisia SV';
+  document.getElementById('pgPortfolio').innerHTML=`
+    <div style="background:var(--txt);border-radius:10px;padding:26px;margin-bottom:16px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;right:0;bottom:0;width:5px;background:#4FA8D1"></div>
+      <button onclick="document.getElementById('hName').value=PORTFOLIO_NAME||PROFILE?.name||'';document.getElementById('hTitle').value=PORTFOLIO_TITLE;document.getElementById('hClub').value=PORTFOLIO_CLUB||CLUB_NAME||'';openModal('editHeaderModal')" style="position:absolute;top:10px;right:16px;padding:4px 10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;color:rgba(255,255,255,.7);font-size:11px;cursor:pointer">✏ Bewerken</button>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="cursor:pointer" onclick="document.getElementById('coachPhotoFile').click()" title="Foto wijzigen">
+          ${COACH_PHOTO?`<img src="${COACH_PHOTO}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.2)">`:`<div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.1);border:3px dashed rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.4">📷</div>`}
+          <input type="file" id="coachPhotoFile" accept="image/*" style="display:none" onchange="handleCoachPhoto(this)">
+        </div>
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:#fff">${name}</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.6);margin-top:4px">${PORTFOLIO_TITLE}</div>
+          <div style="background:#4FA8D1;display:inline-flex;padding:5px 12px;border-radius:20px;margin-top:10px;font-size:12px;font-weight:700;color:#fff">${club}</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div class="card"><div class="cardTitle" style="display:flex;justify-content:space-between">Coachingfilosofie <button class="btn btnG sm" onclick="editFil()">✏</button></div>
+        <div id="filosText" style="font-size:13px;color:var(--t2);line-height:1.6">${localStorage.getItem('filosText')||'Ik geloof in individuele ontwikkeling als fundament van collectief succes.'}</div>
+      </div>
+      <div class="card"><div class="cardTitle" style="display:flex;justify-content:space-between">Kerncompetenties <button class="btn btnG sm" onclick="addComp()">+</button></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${COMPETENTIES.map((c,i)=>`<span class="chip chip-blue">${c}<span onclick="delComp(${i})" style="margin-left:3px;opacity:.4;cursor:pointer">×</span></span>`).join('')}</div>
+      </div>
+    </div>
+    <div class="card"><div class="cardTitle" style="display:flex;justify-content:space-between">Carrièrelijn <button class="btn btnP sm" onclick="document.getElementById('carrYear').dataset.editIdx='';openModal('carrModal')">+ Toevoegen</button></div>
+      ${CARRIERE.map((c,i)=>`<div style="display:flex;gap:12px;padding-bottom:14px;position:relative">
+        <div style="position:absolute;left:15px;top:24px;bottom:0;width:1px;background:var(--brd)"></div>
+        <div style="width:30px;height:30px;border-radius:50%;background:#E6F4FB;border:2px solid #A8D8EF;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;font-size:12px">⚽</div>
+        <div style="flex:1"><div style="font-size:11px;font-weight:700;color:#4FA8D1">${c.year}</div><div style="font-size:14px;font-weight:600">${c.title}</div><div style="font-size:12px;color:var(--t3)">${c.club}${c.description?' · '+c.description:''}</div></div>
+        <div style="display:flex;gap:4px"><button class="btn btnG sm" onclick="editCarr(${i})">✏</button><button class="btn btnD sm" onclick="delCarr(${i},'${c.id||''}')">✕</button></div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function handleCoachPhoto(input){if(!input.files[0])return;const r=new FileReader();r.onload=e=>{COACH_PHOTO=e.target.result;localStorage.setItem('coachPhoto',e.target.result);renderPortfolio();notify('Foto opgeslagen');};r.readAsDataURL(input.files[0]);}
+function editFil(){const el=document.getElementById('filosText');if(!el)return;const ta=document.createElement('textarea');ta.value=el.textContent;ta.style.cssText='width:100%;padding:8px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:7px;background:var(--bg);min-height:80px;margin-bottom:6px';el.replaceWith(ta);const btn=document.createElement('button');btn.className='btn btnP sm';btn.textContent='Opslaan';btn.onclick=()=>{const p=document.createElement('div');p.id='filosText';p.style.cssText='font-size:13px;color:var(--t2);line-height:1.6';p.textContent=ta.value;localStorage.setItem('filosText',ta.value);btn.remove();ta.replaceWith(p);notify();};ta.after(btn);}
+function addComp(){const c=prompt('Competentie:');if(c){COMPETENTIES.push(c.trim());sbInsert('competenties',{name:c.trim()});renderPortfolio();}}
+function delComp(i){COMPETENTIES.splice(i,1);renderPortfolio();}
+let _editCarrIdx=null;
+function editCarr(i){_editCarrIdx=i;const c=CARRIERE[i];document.getElementById('carrYear').value=c.year||'';document.getElementById('carrTitle').value=c.title||'';document.getElementById('carrClub').value=c.club||'';document.getElementById('carrDesc').value=c.description||'';document.getElementById('carrYear').dataset.editIdx=i;openModal('carrModal');}
+async function saveCarr(){const year=document.getElementById('carrYear').value.trim(),title=document.getElementById('carrTitle').value.trim();if(!title)return;const c={year,title,club:document.getElementById('carrClub').value,description:document.getElementById('carrDesc').value,sort_order:0};const editIdx=document.getElementById('carrYear').dataset.editIdx;if(editIdx!==''){const i=parseInt(editIdx),old=CARRIERE[i];if(old.id)await sbUpdate('carriere',old.id,c);CARRIERE[i]={...old,...c};_editCarrIdx=null;}else{const d=await sbInsert('carriere',c);CARRIERE.unshift({...c,id:d?.id});}closeModal('carrModal');renderPortfolio();notify();}
+async function delCarr(i,id){if(id)await sbDelete('carriere',id);CARRIERE.splice(i,1);renderPortfolio();}
+function saveHeaderFields(){PORTFOLIO_NAME=document.getElementById('hName').value.trim();PORTFOLIO_TITLE=document.getElementById('hTitle').value.trim();PORTFOLIO_CLUB=document.getElementById('hClub').value.trim();localStorage.setItem('pName',PORTFOLIO_NAME);localStorage.setItem('pTitle',PORTFOLIO_TITLE);localStorage.setItem('pClub',PORTFOLIO_CLUB);closeModal('editHeaderModal');renderPortfolio();notify('Header opgeslagen');}
+
+// ============================================================
+// PRO LICENSE
+// ============================================================
+let LICENSE_TOPICS=[];let REFLECTIES=[];let LEERLOG=[];let _editTopicIdx=null;
+
+async function renderLicentie(){
+  document.getElementById('topActions').innerHTML=`<button class="btn btnP sm" onclick="openModal('topicModal')">+ Topic</button>`;
+  if(!LICENSE_TOPICS.length){const[topics,refs]=await Promise.all([sbGet('license_topics','&order=created_at.asc'),sbGet('reflecties','&order=date.desc')]);for(const t of(topics||[])){const vids=await sbGet('license_videos',`&topic_id=eq.${t.id}`);t.videos=vids||[];}LICENSE_TOPICS=topics||[];REFLECTIES=refs||[];try{const ll=await sbGet('leerlog','&order=date.desc');LEERLOG=ll||[];}catch(e){LEERLOG=[];}}
+  const total=LICENSE_TOPICS.length,done=LICENSE_TOPICS.filter(t=>(t.videos||[]).length>0).length,pct=total?Math.round(done/total*100):0;
+  document.getElementById('pgLicentie').innerHTML=`
+    <div style="background:var(--txt);border-radius:10px;padding:16px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff">Pro License traject</span><span style="font-size:13px;color:rgba(255,255,255,.5)">${pct}%</span></div><div style="background:rgba(255,255,255,.1);border-radius:4px;height:7px"><div style="background:#4FA8D1;height:100%;border-radius:4px;width:${pct}%"></div></div></div>
+    <div style="display:flex;gap:2px;border-bottom:1px solid var(--brd);margin-bottom:14px">
+      ${['Topics & Materiaal','Leerlog','Reflecties'].map((t,i)=>`<div onclick="showLicTab(${i})" id="ltab${i}" style="padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;${i===0?'color:#4FA8D1;border-bottom:2px solid #4FA8D1;margin-bottom:-1px':'color:var(--t3)'}">${t}</div>`).join('')}
+    </div>
+    <div id="ltab0">
+      ${LICENSE_TOPICS.map((t,ti)=>`<div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+          <div style="font-weight:600;flex:1">${t.name}</div>
+          <span class="bdg blue">${(t.videos||[]).length} items</span>
+          <button class="btn btnP sm" onclick="event.stopPropagation();_editTopicIdx=${ti};openModal('vidModal')">+ Video/Link</button>
+          <button class="btn btnD sm" onclick="event.stopPropagation();delTopic(${ti},'${t.id||''}')">✕</button>
+        </div>
+        <div style="display:none;margin-top:10px">
+          <p style="font-size:13px;color:var(--t2);margin-bottom:8px">${t.description||''}</p>
+          ${(t.videos||[]).map((v,vi)=>`<div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--brd)"><div style="width:42px;height:28px;background:#E6F4FB;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0">▶</div><div style="flex:1"><div style="font-size:13px;font-weight:600">${v.title}</div>${v.url?`<a href="${v.url}" target="_blank" style="font-size:11px;color:#4FA8D1">${v.url}</a>`:''}</div><button class="btn btnD sm" onclick="delVid(${ti},${vi},'${v.id||''}')">✕</button></div>`).join('')||'<div style="font-size:12px;color:var(--t3)">Nog geen items.</div>'}
+        </div>
+      </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen topics.</p></div>'}
+    </div>
+    <div id="ltab1" style="display:none">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="document.getElementById('llDate').value=new Date().toISOString().split('T')[0];openModal('leerlogModal')">+ Leerlog</button></div>
+      ${LEERLOG.map((l,i)=>`<div class="card" style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-weight:700">${l.date}</span>${l.topic?`<span class="bdg blue">${l.topic}</span>`:''}<button class="btn btnD sm" style="margin-left:auto" onclick="delLeerlog(${i},'${l.id||''}')">✕</button></div><div style="font-size:13px;color:var(--t2);line-height:1.6"><div style="margin-bottom:4px"><strong>Wat:</strong> ${l.wat}</div>${l.hoe?`<div style="margin-bottom:4px"><strong>Hoe:</strong> ${l.hoe}</div>`:''}${l.resultaat?`<div><strong>Resultaat:</strong> ${l.resultaat}</div>`:''}</div></div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen leerlog.</p></div>'}
+    </div>
+    <div id="ltab2" style="display:none">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="document.getElementById('refDate').value=new Date().toISOString().split('T')[0];openModal('refModal')">+ Reflectie</button></div>
+      ${REFLECTIES.map((r,i)=>`<div class="card" style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-weight:700">${r.date}</span><button class="btn btnD sm" style="margin-left:auto" onclick="delRef(${i},'${r.id||''}')">✕</button></div><div style="font-size:13px;color:var(--t2)">${r.text}</div></div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen reflecties.</p></div>'}
+    </div>`;
+}
+
+function showLicTab(idx){[0,1,2].forEach(i=>{const c=document.getElementById('ltab'+i);if(c)c.style.display=i===idx?'block':'none';const t=document.getElementById('ltab'+i+'header'||'ltab'+i);});['ltab0','ltab1','ltab2'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.style.display=i===idx?'block':'none';});const tabs=['ltab0','ltab1','ltab2'];tabs.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.style.display=i===idx?'block':'none';});document.querySelectorAll('[id^="ltab"]').forEach(el=>{if(el.id==='ltab'+idx){el.style.display='block';}else if(['ltab0','ltab1','ltab2'].includes(el.id)){el.style.display='none';}});}
+
+async function saveTopic(){const name=document.getElementById('topicName').value.trim();if(!name)return;const t={name,description:document.getElementById('topicDesc').value};const d=await sbInsert('license_topics',t);LICENSE_TOPICS.push({...t,id:d?.id,videos:[]});closeModal('topicModal');renderLicentie();notify();}
+async function delTopic(ti,id){if(id)await sbDelete('license_topics',id);LICENSE_TOPICS.splice(ti,1);renderLicentie();}
+async function saveVid(){const ti=_editTopicIdx;const t=LICENSE_TOPICS[ti];const v={topic_id:t.id,title:document.getElementById('vidTitle').value,url:document.getElementById('vidUrl').value,note:document.getElementById('vidNote').value};const d=await sbInsert('license_videos',v);t.videos=[...(t.videos||[]),(d||v)];['vidTitle','vidUrl','vidNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});closeModal('vidModal');renderLicentie();notify();}
+async function delVid(ti,vi,id){if(id)await sbDelete('license_videos',id);LICENSE_TOPICS[ti].videos.splice(vi,1);renderLicentie();}
+async function saveLeerlog(){const wat=document.getElementById('llWat').value.trim();if(!wat)return;const l={date:document.getElementById('llDate').value,topic:document.getElementById('llTopic').value,wat,hoe:document.getElementById('llHoe').value,resultaat:document.getElementById('llResultaat').value};try{const d=await sbInsert('leerlog',l);if(d?.id)l.id=d.id;}catch(e){}LEERLOG.unshift(l);closeModal('leerlogModal');showLicTab(1);renderLicentie();notify();}
+async function delLeerlog(i,id){if(id){try{await sbDelete('leerlog',id);}catch(e){}}LEERLOG.splice(i,1);renderLicentie();}
+async function saveRef(){const text=document.getElementById('refText').value.trim();if(!text)return;const r={date:document.getElementById('refDate').value,text};const d=await sbInsert('reflecties',r);REFLECTIES.unshift({...r,id:d?.id});closeModal('refModal');showLicTab(2);renderLicentie();notify();}
+async function delRef(i,id){if(id)await sbDelete('reflecties',id);REFLECTIES.splice(i,1);renderLicentie();}
+
 
 // ============================================================
 // UTILITIES
