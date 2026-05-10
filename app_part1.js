@@ -176,6 +176,17 @@ async function init(){
 async function bootApp(){
   document.getElementById('loading').style.display='flex';
   document.getElementById('authWrap').style.display='none';
+  
+  // Safety net: als alles mislukt na 8 seconden, toon foutmelding
+  const safetyTimer = setTimeout(()=>{
+    document.getElementById('loading').innerHTML = `
+      <div style="text-align:center;padding:20px;font-family:sans-serif">
+        <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:#161F2B">Verbinding mislukt</div>
+        <div style="font-size:13px;color:#94A3B8;margin-bottom:16px">Controleer je Supabase URL en Key in index.html</div>
+        <button onclick="location.reload()" style="padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">Opnieuw proberen</button>
+        <button onclick="doLogout()" style="padding:8px 16px;background:transparent;border:1px solid #DDE3EA;border-radius:8px;cursor:pointer;font-size:13px;margin-left:8px">Uitloggen</button>
+      </div>`;
+  }, 8000);
 
   // STAP 1: Haal vers profiel op via directe REST call met huidige token
   let profileLoaded = false;
@@ -218,17 +229,22 @@ async function bootApp(){
     }
   }
 
-  // STAP 2: Laad alle data
-  await Promise.all([
-    loadPlayers(),
-    loadKpis(),
-    loadPrincipes(),
-    loadWeekSessions(),
-    loadCoachData(),
-    loadOefenvormen()
-  ]);
+  // STAP 2: Laad alle data - elke call heeft eigen foutafhandeling
+  try {
+    await Promise.all([
+      loadPlayers().catch(e=>{ S.players=[]; }),
+      loadKpis().catch(e=>{ S.kpis=[{id:'k1',name:'Passes %',unit:'pct',default_val:70}]; }),
+      loadPrincipes().catch(e=>{ S.principes=[]; }),
+      loadWeekSessions().catch(e=>{ S.weekSessions={}; }),
+      loadCoachData().catch(e=>{ S.carriere=[];S.competenties=[];S.licenseTopics=[];S.reflecties=[]; }),
+      loadOefenvormen().catch(e=>{ S.oefenvormen=[]; })
+    ]);
+  } catch(e) {
+    // Ga door ook als data laden mislukt
+  }
 
   // STAP 3: Render UI met correcte rol
+  clearTimeout(safetyTimer);
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='flex';
   renderSidebar();
@@ -254,6 +270,8 @@ async function loadPlayers(){
     p.injuries=inj||[];
     p.kpis=p.kpis||{};
     p.presence=p.presence||[];
+    // presenceLog: use from DB field if available, otherwise empty
+    p.presenceLog=p.presence_log||p.presenceLog||[];
   }
   S.players=pl||[];
 }
