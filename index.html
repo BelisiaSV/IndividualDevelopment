@@ -1006,31 +1006,156 @@ function renderFysiek() {
 
 function renderTraining() {
   document.getElementById('topActions').innerHTML = `<button class="btn btnP sm" onclick="openModal('addSessionModal');populateSelects()">+ Sessie</button>`;
+  if (!window.TRAINING_VIEW) window.TRAINING_VIEW = 'week';
+  if (window.TRAINING_VIEW === 'week') renderTrainingWeek();
+  else renderTrainingMonth();
+}
+
+function renderTrainingWeek() {
   const dates = getWeekDates();
-  const days = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+  const days = ['Ma','Di','Wo','Do','Vr','Za'];
   const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
   const ws = WEEK_SESSIONS[WEEK_OFFSET]||{};
+  const weekLabel = `Week ${1+WEEK_OFFSET} \u2014 ${months[dates[0].getMonth()]} ${dates[0].getFullYear()}`;
   document.getElementById('pgTraining').innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <button class="btn btnG sm" onclick="WEEK_OFFSET--;renderTraining()">◀</button>
-        <strong>Week ${1+WEEK_OFFSET} — ${months[dates[0].getMonth()]} ${dates[0].getFullYear()}</strong>
-        <button class="btn btnG sm" onclick="WEEK_OFFSET++;renderTraining()">▶</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn btnG sm" onclick="WEEK_OFFSET--;renderTraining()">&#9664;</button>
+        <strong style="font-size:14px">${weekLabel}</strong>
+        <button class="btn btnG sm" onclick="WEEK_OFFSET++;renderTraining()">&#9654;</button>
+        <button class="btn btnG sm" onclick="WEEK_OFFSET=0;renderTraining()">Vandaag</button>
+      </div>
+      <div style="display:flex;background:var(--bg);border:1px solid var(--brd);border-radius:7px;overflow:hidden">
+        <button onclick="window.TRAINING_VIEW='week';renderTraining()" style="padding:5px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--blue);color:#fff;font-family:var(--f)">Week</button>
+        <button onclick="window.TRAINING_VIEW='month';window.MONTH_OFFSET=0;renderTraining()" style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--t2);font-family:var(--f)">Maand</button>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px">
-      ${dates.map((d,i)=>`<div style="background:#fff;border:1px solid var(--brd);border-radius:8px;padding:11px;min-height:120px">
-        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:7px">${days[i]} ${d.getDate()}/${d.getMonth()+1}</div>
-        ${(ws[i]||[]).map(s=>{const tc=s.type==='match'?'#FEF3C7':s.type==='indiv'?'#D1FAE5':s.type==='rest'?'var(--bg)':'#E6F4FB';const c=s.type==='match'?'#92400E':s.type==='indiv'?'#065F46':s.type==='rest'?'var(--t3)':'#2B7FA8';return`<div style="background:${tc};border-radius:5px;padding:5px 7px;margin-bottom:4px;position:relative" onmouseenter="this.querySelector('.sd').style.display='flex'" onmouseleave="this.querySelector('.sd').style.display='none'"><div style="font-size:11px;font-weight:600;color:${c}">${s.title}</div><div style="font-size:10px;color:${c};opacity:.7">${s.time||''}</div><span class="sd" style="display:none;position:absolute;top:2px;right:2px;background:rgba(0,0,0,.2);color:#fff;border-radius:50%;width:14px;height:14px;align-items:center;justify-content:center;font-size:9px;cursor:pointer" onclick="delSession(${WEEK_OFFSET},${i},'${s.id||''}')">✕</span></div>`;}).join('')}
-        ${!(ws[i]||[]).length?'<div style="font-size:10px;color:var(--t3);font-style:italic">Vrij</div>':''}
-      </div>`).join('')}
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+      ${dates.map((d,i)=>{
+        const isToday = d.toDateString()===new Date().toDateString();
+        return `<div style="background:#fff;border:1px solid ${isToday?'var(--blue)':'var(--brd)'};border-radius:8px;padding:10px;min-height:130px">
+          <div style="font-size:11px;font-weight:700;color:${isToday?'var(--blue)':'var(--t3)'};text-transform:uppercase;margin-bottom:6px">${days[i]} <span style="font-size:13px;color:${isToday?'var(--blue)':'var(--txt)'}">${d.getDate()}</span></div>
+          ${(ws[i]||[]).map(s=>{
+            const tc=s.type==='match'?'#FEF3C7':s.type==='indiv'?'#D1FAE5':s.type==='rest'?'var(--bg)':'#E6F4FB';
+            const c=s.type==='match'?'#92400E':s.type==='indiv'?'#065F46':s.type==='rest'?'var(--t3)':'#2B7FA8';
+            return `<div style="background:${tc};border-radius:5px;padding:5px 7px;margin-bottom:4px;position:relative" onmouseenter="this.querySelector('.sd').style.display='flex'" onmouseleave="this.querySelector('.sd').style.display='none'">
+              <div style="font-size:11px;font-weight:600;color:${c}">${s.title}</div>
+              <div style="font-size:10px;color:${c};opacity:.7">${s.time||''}</div>
+              <span class="sd" style="display:none;position:absolute;top:2px;right:2px;background:rgba(0,0,0,.2);color:#fff;border-radius:50%;width:14px;height:14px;align-items:center;justify-content:center;font-size:9px;cursor:pointer" onclick="delSession(${WEEK_OFFSET},${i},'${s.id||''}')">&#x2715;</span>
+            </div>`;
+          }).join('')}
+          ${!(ws[i]||[]).length?'<div style="font-size:10px;color:var(--t3);font-style:italic">Vrij</div>':''}
+          <div onclick="openAddSessionForDay(${WEEK_OFFSET},${i})" style="margin-top:4px;font-size:10px;color:var(--t3);cursor:pointer;text-align:center;padding:3px;border-radius:4px;border:1px dashed var(--brd)" onmouseenter="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseleave="this.style.borderColor='var(--brd)';this.style.color='var(--t3)'">+ Sessie</div>
+        </div>`;
+      }).join('')}
     </div>`;
 }
 
-function getWeekDates() {
+function renderTrainingMonth() {
+  if (!window.MONTH_OFFSET) window.MONTH_OFFSET = 0;
+  const now = new Date();
+  const baseMonth = new Date(now.getFullYear(), now.getMonth() + window.MONTH_OFFSET, 1);
+  const year = baseMonth.getFullYear();
+  const month = baseMonth.getMonth();
+  const monthNames = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+  const dayNames = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+
+  // First day of month (adjust: Mon=0)
+  let firstDay = baseMonth.getDay() - 1;
+  if (firstDay < 0) firstDay = 6;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  // Build calendar cells
+  let cells = [];
+  for (let i=0; i<firstDay; i++) cells.push(null);
+  for (let d=1; d<=daysInMonth; d++) cells.push(new Date(year, month, d));
+
+  // Get sessions for this month across all weeks
+  const monthSessions = {};
+  Object.keys(WEEK_SESSIONS).forEach(wk => {
+    const wkInt = parseInt(wk);
+    const wDates = getWeekDatesFor(wkInt);
+    wDates.forEach((wd, di) => {
+      if (wd.getFullYear()===year && wd.getMonth()===month) {
+        const key = wd.getDate();
+        if (!monthSessions[key]) monthSessions[key] = [];
+        (WEEK_SESSIONS[wk][di]||[]).forEach(s => monthSessions[key].push({...s, wk:wkInt, di}));
+      }
+    });
+  });
+
+  const todayStr = new Date().toDateString();
+  const rows = Math.ceil(cells.length/7);
+
+  document.getElementById('pgTraining').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn btnG sm" onclick="window.MONTH_OFFSET--;renderTraining()">&#9664;</button>
+        <strong style="font-size:14px">${monthNames[month]} ${year}</strong>
+        <button class="btn btnG sm" onclick="window.MONTH_OFFSET++;renderTraining()">&#9654;</button>
+        <button class="btn btnG sm" onclick="window.MONTH_OFFSET=0;renderTraining()">Vandaag</button>
+      </div>
+      <div style="display:flex;background:var(--bg);border:1px solid var(--brd);border-radius:7px;overflow:hidden">
+        <button onclick="window.TRAINING_VIEW='week';renderTraining()" style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--t2);font-family:var(--f)">Week</button>
+        <button onclick="window.TRAINING_VIEW='month';renderTraining()" style="padding:5px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--blue);color:#fff;font-family:var(--f)">Maand</button>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--brd);border-radius:10px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid var(--brd)">
+        ${dayNames.map(d=>`<div style="padding:8px 0;text-align:center;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase">${d}</div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+        ${cells.map((d,ci) => {
+          if (!d) return `<div style="border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);min-height:90px;background:var(--bg)"></div>`;
+          const isToday = d.toDateString()===todayStr;
+          const dayNum = d.getDate();
+          const sessions = monthSessions[dayNum]||[];
+          const isWeekend = d.getDay()===0||d.getDay()===6;
+          return `<div style="border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);min-height:90px;padding:6px;background:${isToday?'#EDF6FB':isWeekend?'#FAFAFA':'#fff'};position:relative" onclick="openAddSessionForMonth(${year},${month},${dayNum})">
+            <div style="font-size:12px;font-weight:${isToday?700:500};color:${isToday?'#fff':'var(--txt)'};background:${isToday?'var(--blue)':'transparent'};width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:4px">${dayNum}</div>
+            ${sessions.slice(0,3).map(s=>{
+              const tc=s.type==='match'?'#FEF3C7':s.type==='indiv'?'#D1FAE5':s.type==='rest'?'var(--bg)':'#E6F4FB';
+              const c=s.type==='match'?'#92400E':s.type==='indiv'?'#065F46':s.type==='rest'?'var(--t3)':'#2B7FA8';
+              return `<div style="background:${tc};color:${c};font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer" onclick="event.stopPropagation();delSession(${s.wk},${s.di},'${s.id||''}')">${s.title}</div>`;
+            }).join('')}
+            ${sessions.length>3?`<div style="font-size:10px;color:var(--t3)">+${sessions.length-3} meer</div>`:''}
+            <div style="position:absolute;bottom:4px;right:4px;width:16px;height:16px;border-radius:50%;border:1px dashed var(--brd);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--t3);cursor:pointer" onmouseenter="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseleave="this.style.borderColor='var(--brd)';this.style.color='var(--t3)'" onclick="event.stopPropagation();openAddSessionForMonth(${year},${month},${dayNum})">+</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function getWeekDatesFor(weekOffset) {
   const b = new Date(2025,6,7);
-  b.setDate(b.getDate()+WEEK_OFFSET*7);
+  b.setDate(b.getDate()+weekOffset*7);
   return Array(6).fill(0).map((_,i)=>{const d=new Date(b);d.setDate(d.getDate()+i);return d;});
+}
+
+function openAddSessionForDay(wk, di) {
+  WEEK_OFFSET = wk;
+  document.getElementById('sesDay').value = di;
+  openModal('addSessionModal');
+  populateSelects();
+}
+
+function openAddSessionForMonth(year, month, day) {
+  // Find which week offset and day index this date corresponds to
+  const target = new Date(year, month, day);
+  const base = new Date(2025,6,7);
+  const diffDays = Math.round((target - base) / 86400000);
+  const wk = Math.floor(diffDays / 7);
+  const di = diffDays % 7;
+  if (di < 0 || di > 5) return; // Sunday or out of range
+  WEEK_OFFSET = wk;
+  document.getElementById('sesDay').value = di;
+  openModal('addSessionModal');
+  populateSelects();
+}
+
+
+function getWeekDates() {
+  return getWeekDatesFor(WEEK_OFFSET);
 }
 
 function renderOefenvormen() {
