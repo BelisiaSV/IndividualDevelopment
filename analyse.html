@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Belisia SV – CompetitieAnalyse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f8f7f5;
+    --surface: #ffffff;
+    --surface2: #f1f0ee;
+    --border: #e4e2df;
+    --border2: #d1cec9;
+    --text: #1a1917;
+    --text2: #6b6560;
+    --text3: #9c9590;
+    --accent: #1a7a3c;
+    --accent2: #15692f;
+    --accent-bg: #f0faf3;
+    --red: #c0392b;
+    --red-bg: #fdf2f0;
+    --yellow: #b45309;
+    --yellow-bg: #fffbeb;
+    --blue: #1d4ed8;
+    --blue-bg: #eff6ff;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow: 0 4px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+    --shadow-lg: 0 10px 40px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+    --r: 10px;
+    --r-sm: 6px;
+  }
+  html, body { height: 100%; background: var(--bg); font-family: var(--sans); color: var(--text); }
+  #root { height: 100%; display: flex; flex-direction: column; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* Utilities */
+  .mono { font-family: var(--mono); }
+  .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  input, select, button { font-family: var(--sans); }
+
+  /* Transitions */
+  button { transition: background .15s, color .15s, box-shadow .15s, transform .1s; }
+  button:active { transform: scale(0.97); }
+
+  /* Nav */
+  .nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 4px; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; padding: 12px 0; margin-right: 20px; border-right: 1px solid var(--border); padding-right: 20px; }
+  .nav-logo { width: 34px; height: 34px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0; }
+  .nav-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .nav-sub { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+  .nav-tab { padding: 14px 14px; background: transparent; border: none; border-bottom: 2px solid transparent; font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: color .15s, border-color .15s; }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .nav-spacer { flex: 1; }
+  .nav-actions { display: flex; align-items: center; gap: 8px; }
+
+  /* Main layout */
+  .main { flex: 1; overflow-y: auto; padding: 24px 20px; max-width: 1280px; margin: 0 auto; width: 100%; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow-sm); }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: .02em; text-transform: uppercase; }
+  .card-body { padding: 20px; }
+
+  /* Stat cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; }
+  .stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 800; line-height: 1; font-family: var(--mono); color: var(--text); }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* Table */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tbl th { padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); background: var(--surface2); border-bottom: 1px solid var(--border); position: sticky; top: 0; }
+  .tbl th.r, .tbl td.r { text-align: right; }
+  .tbl th.c, .tbl td.c { text-align: center; }
+  .tbl td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .tbl tr:last-child td { border-bottom: none; }
+  .tbl tr:hover td { background: var(--surface2); }
+  .tbl tbody tr { transition: background .1s; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--r-sm); border: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #fdd; }
+  .btn-danger:hover { background: #fdd; }
+
+  /* Badges */
+  .badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-goal { background: #dcfce7; color: #15803d; }
+  .badge-yellow { background: #fef9c3; color: #a16207; }
+  .badge-red { background: #fee2e2; color: #b91c1c; }
+  .badge-sub-out { background: #ffedd5; color: #c2410c; }
+  .badge-sub-in { background: #f0fdf4; color: #15803d; }
+  .badge-warn { background: #fef3c7; color: #92400e; }
+
+  /* Form elements */
+  .form-label { font-size: 11px; font-weight: 600; color: var(--text2); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 5px; display: block; }
+  .form-input { width: 100%; padding: 8px 11px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-sm); font-size: 13px; color: var(--text); outline: none; transition: border-color .15s, box-shadow .15s; }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,122,60,.1); }
+  select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239c9590' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+
+  /* Tags */
+  .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: var(--surface2); color: var(--text2); }
+
+  /* Section header */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 18px; font-weight: 700; color: var(--text); }
+
+  /* Form chip pill */
+  .form-pill { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .form-W { background: #dcfce7; color: #15803d; }
+  .form-D { background: #f1f5f9; color: #64748b; }
+  .form-L { background: #fee2e2; color: #b91c1c; }
+
+  /* Player photo */
+  .player-photo { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; flex-shrink: 0; }
+
+  /* Zone bar */
+  .zone-bar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .zone-bar-label { font-size: 11px; color: var(--text3); font-family: var(--mono); width: 50px; flex-shrink: 0; }
+  .zone-bar-bg { flex: 1; height: 20px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .zone-bar-fill { height: 100%; border-radius: 4px; transition: width .4s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; }
+  .zone-bar-val { font-size: 10px; font-weight: 700; color: white; font-family: var(--mono); }
+
+  /* Match row */
+  .match-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 12px; transition: background .1s; }
+  .match-row:last-child { border-bottom: none; }
+  .match-row:hover { background: var(--surface2); }
+  .match-team { flex: 1; font-size: 13px; font-weight: 600; }
+  .match-score { font-size: 20px; font-weight: 800; font-family: var(--mono); color: var(--text); min-width: 60px; text-align: center; letter-spacing: -1px; }
+  .match-day { font-size: 10px; color: var(--text3); font-family: var(--mono); min-width: 28px; }
+
+  /* Tooltip override */
+  .recharts-tooltip-wrapper { font-family: var(--sans) !important; }
+
+  /* Empty state */
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: var(--text3); gap: 12px; }
+  .empty-icon { font-size: 36px; opacity: .4; }
+  .empty-text { font-size: 14px; }
+
+  /* Suspension warning */
+  .susp-warn { background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px; padding: 4px 8px; font-size: 10px; font-weight: 700; color: #92400e; }
+
+  /* Tab panel */
+  .tab-panel { animation: fadeIn .15s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Modal overlay */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* Drop zone */
+  .dropzone { flex: 1; min-height: 120px; border-radius: var(--r); border: 2px dashed var(--border2); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: var(--surface2); transition: border-color .2s, background .2s; }
+  .dropzone:hover { border-color: var(--accent); background: var(--accent-bg); }
+  .dropzone-active { border-color: var(--accent) !important; background: var(--accent-bg) !important; }
+
+  /* Player row in match editor */
+  .player-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid var(--border); }
+  .player-num { font-family: var(--mono); font-size: 11px; color: var(--text3); min-width: 24px; text-align: center; }
+  .player-name { font-size: 12px; font-weight: 500; min-width: 140px; }
+  .player-name.starter { font-weight: 700; color: var(--text); }
+  .player-name.sub { color: var(--text2); }
+
+  /* Responsive grid helpers */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .grid-3 { grid-template-columns: 1fr; } .main { padding: 16px 12px; } .nav-brand { display: none; } }
+
+  /* Pill tab */
+  .pill-tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 8px; padding: 4px; }
+  .pill-tab { padding: 6px 14px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; color: var(--text2); cursor: pointer; background: transparent; transition: background .15s, color .15s; }
+  .pill-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+
+  /* Sponsor strip */
+  .accent-strip { height: 3px; background: linear-gradient(90deg, var(--accent) 0%, #22c55e 100%); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+
+<script>// ═══════════════════════ CONSTANTS ═══════════════════════
+const TEAMS = [
+  "Belisia SV","Cercle Brugge B","Dessel Sport","Diegem Sport",
+  "Hoogstraten VV","Houtvenne","Knokke FC","Lyra-Lierse",
+  "Merelbeke","Ninove","OH Leuven B","Roeselare",
+  "Sporting Hasselt","Thes Sport","Tienen","Zelzate"
+];
+
+const COMPETITION = "1e Afdeling VV – 2025-2026";
+const PRIMARY_TEAM = "Belisia SV";
+
+const EVENT_CYCLE = ["unset","goal","yellow","red","sub_out","sub_in"];
+const EV = {
+  unset:   { bg:"#e2e8f0", fg:"#64748b", icon:"?",  label:"Onbekend" },
+  goal:    { bg:"#dcfce7", fg:"#15803d", icon:"⚽", label:"Doelpunt" },
+  yellow:  { bg:"#fef9c3", fg:"#a16207", icon:"Y",  label:"Geel" },
+  red:     { bg:"#fee2e2", fg:"#b91c1c", icon:"R",  label:"Rood" },
+  sub_out: { bg:"#ffedd5", fg:"#c2410c", icon:"↓",  label:"Gewisseld uit" },
+  sub_in:  { bg:"#f0fdf4", fg:"#15803d", icon:"↑",  label:"Gewisseld in" },
+};
+
+const ZONES = ["0–15","16–30","31–45","46–60","61–75","76–90+"];
+const ZONE_COLORS = ["#3b82f6","#6366f1","#8b5cf6","#f59e0b","#ef4444","#ec4899"];
+
+const PROMPT = `Je bent een data-extractie assistent voor Belgische amateurvoetbal wedstrijdbladen van Voetbal Vlaanderen.
+Analyseer de screenshot(s) en extraheer ALLE data in exact dit JSON-formaat:
+{"homeTeam":"","awayTeam":"","homePlayers":[{"number":"","name":"","isSub":false,"captain":false,"gk":false,"events":[{"minute":"","type":"goal|yellow|red|sub_out|sub_in"}]}],"awayPlayers":[...]}
+ICONEN: ⚽=goal, geel kaartje=yellow, rood kaartje=red, rood pijltje/↓=sub_out, groen pijltje/↑=sub_in.
+Het getal naast een icoon is de MINUUT. Alles staat ONDER de naam.
+Links=THUIS, rechts=UIT. Eerst basis, dan "WISSELSPELERS" met isSub=true.
+Twee gele kaarten = twee aparte "yellow" events. Als icoon onduidelijk → "unset".
+Antwoord ENKEL met valid JSON.`;
+
+const f2b = f => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(r.result.split(",")[1]);
+  r.onerror = rej;
+  r.readAsDataURL(f);
+});
+
+// SUSPENSION THRESHOLDS (Belgian amateur football)
+const YELLOW_SUSPENSION = 3; // suspended after 3rd yellow
+
+Object.assign(window, { TEAMS, COMPETITION, PRIMARY_TEAM, EVENT_CYCLE, EV, ZONES, ZONE_COLORS, PROMPT, f2b, YELLOW_SUSPENSION });
+</script>
+<script>// ═══════════════════════ STORAGE ═══════════════════════
+
+// Cloud storage handled by Supabase
+
+function getJSONBinConfig() {
+  return {
+    apiKey: localStorage.getItem("jsonbin_api_key") || "",
+    binId:  localStorage.getItem("jsonbin_bin_id")  || "",
+  };
+}
+
+// Create a new bin and store its ID
+async function createJSONBin(apiKey, initialData) {
+  const resp = await fetch(`${JSONBIN_BASE}/b`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Master-Key": apiKey,
+      "X-Bin-Name": "belisia-sv-data",
+      "X-Bin-Private": "true",
+    },
+    body: JSON.stringify({ matches: initialData }),
+  });
+  if (!resp.ok) throw new Error(`JSONBin create error: ${resp.status}`);
+  const data = await resp.json();
+  return data.metadata.id;
+}
+
+// Read from cloud, fall back to localStorage
+async function loadMatches() {
+  const { apiKey, binId } = getJSONBinConfig();
+  if (apiKey && binId) {
+    try {
+      const resp = await fetch(`${JSONBIN_BASE}/b/${binId}/latest`, {
+        headers: { "X-Master-Key": apiKey },
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        const matches = data.record?.matches || [];
+        // Mirror to localStorage as offline cache
+        localStorage.setItem("belisia_matches_v2", JSON.stringify(matches));
+        return matches;
+      }
+    } catch(e) { console.warn("JSONBin load failed, using local cache:", e); }
+  }
+  // Fallback: localStorage
+  try {
+    const raw = localStorage.getItem("belisia_matches_v2");
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+// Write to cloud AND localStorage
+async function saveMatches(m) {
+  // Always save locally first
+  try { localStorage.setItem("belisia_matches_v2", JSON.stringify(m)); } catch(e) { console.error(e); }
+
+  const { apiKey, binId } = getJSONBinConfig();
+  if (!apiKey) return; // No cloud config yet
+
+  try {
+    let id = binId;
+    // Auto-create bin if we have a key but no bin yet
+    if (!id) {
+      id = await createJSONBin(apiKey, m);
+      localStorage.setItem("jsonbin_bin_id", id);
+      return; // already saved via create
+    }
+    const resp = await fetch(`${JSONBIN_BASE}/b/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": apiKey,
+      },
+      body: JSON.stringify({ matches: m }),
+    });
+    if (!resp.ok) console.warn("JSONBin save error:", resp.status);
+  } catch(e) { console.warn("JSONBin save failed:", e); }
+}
+
+function exportData(matches) {
+  const blob = new Blob([JSON.stringify(matches, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `belisia_data_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function importData(file, cb) {
+  const r = new FileReader();
+  r.onload = e => { try { cb(JSON.parse(e.target.result)); } catch { alert("Ongeldig JSON bestand."); } };
+  r.readAsText(file);
+}
+
+Object.assign(window, { getJSONBinConfig, createJSONBin });
+
+// ═══════════════════════ SEIZOEN HELPERS ═══════════════════════
+// Een seizoen loopt van juli (maand 7) t/m mei (maand 5) van het volgende jaar.
+// Juni valt buiten een seizoen — wedstrijden in juni worden bij het vorige seizoen geteld (verlenging).
+function getSeasonForDate(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1; // 1-12
+  // juli t/m december → seizoen y / y+1
+  // januari t/m juni → seizoen y-1 / y
+  if (m >= 7) return `${y}-${y + 1}`;
+  return `${y - 1}-${y}`;
+}
+
+function getCurrentSeason() {
+  return getSeasonForDate(new Date().toISOString().slice(0, 10));
+}
+
+function getMatchSeason(match) {
+  if (match && match.season) return match.season;
+  return getSeasonForDate(match?.date) || getCurrentSeason();
+}
+
+function getAllSeasons(matches) {
+  const set = new Set();
+  for (const m of matches) {
+    const s = getMatchSeason(m);
+    if (s) set.add(s);
+  }
+  // Voeg ook huidig seizoen toe zodat keuzelijst nooit leeg is
+  set.add(getCurrentSeason());
+  return [...set].sort().reverse(); // nieuwste bovenaan
+}
+
+function filterMatchesBySeason(matches, season) {
+  if (!season || season === 'all') return matches;
+  return matches.filter(m => getMatchSeason(m) === season);
+}
+
+Object.assign(window, {
+  getSeasonForDate, getCurrentSeason, getMatchSeason,
+  getAllSeasons, filterMatchesBySeason
+});
+
+// ═══════════════════════ SCORE CALCULATOR ═══════════════════════
+function computeMatchScore(m) {
+  let h = 0, a = 0;
+  const evts = m.events || {};
+  [...(m.homePlayers || []), ...(m.awayPlayers || [])].forEach(p => {
+    (evts[p.id] || []).forEach(e => {
+      if (e.type === "goal") { p.side === "home" ? h++ : a++; }
+    });
+  });
+  return { home: h, away: a, label: `${h}–${a}` };
+}
+
+// ═══════════════════════ MINUTE ZONE ═══════════════════════
+function getMinuteZone(min) {
+  const m = parseInt(min);
+  if (isNaN(m)) return null;
+  if (m <= 15) return 0;
+  if (m <= 30) return 1;
+  if (m <= 45) return 2;
+  if (m <= 60) return 3;
+  if (m <= 75) return 4;
+  return 5;
+}
+
+// ═══════════════════════ PLAYER STATS ═══════════════════════
+function computePlayerStats(matches, teamFilter) {
+  const stats = {};
+  for (const match of matches) {
+    const allP = [
+      ...(match.homePlayers || []).map(p => ({ ...p, side: "home", team: match.homeTeam })),
+      ...(match.awayPlayers || []).map(p => ({ ...p, side: "away", team: match.awayTeam }))
+    ];
+    const evts = match.events || {};
+    for (const p of allP) {
+      if (teamFilter && p.team !== teamFilter) continue;
+      const key = `${p.team}__${p.name}`;
+      if (!stats[key]) stats[key] = {
+        name: p.name, team: p.team, matches: 0, minutes: 0,
+        goals: 0, yellow: 0, red: 0, starts: 0, subIn: 0,
+        photo: null, number: p.number || ""
+      };
+      const s = stats[key];
+      if (!s.number && p.number) s.number = p.number;
+      const pEvts = evts[p.id] || [];
+      const isStart = !p.isSub;
+      let played = false;
+
+      if (isStart) {
+        s.starts++;
+        played = true;
+        const subOut = pEvts.find(e => e.type === "sub_out");
+        s.minutes += subOut ? (parseInt(subOut.minute) || 90) : 90;
+      } else {
+        const subIn = pEvts.find(e => e.type === "sub_in");
+        if (subIn) {
+          s.subIn++;
+          played = true;
+          s.minutes += 90 - (parseInt(subIn.minute) || 0);
+        }
+      }
+      if (played) s.matches++;
+      for (const e of pEvts) {
+        if (e.type === "goal") s.goals++;
+        if (e.type === "yellow") s.yellow++;
+        if (e.type === "red") s.red++;
+      }
+    }
+  }
+  return Object.values(stats).sort((a, b) => b.minutes - a.minutes);
+}
+
+// ═══════════════════════ TIMEZONE ANALYSIS ═══════════════════════
+function computeTimezones(matches, teamFilter) {
+  const zones = { for: Array(6).fill(0), against: Array(6).fill(0) };
+  for (const match of matches) {
+    const evts = match.events || {};
+    const allP = [
+      ...(match.homePlayers || []).map(p => ({ ...p, side: "home", team: match.homeTeam })),
+      ...(match.awayPlayers || []).map(p => ({ ...p, side: "away", team: match.awayTeam }))
+    ];
+    for (const p of allP) {
+      for (const e of (evts[p.id] || [])) {
+        if (e.type !== "goal") continue;
+        const zi = getMinuteZone(e.minute);
+        if (zi === null) continue;
+        if (!teamFilter) { zones.for[zi]++; continue; }
+        if (p.team === teamFilter) { zones.for[zi]++; }
+        else {
+          const isHome = p.side === "home";
+          const opponent = isHome ? match.awayTeam : match.homeTeam;
+          if (opponent === teamFilter) zones.against[zi]++;
+        }
+      }
+    }
+  }
+  return zones;
+}
+
+// ═══════════════════════ STANDINGS ═══════════════════════
+function computeStandings(matches) {
+  const t = {};
+  TEAMS.forEach(tm => t[tm] = { team: tm, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, mp: 0, form: [] });
+  for (const m of matches) {
+    if (!m.homeTeam || !m.awayTeam) continue;
+    const { home: gh, away: ga } = computeMatchScore(m);
+    const h = t[m.homeTeam], a = t[m.awayTeam];
+    if (!h || !a) continue;
+    h.mp++; a.mp++; h.gf += gh; h.ga += ga; a.gf += ga; a.ga += gh;
+    if (gh > ga) {
+      h.w++; h.pts += 3; a.l++;
+      h.form.push("W"); a.form.push("L");
+    } else if (gh < ga) {
+      a.w++; a.pts += 3; h.l++;
+      h.form.push("L"); a.form.push("W");
+    } else {
+      h.d++; a.d++; h.pts++; a.pts++;
+      h.form.push("D"); a.form.push("D");
+    }
+  }
+  return Object.values(t).sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+}
+
+// ═══════════════════════ STREAKS ═══════════════════════
+function getCurrentStreak(form) {
+  if (!form.length) return { type: null, count: 0 };
+  const last = form[form.length - 1];
+  let count = 0;
+  for (let i = form.length - 1; i >= 0; i--) {
+    if (form[i] === last) count++;
+    else break;
+  }
+  return { type: last, count };
+}
+
+// ═══════════════════════ HEAD TO HEAD ═══════════════════════
+function computeH2H(matches, teamA, teamB) {
+  const results = [];
+  for (const m of matches) {
+    const isH2H = (m.homeTeam === teamA && m.awayTeam === teamB) ||
+                  (m.homeTeam === teamB && m.awayTeam === teamA);
+    if (!isH2H) continue;
+    const sc = computeMatchScore(m);
+    results.push({ ...m, score: sc });
+  }
+  const wA = results.filter(r => (r.homeTeam === teamA && r.score.home > r.score.away) || (r.awayTeam === teamA && r.score.away > r.score.home)).length;
+  const wB = results.filter(r => (r.homeTeam === teamB && r.score.home > r.score.away) || (r.awayTeam === teamB && r.score.away > r.score.home)).length;
+  const draws = results.length - wA - wB;
+  return { results, wA, wB, draws };
+}
+
+// ═══════════════════════ OPPONENT REPORT ═══════════════════════
+function computeOpponentReport(matches, team) {
+  const filtered = matches.filter(m => m.homeTeam === team || m.awayTeam === team);
+  const tz = computeTimezones(matches, team);
+  const players = computePlayerStats(matches, team);
+  const standings = computeStandings(matches);
+  const standing = standings.find(s => s.team === team);
+  const streak = standing ? getCurrentStreak(standing.form) : null;
+
+  // Dangerous zones (most goals scored)
+  const maxFor = Math.max(...tz.for, 1);
+  const dangerZones = ZONES.map((z, i) => ({ zone: z, score: tz.for[i] }))
+    .sort((a, b) => b.score - a.score).slice(0, 2).map(z => z.zone);
+
+  // Vulnerable zones (most goals against)
+  const maxAgainst = Math.max(...tz.against, 1);
+  const vulnZones = ZONES.map((z, i) => ({ zone: z, score: tz.against[i] }))
+    .sort((a, b) => b.score - a.score).slice(0, 2).map(z => z.zone);
+
+  return { filtered, tz, players, standing, streak, dangerZones, vulnZones, topScorer: players.filter(p => p.goals > 0)[0] || null };
+}
+
+Object.assign(window, {
+  loadMatches, saveMatches, exportData, importData,
+  computeMatchScore, getMinuteZone, computePlayerStats,
+  computeTimezones, computeStandings, getCurrentStreak,
+  computeH2H, computeOpponentReport
+});
+</script>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo, useRef } = React;
+
+// ─── SIMPLE SVG CHARTS (no external dependency) ───────────────────────────
+
+function HBarChart({ data, valueKey, labelKey, colors, height }) {
+  if (!data || data.length === 0) return null;
+  const max = Math.max(...data.map(d => d[valueKey]), 1);
+  const rowH = 32;
+  const labelW = 120;
+  const barAreaW = 220;
+  const valW = 36;
+  const totalW = labelW + barAreaW + valW;
+  const totalH = data.length * rowH + 20;
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${totalW} ${totalH}`} style={{overflow:'visible'}}>
+      {data.map((d, i) => {
+        const pct = d[valueKey] / max;
+        const barW = pct * barAreaW;
+        const y = i * rowH + 10;
+        const color = Array.isArray(colors) ? (colors[i] || colors[colors.length-1]) : colors;
+        return (
+          <g key={i}>
+            <text x={labelW - 8} y={y + rowH/2 + 4} textAnchor="end" fontSize="11" fill="var(--text)" fontFamily="var(--sans)"
+              style={{overflow:'hidden'}} clipPath={`url(#lbl${i})`}>
+              {d[labelKey]}
+            </text>
+            <rect x={labelW} y={y + 4} width={Math.max(barW, 2)} height={rowH - 10}
+              rx="4" fill={color} opacity="0.9"/>
+            <text x={labelW + Math.max(barW, 2) + 6} y={y + rowH/2 + 4} fontSize="11"
+              fill="var(--text2)" fontFamily="var(--mono)" fontWeight="700">
+              {d[valueKey]}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function VBarChart({ data, valueKey, labelKey, colors }) {
+  if (!data || data.length === 0) return null;
+  const max = Math.max(...data.map(d => d[valueKey]), 1);
+  const barW = 32;
+  const gap = 8;
+  const chartH = 120;
+  const labelH = 20;
+  const totalW = data.length * (barW + gap);
+  const totalH = chartH + labelH + 8;
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${totalW} ${totalH}`} style={{overflow:'visible'}}>
+      {data.map((d, i) => {
+        const pct = d[valueKey] / max;
+        const barH = pct * chartH;
+        const x = i * (barW + gap);
+        const color = Array.isArray(colors) ? (colors[i] || '#94a3b8') : colors;
+        return (
+          <g key={i}>
+            <rect x={x} y={chartH - barH} width={barW} height={Math.max(barH, 2)}
+              rx="4" fill={color} opacity="0.85"/>
+            {d[valueKey] > 0 && (
+              <text x={x + barW/2} y={chartH - barH - 4} textAnchor="middle"
+                fontSize="10" fill="var(--text2)" fontFamily="var(--mono)" fontWeight="700">
+                {d[valueKey]}
+              </text>
+            )}
+            <text x={x + barW/2} y={totalH - 2} textAnchor="middle"
+              fontSize="9" fill="var(--text3)" fontFamily="var(--mono)">
+              {d[labelKey]}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+// ─── SMALL UI COMPONENTS ───────────────────────────────────────────────────
+
+function EventBadge({ type, minute, onClick, onRemove }) {
+  const cfg = { goal:'⚽', yellow:'Y', red:'R', sub_out:'↓', sub_in:'↑', unset:'?' };
+  const cls = { goal:'badge-goal', yellow:'badge-yellow', red:'badge-red', sub_out:'badge-sub-out', sub_in:'badge-sub-in', unset:'' };
+  const missingMinute = type === 'goal' && (!minute || minute.trim() === '' || isNaN(parseInt(minute)));
+  return (
+    <span className={`badge ${cls[type]||''}`} onClick={onClick}
+      style={{ cursor:'pointer', userSelect:'none', marginRight:3, marginBottom:2,
+        outline: missingMinute ? '2px solid #f59e0b' : 'none' }}>
+      {cfg[type]||'?'} {minute && !isNaN(parseInt(minute)) ? `${minute}'` : <span style={{color:'#b45309',fontWeight:800}}>?'</span>}
+      {onRemove && <span onClick={e=>{e.stopPropagation();onRemove();}} style={{marginLeft:4,opacity:.5,fontSize:9}}>✕</span>}
+    </span>
+  );
+}
+
+function StatCard({ label, value, sub, color }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-label">{label}</div>
+      <div className="stat-value" style={color?{color}:{}}>{value}</div>
+      {sub && <div className="stat-sub">{sub}</div>}
+    </div>
+  );
+}
+
+function ZoneBar({ label, value, max, color }) {
+  const pct = max > 0 ? (value / max) * 100 : 0;
+  return (
+    <div className="zone-bar-wrap">
+      <div className="zone-bar-label">{label}'</div>
+      <div className="zone-bar-bg">
+        <div className="zone-bar-fill" style={{ width: `${pct}%`, background: color }}>
+          {value > 0 && <span className="zone-bar-val">{value}</span>}
+        </div>
+      </div>
+      {value === 0 && <span style={{fontSize:10,color:'var(--text3)',fontFamily:'var(--mono)'}}>0</span>}
+    </div>
+  );
+}
+
+function FormPills({ form }) {
+  const last5 = form.slice(-5);
+  return (
+    <div style={{display:'flex',gap:2}}>
+      {last5.map((f,i) => <span key={i} className={`form-pill form-${f}`}>{f}</span>)}
+    </div>
+  );
+}
+
+function StreakBadge({ streak }) {
+  if (!streak || !streak.type) return null;
+  const colors = { W:['#dcfce7','#15803d'], D:['#f1f5f9','#64748b'], L:['#fee2e2','#b91c1c'] };
+  const [bg, fg] = colors[streak.type] || ['#f1f5f9','#64748b'];
+  const labels = { W:'Winning', D:'Gelijk', L:'Verlies' };
+  return (
+    <span style={{background:bg,color:fg,borderRadius:20,padding:'2px 9px',fontSize:10,fontWeight:700}}>
+      {labels[streak.type]} ×{streak.count}
+    </span>
+  );
+}
+
+function DropZone({ label, preview, onFile }) {
+  const ref = useRef();
+  const [drag, setDrag] = useState(false);
+  return (
+    <div className={`dropzone${drag?' dropzone-active':''}`}
+      onClick={()=>ref.current?.click()}
+      onDragOver={e=>{e.preventDefault();setDrag(true);}}
+      onDragLeave={()=>setDrag(false)}
+      onDrop={e=>{e.preventDefault();setDrag(false);if(e.dataTransfer.files[0])onFile(e.dataTransfer.files[0]);}}>
+      <input ref={ref} type="file" accept="image/*" hidden onChange={e=>{if(e.target.files[0])onFile(e.target.files[0]);}}/>
+      {preview
+        ? <img src={preview} alt="" style={{width:'100%',maxHeight:220,objectFit:'contain'}}/>
+        : <>
+            <div style={{fontSize:26,marginBottom:6,opacity:.3}}>📸</div>
+            <div style={{fontSize:12,color:'var(--text3)',textAlign:'center',padding:'0 12px'}}>{label}</div>
+          </>
+      }
+    </div>
+  );
+}
+
+function PlayerPhoto({ photo, name, size=40 }) {
+  if (photo) return <img src={photo} alt={name} style={{width:size,height:size,borderRadius:8,objectFit:'cover',flexShrink:0}}/>;
+  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const hue = name.split('').reduce((acc,c)=>acc+c.charCodeAt(0),0) % 360;
+  return (
+    <div style={{width:size,height:size,borderRadius:8,background:`oklch(0.88 0.06 ${hue})`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*0.35,fontWeight:700,color:`oklch(0.4 0.1 ${hue})`,flexShrink:0}}>
+      {initials}
+    </div>
+  );
+}
+
+// ─── API KEY MODAL ─────────────────────────────────────────────────────────
+
+function ApiKeyModal({ onClose }) {
+  const [key, setKey] = useState(localStorage.getItem('claude_api_key')||'');
+  const save = () => { localStorage.setItem('claude_api_key', key); onClose(); };
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:440}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <span style={{fontWeight:700,fontSize:15}}>Claude API-sleutel</span>
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          <p style={{fontSize:13,color:'var(--text2)',marginBottom:16,lineHeight:1.6}}>
+            De AI-parsing functie gebruikt de Claude API om wedstrijdblad-screenshots automatisch te lezen. Voer hier je persoonlijke API-sleutel in. Deze wordt alleen lokaal opgeslagen.
+          </p>
+          <label className="form-label">API Sleutel</label>
+          <input className="form-input" type="password" value={key} onChange={e=>setKey(e.target.value)} placeholder="sk-ant-..."/>
+          <p style={{fontSize:11,color:'var(--text3)',marginTop:8}}>Sleutel wordt opgeslagen in localStorage — nooit gedeeld.</p>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Annuleer</button>
+          <button className="btn btn-primary" onClick={save}>Opslaan</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── JSONBIN SETTINGS MODAL ────────────────────────────────────────────────
+
+function CloudSettingsModal({ onClose, matches }) {
+  const cfg = getJSONBinConfig();
+  const [apiKey, setApiKey] = useState(cfg.apiKey);
+  const [binId, setBinId] = useState(cfg.binId);
+  const [status, setStatus] = useState('');
+  const [testing, setTesting] = useState(false);
+
+  const save = async () => {
+    localStorage.setItem('jsonbin_api_key', apiKey);
+    localStorage.setItem('jsonbin_bin_id', binId);
+    setStatus('✅ Instellingen opgeslagen!');
+    setTimeout(onClose, 1200);
+  };
+
+  const testAndCreate = async () => {
+    if (!apiKey) { setStatus('❌ Vul eerst een API key in.'); return; }
+    setTesting(true); setStatus('Verbinding testen…');
+    try {
+      // If no bin ID yet, create one now with current data
+      let id = binId;
+      if (!id) {
+        setStatus('Nieuwe bin aanmaken…');
+        id = await createJSONBin(apiKey, matches);
+        setBinId(id);
+        localStorage.setItem('jsonbin_bin_id', id);
+        localStorage.setItem('jsonbin_api_key', apiKey);
+        setStatus(`✅ Bin aangemaakt! ID: ${id}`);
+      } else {
+        // Test read
+        const resp = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, {
+          headers: { 'X-Master-Key': apiKey }
+        });
+        if (resp.ok) {
+          setStatus('✅ Verbinding werkt!');
+        } else {
+          setStatus(`❌ Fout ${resp.status}: controleer je key en bin ID.`);
+        }
+      }
+    } catch(e) {
+      setStatus('❌ Fout: ' + e.message);
+    } finally { setTesting(false); }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:500}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <span style={{fontWeight:700,fontSize:15}}>☁️ Cloud Opslag (JSONBin.io)</span>
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          {/* Step-by-step */}
+          <div style={{background:'var(--surface2)',borderRadius:8,padding:14,marginBottom:20,fontSize:13,lineHeight:1.8}}>
+            <div style={{fontWeight:700,marginBottom:6}}>Hoe instellen:</div>
+            <ol style={{paddingLeft:18,color:'var(--text2)',display:'flex',flexDirection:'column',gap:4}}>
+              <li>Ga naar <a href="https://jsonbin.io" target="_blank" rel="noreferrer" style={{color:'var(--accent)'}}>jsonbin.io</a> → maak een gratis account</li>
+              <li>Ga naar <strong>API Keys</strong> → kopieer je <code style={{background:'var(--border)',padding:'1px 5px',borderRadius:3}}>X-Master-Key</code></li>
+              <li>Plak de key hieronder en klik <strong>"Test & Maak Bin Aan"</strong></li>
+              <li>Klaar! Alle data wordt nu automatisch gesynchroniseerd</li>
+            </ol>
+          </div>
+
+          <label className="form-label">JSONBin Master Key</label>
+          <input className="form-input" type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="$2a$10$..." style={{marginBottom:14}}/>
+
+          <label className="form-label">Bin ID <span style={{fontWeight:400,color:'var(--text3)'}}>(automatisch ingevuld)</span></label>
+          <input className="form-input" value={binId} onChange={e=>setBinId(e.target.value)} placeholder="Laat leeg — wordt automatisch aangemaakt" style={{marginBottom:14}}/>
+
+          {status && (
+            <div style={{padding:'10px 14px',background: status.startsWith('✅')?'var(--accent-bg)':'var(--red-bg)',
+              border:`1px solid ${status.startsWith('✅')?'#bbf7d0':'#fdd'}`,
+              borderRadius:8,fontSize:13,fontWeight:600,color:status.startsWith('✅')?'var(--accent)':'var(--red)'}}>
+              {status}
+            </div>
+          )}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Sluiten</button>
+          <button className="btn btn-ghost" onClick={testAndCreate} disabled={testing} style={{borderColor:'var(--accent)',color:'var(--accent)'}}>
+            {testing ? 'Bezig…' : '🔌 Test & Maak Bin Aan'}
+          </button>
+          <button className="btn btn-primary" onClick={save}>Opslaan</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── DASHBOARD TAB ─────────────────────────────────────────────────────────
+
+function DashboardTab({ matches, standings, topScorers, teamFilter, setTeamFilter, setTab }) {
+  const totalGoals = useMemo(() => {
+    let g=0; matches.forEach(m=>{const e=m.events||{};Object.values(e).forEach(evts=>evts.forEach(ev=>{if(ev.type==='goal')g++;}));}); return g;
+  }, [matches]);
+
+  const totalCards = useMemo(() => {
+    let y=0,r=0; matches.forEach(m=>{const e=m.events||{};Object.values(e).forEach(evts=>evts.forEach(ev=>{if(ev.type==='yellow')y++;if(ev.type==='red')r++;}));}); return {y,r};
+  }, [matches]);
+
+  const belisiaStanding = standings.find(s=>s.team==="Belisia SV");
+  const belisiaStreak = belisiaStanding ? getCurrentStreak(belisiaStanding.form) : null;
+
+  return (
+    <div className="tab-panel">
+      {/* Quick stats */}
+      <div className="stat-grid" style={{marginBottom:20}}>
+        <StatCard label="Wedstrijden" value={matches.length} sub="ingevoerd"/>
+        <StatCard label="Totaal goals" value={totalGoals} sub={matches.length ? `Ø ${(totalGoals/matches.length).toFixed(1)}/wed` : 'nog geen data'} color="var(--accent)"/>
+        <StatCard label="Gele kaarten" value={totalCards.y} sub="gespeeld seizoen" color="var(--yellow)"/>
+        <StatCard label="Rode kaarten" value={totalCards.r} sub="gespeeld seizoen" color="var(--red)"/>
+        {belisiaStanding && <StatCard label="Belisia Positie" value={`#${standings.indexOf(belisiaStanding)+1}`} sub={`${belisiaStanding.pts} punten`} color="var(--accent)"/>}
+        {topScorers[0] && <StatCard label="Topschutter" value={topScorers[0].goals} sub={topScorers[0].name} color="var(--yellow)"/>}
+      </div>
+
+      <div className="grid-2" style={{marginBottom:20}}>
+        {/* Standings */}
+        <div className="card" style={{overflow:'hidden'}}>
+          <div className="card-header">
+            <span className="card-title">Rangschikking</span>
+            <span style={{fontSize:11,color:'var(--text3)',fontFamily:'var(--mono)'}}>SD {matches.length ? Math.max(...matches.map(m=>m.matchday||0)) : 0}</span>
+          </div>
+          <div style={{overflowX:'auto'}}>
+            <table className="tbl">
+              <thead><tr>
+                <th style={{width:28}}>#</th>
+                <th>Ploeg</th>
+                <th className="c">W</th><th className="c">G</th><th className="c">V</th>
+                <th className="c">+/-</th><th className="c" style={{fontWeight:800}}>Pt</th>
+                <th>Reeks</th>
+              </tr></thead>
+              <tbody>{standings.map((s,i)=>{
+                const isBelisia = s.team==="Belisia SV";
+                const streak = getCurrentStreak(s.form);
+                return <tr key={s.team} style={isBelisia?{background:'var(--accent-bg)'}:{}}>
+                  <td className="c mono" style={{fontSize:12,color:'var(--text3)',fontWeight:isBelisia?700:400}}>{i+1}</td>
+                  <td style={{fontWeight:isBelisia?700:500,color:isBelisia?'var(--accent)':'var(--text)',fontSize:13}}>{s.team}</td>
+                  <td className="c">{s.w}</td><td className="c">{s.d}</td><td className="c">{s.l}</td>
+                  <td className="c mono" style={{color:s.gf-s.ga>0?'var(--accent)':s.gf-s.ga<0?'var(--red)':'var(--text3)',fontWeight:600,fontSize:12}}>
+                    {s.gf-s.ga>0?'+':''}{s.gf-s.ga}
+                  </td>
+                  <td className="c mono" style={{fontWeight:800,fontSize:14}}>{s.pts}</td>
+                  <td><StreakBadge streak={streak}/></td>
+                </tr>;
+              })}</tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Top scorers chart */}
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">Topschutters</span>
+            <select className="form-input" style={{width:'auto',fontSize:11,padding:'4px 24px 4px 8px'}} value={teamFilter} onChange={e=>setTeamFilter(e.target.value)}>
+              <option value="">Alle ploegen</option>
+              {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div className="card-body">
+            {topScorers.length===0
+              ? <div className="empty"><div className="empty-icon">⚽</div><div className="empty-text">Nog geen goals ingevoerd</div></div>
+              : <HBarChart
+                  data={topScorers.slice(0,12).map((p,i)=>({...p, _color: i===0?'#f59e0b':i<3?'#a3a3a3':'var(--accent)'}))}
+                  valueKey="goals"
+                  labelKey="name"
+                  colors={topScorers.slice(0,12).map((_,i)=>i===0?'#f59e0b':i<3?'#a3a3a3':'#1a7a3c')}
+                />
+            }
+          </div>
+        </div>
+      </div>
+
+      {matches.length===0 && (
+        <div className="card">
+          <div className="empty" style={{padding:48}}>
+            <div className="empty-icon">📭</div>
+            <div className="empty-text">Nog geen wedstrijden ingevoerd</div>
+            <button className="btn btn-primary" onClick={()=>setTab("add")}>Eerste wedstrijd toevoegen →</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── MATCHES TAB ───────────────────────────────────────────────────────────
+
+function MatchesTab({ matches, onEdit, onDelete, setTab }) {
+  const [filterTeam, setFilterTeam] = useState('');
+  const filtered = filterTeam ? matches.filter(m=>m.homeTeam===filterTeam||m.awayTeam===filterTeam) : matches;
+  const sorted = [...filtered].reverse();
+
+  // Find all goals without a valid minute across all matches
+  const incompleteGoals = useMemo(() => {
+    const results = [];
+    for (const m of matches) {
+      const evts = m.events || {};
+      const allP = [
+        ...(m.homePlayers||[]).map(p=>({...p, side:'home', team:m.homeTeam})),
+        ...(m.awayPlayers||[]).map(p=>({...p, side:'away', team:m.awayTeam})),
+      ];
+      for (const p of allP) {
+        for (const e of (evts[p.id]||[])) {
+          if (e.type === 'goal' && (!e.minute || e.minute.trim() === '' || isNaN(parseInt(e.minute)))) {
+            results.push({ match: m, player: p, event: e });
+          }
+        }
+      }
+    }
+    return results;
+  }, [matches]);
+
+  return (
+    <div className="tab-panel">
+
+      {/* Incomplete goals warning */}
+      {incompleteGoals.length > 0 && (
+        <div style={{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:10,padding:'14px 18px',marginBottom:20}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
+            <span style={{fontSize:16}}>⚠️</span>
+            <span style={{fontWeight:700,fontSize:14,color:'#92400e'}}>
+              {incompleteGoals.length} goal{incompleteGoals.length>1?'s':''} zonder tijdsindicatie
+            </span>
+            <span style={{fontSize:12,color:'#b45309',marginLeft:4}}>— worden meegeteld maar missen een minuut</span>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            {incompleteGoals.map((ig, i) => {
+              const sc = computeMatchScore(ig.match);
+              return (
+                <div key={i} style={{display:'flex',alignItems:'center',gap:10,background:'white',borderRadius:7,padding:'8px 12px',border:'1px solid #fde68a'}}>
+                  <span style={{background:'#dcfce7',color:'#15803d',borderRadius:20,padding:'2px 8px',fontSize:11,fontWeight:700,flexShrink:0}}>⚽ ?'</span>
+                  <span style={{fontWeight:600,fontSize:13,flex:1}}>{ig.player.name}</span>
+                  <span style={{fontSize:12,color:'#92400e'}}>{ig.match.homeTeam} {sc.label} {ig.match.awayTeam}</span>
+                  <span style={{fontSize:11,color:'#b45309',fontFamily:'var(--mono)'}}>SD{ig.match.matchday||'?'}</span>
+                  <button className="btn btn-sm" onClick={()=>onEdit(ig.match)}
+                    style={{background:'#fef3c7',color:'#92400e',border:'1px solid #fde68a',flexShrink:0}}>
+                    ✏️ Aanpassen
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="section-header">
+        <h2 className="section-title">Wedstrijden <span style={{fontSize:14,color:'var(--text3)',fontWeight:500}}>({filtered.length})</span></h2>
+        <div style={{display:'flex',gap:10,alignItems:'center'}}>
+          <select className="form-input" style={{width:'auto'}} value={filterTeam} onChange={e=>setFilterTeam(e.target.value)}>
+            <option value="">Alle ploegen</option>
+            {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
+          <button className="btn btn-primary" onClick={()=>setTab("add")}>+ Toevoegen</button>
+        </div>
+      </div>
+
+      {sorted.length===0
+        ? <div className="card"><div className="empty"><div className="empty-icon">📋</div><div className="empty-text">Geen wedstrijden gevonden</div></div></div>
+        : <div className="card" style={{overflow:'hidden'}}>
+            {sorted.map(m=>{
+              const sc = computeMatchScore(m);
+              const isBelisiaHome = m.homeTeam==='Belisia SV';
+              const isBelisiaAway = m.awayTeam==='Belisia SV';
+              let resultColor = 'var(--text3)';
+              if (isBelisiaHome || isBelisiaAway) {
+                const bGoals = isBelisiaHome ? sc.home : sc.away;
+                const oGoals = isBelisiaHome ? sc.away : sc.home;
+                resultColor = bGoals>oGoals ? 'var(--accent)' : bGoals<oGoals ? 'var(--red)' : 'var(--text3)';
+              }
+              // Check if this match has incomplete goals
+              const hasIncomplete = Object.values(m.events||{}).some(evts =>
+                evts.some(e => e.type==='goal' && (!e.minute || e.minute.trim()==='' || isNaN(parseInt(e.minute))))
+              );
+              return (
+                <div key={m.id} className="match-row">
+                  <span className="match-day mono">SD{m.matchday||'?'}</span>
+                  <span style={{fontSize:11,color:'var(--text3)',minWidth:72,fontFamily:'var(--mono)'}}>{m.date||'—'}</span>
+                  <span className="match-team" style={{textAlign:'right',fontWeight:m.homeTeam==='Belisia SV'?700:500,color:m.homeTeam==='Belisia SV'?'var(--accent)':'var(--text)'}}>{m.homeTeam||'—'}</span>
+                  <span className="match-score" style={{color:resultColor}}>{sc.label}</span>
+                  <span className="match-team" style={{fontWeight:m.awayTeam==='Belisia SV'?700:500,color:m.awayTeam==='Belisia SV'?'var(--accent)':'var(--text)'}}>{m.awayTeam||'—'}</span>
+                  {hasIncomplete && <span title="Heeft goals zonder tijdsindicatie" style={{fontSize:12,color:'#b45309'}}>⚠️</span>}
+                  <div style={{display:'flex',gap:6,marginLeft:'auto',flexShrink:0}}>
+                    <button className="btn btn-ghost btn-sm" onClick={()=>onEdit(m)}>✏️ Bewerk</button>
+                    <button className="btn btn-danger btn-sm" onClick={()=>{if(confirm('Wedstrijd verwijderen?'))onDelete(m.id);}}>🗑</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+      }
+    </div>
+  );
+}
+
+// ─── ADD MATCH TAB ─────────────────────────────────────────────────────────
+
+function AddMatchTab({ editMatch, setEditMatch, matchCount, onSave, onCancel }) {
+  const [img1,setImg1]=useState(null); const [img2,setImg2]=useState(null);
+  const [prev1,setPrev1]=useState(null); const [prev2,setPrev2]=useState(null);
+  const [loading,setLoading]=useState(false); const [loadMsg,setLoadMsg]=useState('');
+  const [error,setError]=useState('');
+
+  const cycleEv = useCallback((pid,idx) => {
+    setEditMatch(prev => {
+      const evs = {...prev.events};
+      evs[pid] = [...(evs[pid]||[])];
+      const cur = evs[pid][idx].type;
+      evs[pid][idx] = {...evs[pid][idx], type: EVENT_CYCLE[(EVENT_CYCLE.indexOf(cur)+1)%EVENT_CYCLE.length]};
+      return {...prev, events:evs};
+    });
+  }, []);
+
+  const removeEv = useCallback((pid,idx) => {
+    setEditMatch(prev => {
+      const evs = {...prev.events};
+      evs[pid] = (evs[pid]||[]).filter((_,i)=>i!==idx);
+      return {...prev, events:evs};
+    });
+  }, []);
+
+  const addEv = useCallback((pid) => {
+    setEditMatch(prev => {
+      const evs = {...prev.events};
+      evs[pid] = [...(evs[pid]||[]), {minute:'', type:'goal'}];
+      return {...prev, events:evs};
+    });
+  }, []);
+
+  const updateEvMin = useCallback((pid,idx,val) => {
+    setEditMatch(prev => {
+      const evs = {...prev.events};
+      evs[pid] = [...(evs[pid]||[])];
+      evs[pid][idx] = {...evs[pid][idx], minute:val};
+      return {...prev, events:evs};
+    });
+  }, []);
+
+  const handleAnalyse = useCallback(async () => {
+    const apiKey = localStorage.getItem('claude_api_key');
+    if (!apiKey) { setError('Stel eerst je Claude API-sleutel in via het slotje rechtsboven.'); return; }
+    if (!img1) { setError('Upload minstens screenshot 1.'); return; }
+    setLoading(true); setError('');
+    const msgs = ["Screenshots inlezen…","Spelers herkennen…","Events koppelen…","Bijna klaar…"];
+    let mi=0; setLoadMsg(msgs[0]);
+    const iv = setInterval(()=>{mi=Math.min(mi+1,3);setLoadMsg(msgs[mi]);},2500);
+    try {
+      const content = [{type:"image",source:{type:"base64",media_type:img1.type||"image/png",data:await f2b(img1)}}];
+      if (img2) content.push({type:"image",source:{type:"base64",media_type:img2.type||"image/png",data:await f2b(img2)}});
+      content.push({type:"text",text:img2?"Twee screenshots: basis + wissels. Extraheer JSON.":"Eén screenshot. Extraheer JSON."});
+      const resp = await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({model:"claude-opus-4-5",max_tokens:4000,system:PROMPT,messages:[{role:"user",content}]})
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message);
+      const text = (data.content||[]).map(b=>b.text||"").join("");
+      const parsed = JSON.parse(text.replace(/```json|```/g,"").trim());
+      const evMap = {};
+      const hP = (parsed.homePlayers||[]).map((p,i)=>{
+        const id=`h_${p.number}_${i}`;
+        evMap[id]=(p.events||[]).map(e=>({minute:String(e.minute),type:e.type||"unset"}));
+        return {...p,id,side:"home"};
+      });
+      const aP = (parsed.awayPlayers||[]).map((p,i)=>{
+        const id=`a_${p.number}_${i}`;
+        evMap[id]=(p.events||[]).map(e=>({minute:String(e.minute),type:e.type||"unset"}));
+        return {...p,id,side:"away"};
+      });
+      setEditMatch({id:Date.now(),homeTeam:parsed.homeTeam||"",awayTeam:parsed.awayTeam||"",homePlayers:hP,awayPlayers:aP,events:evMap,date:new Date().toISOString().slice(0,10),matchday:matchCount+1});
+    } catch(e) { setError("Fout: "+e.message); }
+    finally { clearInterval(iv); setLoading(false); }
+  }, [img1, img2, matchCount]);
+
+  const score = editMatch ? computeMatchScore(editMatch) : null;
+
+  if (!editMatch) return (
+    <div className="tab-panel">
+      <h2 className="section-title" style={{marginBottom:20}}>Wedstrijd invoeren</h2>
+      <div className="card card-body">
+        <p style={{fontSize:13,color:'var(--text2)',marginBottom:20,lineHeight:1.7}}>
+          Upload een of twee screenshots van het wedstrijdblad (voetbalvlaanderen.be) om automatisch alle spelers en events te extraheren.
+        </p>
+        <div style={{display:'flex',gap:12,marginBottom:20}}>
+          <DropZone label="Basisopstelling" preview={prev1} onFile={f=>{setImg1(f);setPrev1(URL.createObjectURL(f));}}/>
+          <DropZone label="Wisselspelers (optioneel)" preview={prev2} onFile={f=>{setImg2(f);setPrev2(URL.createObjectURL(f));}}/>
+        </div>
+        {error && <div style={{padding:'10px 14px',background:'var(--red-bg)',border:'1px solid #fdd',borderRadius:8,fontSize:12,color:'var(--red)',marginBottom:16}}>{error}</div>}
+        <div style={{display:'flex',gap:12,alignItems:'center',flexWrap:'wrap'}}>
+          <button className="btn btn-primary" onClick={handleAnalyse} disabled={!img1||loading} style={{opacity:!img1||loading?.5:1}}>
+            {loading ? loadMsg : '🤖 Analyseer met AI →'}
+          </button>
+          <button className="btn btn-ghost" onClick={()=>{
+            const now = new Date().toISOString().slice(0,10);
+            const hP = Array.from({length:11},(_,i)=>({id:`h_${i}`,name:'',number:String(i+1),isSub:false,side:'home'}));
+            const aP = Array.from({length:11},(_,i)=>({id:`a_${i}`,name:'',number:String(i+1),isSub:false,side:'away'}));
+            setEditMatch({id:Date.now(),homeTeam:'',awayTeam:'',homePlayers:hP,awayPlayers:aP,events:{},date:now,matchday:matchCount+1});
+          }}>✍️ Manueel invoeren</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Edit view
+  return (
+    <div className="tab-panel">
+      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:20,flexWrap:'wrap'}}>
+        <h2 className="section-title">Wedstrijd bewerken</h2>
+        <div style={{marginLeft:'auto',display:'flex',gap:10}}>
+          <button className="btn btn-ghost" onClick={onCancel}>Annuleer</button>
+          <button className="btn btn-primary" onClick={onSave} disabled={!editMatch.homeTeam||!editMatch.awayTeam}>✓ Opslaan</button>
+        </div>
+      </div>
+
+      {/* Match header */}
+      <div className="card card-body" style={{marginBottom:16}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr auto auto',gap:12,alignItems:'end',flexWrap:'wrap'}}>
+          <div>
+            <label className="form-label">Thuisploeg</label>
+            <select className="form-input" value={editMatch.homeTeam} onChange={e=>setEditMatch(p=>({...p,homeTeam:e.target.value}))}>
+              <option value="">Kies ploeg…</option>
+              {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div style={{textAlign:'center',paddingBottom:4}}>
+            <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--mono)',color:'var(--text)',letterSpacing:-1}}>{score?.label||'—'}</div>
+          </div>
+          <div>
+            <label className="form-label">Uitploeg</label>
+            <select className="form-input" value={editMatch.awayTeam} onChange={e=>setEditMatch(p=>({...p,awayTeam:e.target.value}))}>
+              <option value="">Kies ploeg…</option>
+              {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div style={{minWidth:80}}>
+            <label className="form-label">Speeldag</label>
+            <input className="form-input" type="number" min={1} max={30} value={editMatch.matchday||''} onChange={e=>setEditMatch(p=>({...p,matchday:parseInt(e.target.value)||''}))}/>
+          </div>
+          <div style={{minWidth:120}}>
+            <label className="form-label">Datum</label>
+            <input className="form-input" type="date" value={editMatch.date||''} onChange={e=>setEditMatch(p=>({...p,date:e.target.value}))}/>
+          </div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12,alignItems:'center'}}>
+        <span style={{fontSize:11,color:'var(--text3)',fontWeight:600,marginRight:4}}>Events:</span>
+        {EVENT_CYCLE.filter(t=>t!=='unset').map(t=><span key={t} className={`badge badge-${t.replace('_','-')}`}>{EV[t].icon} {EV[t].label}</span>)}
+        <span style={{fontSize:11,color:'var(--text3)',marginLeft:4}}>— klik badge om type te wijzigen</span>
+      </div>
+
+      {/* Player grid */}
+      <div className="grid-2" style={{marginBottom:16}}>
+        {['home','away'].map(side=>{
+          const players = side==='home' ? editMatch.homePlayers : editMatch.awayPlayers;
+          const teamName = side==='home' ? editMatch.homeTeam : editMatch.awayTeam;
+          const accentColor = side==='home' ? 'var(--accent)' : 'var(--blue)';
+          return (
+            <div key={side} className="card" style={{overflow:'hidden'}}>
+              <div style={{padding:'10px 14px',borderBottom:`2px solid ${accentColor}`,fontWeight:700,fontSize:13,color:accentColor,background:'var(--surface2)'}}>
+                {teamName||'—'} ({side==='home'?'Thuis':'Uit'})
+              </div>
+              {(players||[]).map((p,pi)=>{
+                const sep = pi>0 && p.isSub && !players[pi-1]?.isSub;
+                return (
+                  <div key={p.id||pi}>
+                    {sep && <div style={{background:'#f8f7f5',borderBottom:'1px solid var(--border)',padding:'4px 12px',fontSize:10,fontWeight:700,color:'var(--text3)',textTransform:'uppercase',letterSpacing:2}}>↑ Wisselspelers</div>}
+                    <div className="player-row" style={{background:p.isSub?'var(--surface2)':'var(--surface)'}}>
+                      <span className="player-num">{p.number}</span>
+                      <span className={`player-name ${p.isSub?'sub':'starter'}`} style={{flex:'0 0 130px'}}>
+                        {p.name||<span style={{color:'var(--text3)'}}>Naam…</span>}
+                        {p.captain&&<span style={{fontSize:9,marginLeft:4,color:'var(--yellow)'}}>©</span>}
+                        {p.gk&&<span style={{fontSize:9,marginLeft:4,color:'var(--text3)'}}>GK</span>}
+                      </span>
+                      <div style={{display:'flex',flexWrap:'wrap',gap:4,flex:1,alignItems:'center'}}>
+                        {(editMatch.events[p.id]||[]).map((ev,i)=>{
+                          const missingMin = ev.type==='goal' && (!ev.minute || ev.minute.trim()==='' || isNaN(parseInt(ev.minute)));
+                          return (
+                            <span key={i} style={{display:'inline-flex',alignItems:'center',gap:3,background:missingMin?'#fef3c7':'var(--surface2)',border:`1px solid ${missingMin?'#fde68a':'var(--border)'}`,borderRadius:8,padding:'2px 4px 2px 6px'}}>
+                              <EventBadge type={ev.type} minute={ev.minute} onClick={()=>cycleEv(p.id,i)}/>
+                              <input
+                                type="number" min="0" max="120"
+                                value={ev.minute||''}
+                                onChange={e=>updateEvMin(p.id,i,e.target.value)}
+                                placeholder="min"
+                                style={{width:38,border:'none',background:'transparent',fontSize:11,fontFamily:'var(--mono)',color:'var(--text)',outline:'none',padding:'1px 2px'}}
+                              />
+                              <span onClick={()=>removeEv(p.id,i)} style={{cursor:'pointer',opacity:.4,fontSize:10,padding:'0 2px'}}>✕</span>
+                            </span>
+                          );
+                        })}
+                        <button onClick={()=>addEv(p.id)} style={{background:'none',border:'1px dashed var(--border2)',borderRadius:10,padding:'1px 7px',fontSize:10,cursor:'pointer',color:'var(--text3)'}}>+</button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
+        <button className="btn btn-ghost" onClick={onCancel}>Annuleer</button>
+        <button className="btn btn-primary" onClick={onSave} disabled={!editMatch.homeTeam||!editMatch.awayTeam}>✓ Opslaan</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── PLAYERS TAB ───────────────────────────────────────────────────────────
+
+function PlayersTab({ matches, allMatches, season, allSeasons }) {
+  const [teamFilter, setTeamFilter] = useState('Belisia SV');
+  const [sortKey, setSortKey] = useState('minutes');
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [compareSeason, setCompareSeason] = useState('');
+  const [photos, setPhotos] = useState(() => { try { return JSON.parse(localStorage.getItem('player_photos')||'{}'); } catch{return {};} });
+
+  const stats = useMemo(() => computePlayerStats(matches, teamFilter||''), [matches, teamFilter]);
+  const sorted = useMemo(() => [...stats].sort((a,b)=>b[sortKey]-a[sortKey]), [stats, sortKey]);
+
+  // Vergelijking met ander seizoen
+  const compareStats = useMemo(() => {
+    if (!compareSeason) return null;
+    const cm = filterMatchesBySeason(allMatches||[], compareSeason);
+    return computePlayerStats(cm, teamFilter||'');
+  }, [allMatches, compareSeason, teamFilter]);
+
+  const compareMap = useMemo(() => {
+    if (!compareStats) return null;
+    const m = {};
+    for (const p of compareStats) m[`${p.team}__${p.name}`] = p;
+    return m;
+  }, [compareStats]);
+
+  const compareOptions = (allSeasons||[]).filter(s => s !== season);
+
+  const uploadPhoto = (playerKey, file) => {
+    const url = URL.createObjectURL(file);
+    const newPhotos = {...photos, [playerKey]: url};
+    setPhotos(newPhotos);
+    // Note: ObjectURLs don't persist across reload, but we store for session
+  };
+
+  const suspendedAt = (y) => y > 0 && y % 3 === 0;
+  const warnAt = (y) => y > 0 && y % 3 === 2; // 1 kaart van volgende schorsing
+
+  return (
+    <div className="tab-panel">
+      <div className="section-header">
+        <h2 className="section-title">
+          Spelersstatistieken
+          {season && <span style={{fontSize:13,color:'var(--text3)',fontWeight:500,marginLeft:8,fontFamily:'var(--mono)'}}>{season==='all' ? '· Alle seizoenen' : `· ${season}`}</span>}
+        </h2>
+        <div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
+          <select className="form-input" style={{width:'auto'}} value={teamFilter} onChange={e=>setTeamFilter(e.target.value)}>
+            <option value="">Alle ploegen</option>
+            {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
+          <select className="form-input" style={{width:'auto'}} value={sortKey} onChange={e=>setSortKey(e.target.value)}>
+            <option value="minutes">Sorteer: minuten</option>
+            <option value="goals">Sorteer: goals</option>
+            <option value="matches">Sorteer: wedstrijden</option>
+            <option value="yellow">Sorteer: gele kaarten</option>
+          </select>
+          {compareOptions.length > 0 && (
+            <select className="form-input" style={{width:'auto',borderColor: compareSeason ? 'var(--accent)' : 'var(--border2)'}} value={compareSeason} onChange={e=>setCompareSeason(e.target.value)} title="Vergelijk met ander seizoen">
+              <option value="">⇄ Vergelijken met…</option>
+              {compareOptions.map(s=><option key={s} value={s}>vs {s}</option>)}
+            </select>
+          )}
+        </div>
+      </div>
+
+      {selectedPlayer && (
+        <PlayerProfileModal player={selectedPlayer} photo={photos[`${selectedPlayer.team}__${selectedPlayer.name}`]} onClose={()=>setSelectedPlayer(null)} onPhotoUpload={(f)=>{uploadPhoto(`${selectedPlayer.team}__${selectedPlayer.name}`,f);}}/>
+      )}
+
+      {sorted.length === 0
+        ? <div className="card"><div className="empty"><div className="empty-icon">👤</div><div className="empty-text">Geen spelersdata beschikbaar</div></div></div>
+        : <div className="card" style={{overflow:'hidden'}}>
+            {compareSeason && (
+              <div style={{padding:'8px 14px',background:'var(--accent-bg)',borderBottom:'1px solid var(--border)',fontSize:12,color:'var(--accent)',fontWeight:600,display:'flex',alignItems:'center',gap:6}}>
+                <span>⇄</span><span>Vergelijking: <strong>{season}</strong> tegenover <strong>{compareSeason}</strong></span>
+                <span style={{marginLeft:'auto',color:'var(--text3)',fontWeight:400,fontSize:11}}>Delta-waarden tonen verschil met {compareSeason}</span>
+              </div>
+            )}
+            <div style={{overflowX:'auto'}}>
+              <table className="tbl">
+                <thead><tr>
+                  <th style={{width:44}}></th>
+                  <th>Speler</th>
+                  {!teamFilter && <th>Ploeg</th>}
+                  <th className="c">Wed</th>
+                  <th className="c">Basis</th>
+                  <th className="c">Inv</th>
+                  <th className="c">Min</th>
+                  <th className="c">⚽</th>
+                  <th className="c">🟨</th>
+                  <th className="c">🟥</th>
+                  <th></th>
+                </tr></thead>
+                <tbody>
+                  {sorted.slice(0,60).map((p,i)=>{
+                    const key = `${p.team}__${p.name}`;
+                    const photo = photos[key];
+                    const susp = suspendedAt(p.yellow);
+                    const warn = warnAt(p.yellow);
+                    const cmp = compareMap ? compareMap[key] : null;
+                    const renderDelta = (cur, prev) => {
+                      if (!compareSeason) return null;
+                      const prevVal = prev || 0;
+                      const diff = cur - prevVal;
+                      if (diff === 0 && prevVal === 0) return <div style={{fontSize:10,color:'var(--text3)',marginTop:2,fontFamily:'var(--mono)'}}>—</div>;
+                      const color = diff > 0 ? 'var(--accent)' : diff < 0 ? 'var(--red)' : 'var(--text3)';
+                      const sign = diff > 0 ? '+' : '';
+                      return <div style={{fontSize:10,color,marginTop:2,fontFamily:'var(--mono)',fontWeight:600}}>{sign}{diff} <span style={{color:'var(--text3)',fontWeight:400}}>(was {prevVal})</span></div>;
+                    };
+                    return (
+                      <tr key={i} style={{cursor:'pointer'}} onClick={()=>setSelectedPlayer(p)}>
+                        <td style={{padding:'6px 8px 6px 14px'}}>
+                          <PlayerPhoto photo={photo} name={p.name} size={32}/>
+                        </td>
+                        <td>
+                          <div style={{fontWeight:600,fontSize:13}}>{p.name}</div>
+                          {susp && <span className="susp-warn">⚠ Schorsing</span>}
+                          {warn && !susp && <span className="badge badge-warn" style={{fontSize:9}}>1 kaart van schorsing</span>}
+                          {compareSeason && !cmp && <div style={{fontSize:10,color:'var(--text3)',marginTop:2,fontStyle:'italic'}}>nieuw t.o.v. {compareSeason}</div>}
+                        </td>
+                        {!teamFilter && <td style={{fontSize:12,color:'var(--text2)'}}>{p.team}</td>}
+                        <td className="c">{p.matches}{renderDelta(p.matches, cmp?.matches)}</td>
+                        <td className="c">{p.starts}{renderDelta(p.starts, cmp?.starts)}</td>
+                        <td className="c">{p.subIn}{renderDelta(p.subIn, cmp?.subIn)}</td>
+                        <td className="c mono" style={{fontWeight:700,color:'var(--accent)'}}>{p.minutes}{renderDelta(p.minutes, cmp?.minutes)}</td>
+                        <td className="c" style={{fontWeight:p.goals?700:400,color:p.goals?'#b45309':'var(--text3)'}}>{p.goals||'—'}{renderDelta(p.goals, cmp?.goals)}</td>
+                        <td className="c" style={{color:p.yellow?'#a16207':'var(--text3)',fontWeight:p.yellow?700:400}}>{p.yellow||'—'}{renderDelta(p.yellow, cmp?.yellow)}</td>
+                        <td className="c" style={{color:p.red?'var(--red)':'var(--text3)',fontWeight:p.red?700:400}}>{p.red||'—'}{renderDelta(p.red, cmp?.red)}</td>
+                        <td><button className="btn btn-ghost btn-sm" onClick={e=>{e.stopPropagation();setSelectedPlayer(p);}}>→</button></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+      }
+    </div>
+  );
+}
+
+function PlayerProfileModal({ player, photo, onClose, onPhotoUpload }) {
+  const ref = useRef();
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:480}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <div style={{display:'flex',alignItems:'center',gap:14}}>
+            <div style={{cursor:'pointer'}} onClick={()=>ref.current?.click()}>
+              <PlayerPhoto photo={photo} name={player.name} size={52}/>
+              <input ref={ref} type="file" accept="image/*" hidden onChange={e=>{if(e.target.files[0])onPhotoUpload(e.target.files[0]);}}/>
+            </div>
+            <div>
+              <div style={{fontWeight:800,fontSize:17}}>{player.name}</div>
+              <div style={{fontSize:12,color:'var(--text3)'}}>{player.team}</div>
+              <div style={{fontSize:10,color:'var(--text3)',marginTop:2}}>Klik foto om te wijzigen</div>
+            </div>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:20}}>
+            <div style={{textAlign:'center',padding:'14px 8px',background:'var(--surface2)',borderRadius:8}}>
+              <div style={{fontSize:24,fontWeight:800,fontFamily:'var(--mono)',color:'var(--accent)'}}>{player.minutes}'</div>
+              <div style={{fontSize:10,color:'var(--text3)',marginTop:2,textTransform:'uppercase',letterSpacing:.05}}>Minuten</div>
+            </div>
+            <div style={{textAlign:'center',padding:'14px 8px',background:'var(--surface2)',borderRadius:8}}>
+              <div style={{fontSize:24,fontWeight:800,fontFamily:'var(--mono)',color:'#b45309'}}>{player.goals}</div>
+              <div style={{fontSize:10,color:'var(--text3)',marginTop:2,textTransform:'uppercase',letterSpacing:.05}}>Goals</div>
+            </div>
+            <div style={{textAlign:'center',padding:'14px 8px',background:'var(--surface2)',borderRadius:8}}>
+              <div style={{fontSize:24,fontWeight:800,fontFamily:'var(--mono)'}}>{player.matches}</div>
+              <div style={{fontSize:10,color:'var(--text3)',marginTop:2,textTransform:'uppercase',letterSpacing:.05}}>Wedstrijden</div>
+            </div>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:8}}>
+            {[['Starts',player.starts,'var(--text)'],['Inval',player.subIn,'var(--text)'],['Geel',player.yellow,'#a16207'],['Rood',player.red,'var(--red)']].map(([l,v,c])=>(
+              <div key={l} style={{textAlign:'center',padding:'10px 6px',border:'1px solid var(--border)',borderRadius:6}}>
+                <div style={{fontSize:20,fontWeight:800,fontFamily:'var(--mono)',color:c}}>{v}</div>
+                <div style={{fontSize:10,color:'var(--text3)'}}>{l}</div>
+              </div>
+            ))}
+          </div>
+          {player.yellow > 0 && player.yellow % 3 === 0 && (
+            <div style={{marginTop:16,padding:'10px 14px',background:'var(--red-bg)',border:'1px solid #fdd',borderRadius:8,fontSize:12,color:'var(--red)',fontWeight:600}}>
+              ⚠️ Speler staat onder schorsing ({player.yellow} gele kaarten)
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── TIMEZONES TAB ─────────────────────────────────────────────────────────
+
+function TimezonesTab({ matches, allMatches, season, allSeasons }) {
+  const [teamFilter, setTeamFilter] = useState('Belisia SV');
+  const [compareSeason, setCompareSeason] = useState('');
+  const tzData = useMemo(() => computeTimezones(matches, teamFilter), [matches, teamFilter]);
+  const tzCompare = useMemo(() => {
+    if (!compareSeason) return null;
+    const cm = filterMatchesBySeason(allMatches||[], compareSeason);
+    return computeTimezones(cm, teamFilter);
+  }, [allMatches, compareSeason, teamFilter]);
+
+  const maxFor = Math.max(...tzData.for, ...(tzCompare?.for||[]), 1);
+  const maxAgainst = Math.max(...tzData.against, ...(tzCompare?.against||[]), 1);
+  const totalFor = tzData.for.reduce((a,b)=>a+b,0);
+  const totalAgainst = tzData.against.reduce((a,b)=>a+b,0);
+  const totalForCmp = tzCompare ? tzCompare.for.reduce((a,b)=>a+b,0) : 0;
+  const totalAgainstCmp = tzCompare ? tzCompare.against.reduce((a,b)=>a+b,0) : 0;
+
+  const compareOptions = (allSeasons||[]).filter(s => s !== season);
+
+  return (
+    <div className="tab-panel">
+      <div className="section-header">
+        <h2 className="section-title">
+          Tijdzone-analyse
+          {season && <span style={{fontSize:13,color:'var(--text3)',fontWeight:500,marginLeft:8,fontFamily:'var(--mono)'}}>{season==='all' ? '· Alle seizoenen' : `· ${season}`}</span>}
+        </h2>
+        <div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
+          <select className="form-input" style={{width:'auto'}} value={teamFilter} onChange={e=>setTeamFilter(e.target.value)}>
+            <option value="">Alle ploegen (goals totaal)</option>
+            {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
+          {compareOptions.length > 0 && (
+            <select className="form-input" style={{width:'auto',borderColor: compareSeason ? 'var(--accent)' : 'var(--border2)'}} value={compareSeason} onChange={e=>setCompareSeason(e.target.value)}>
+              <option value="">⇄ Vergelijken met…</option>
+              {compareOptions.map(s=><option key={s} value={s}>vs {s}</option>)}
+            </select>
+          )}
+        </div>
+      </div>
+
+      {compareSeason && (
+        <div style={{padding:'10px 14px',background:'var(--accent-bg)',border:'1px solid #bbf7d0',borderRadius:8,fontSize:12,color:'var(--accent)',fontWeight:600,marginBottom:16,display:'flex',alignItems:'center',gap:8}}>
+          <span>⇄</span><span>Vergelijking: <strong>{season}</strong> vs <strong>{compareSeason}</strong> — gestreepte balken tonen het vergelijkingsseizoen</span>
+        </div>
+      )}
+
+      <div className="grid-2" style={{marginBottom:20}}>
+        {/* Goals FOR */}
+        <div className="card card-body">
+          <div style={{fontWeight:700,fontSize:13,color:'var(--accent)',marginBottom:16,display:'flex',alignItems:'baseline',justifyContent:'space-between'}}>
+            <span>{teamFilter?`⚽ Goals voor ${teamFilter}`:'⚽ Alle gescoorde goals'}</span>
+            <span className="mono" style={{fontSize:12,fontWeight:400,color:'var(--text3)'}}>
+              {totalFor}{compareSeason && <span> <span style={{opacity:.6}}>vs {totalForCmp}</span></span>}
+            </span>
+          </div>
+          {ZONES.map((z,i)=>(
+            <div key={z}>
+              <ZoneBar label={z} value={tzData.for[i]} max={maxFor} color={ZONE_COLORS[i]}/>
+              {tzCompare && <ZoneBarCompare label={z} value={tzCompare.for[i]} max={maxFor} color={ZONE_COLORS[i]}/>}
+            </div>
+          ))}
+          {totalFor===0 && <div style={{textAlign:'center',color:'var(--text3)',fontSize:13,padding:16}}>Geen goals beschikbaar</div>}
+        </div>
+
+        {/* Goals AGAINST */}
+        {teamFilter
+          ? <div className="card card-body">
+              <div style={{fontWeight:700,fontSize:13,color:'var(--red)',marginBottom:16,display:'flex',alignItems:'baseline',justifyContent:'space-between'}}>
+                <span>🔴 Goals tegen {teamFilter}</span>
+                <span className="mono" style={{fontSize:12,fontWeight:400,color:'var(--text3)'}}>
+                  {totalAgainst}{compareSeason && <span> <span style={{opacity:.6}}>vs {totalAgainstCmp}</span></span>}
+                </span>
+              </div>
+              {ZONES.map((z,i)=>(
+                <div key={z}>
+                  <ZoneBar label={z} value={tzData.against[i]} max={Math.max(maxAgainst,1)} color="var(--red)"/>
+                  {tzCompare && <ZoneBarCompare label={z} value={tzCompare.against[i]} max={Math.max(maxAgainst,1)} color="var(--red)"/>}
+                </div>
+              ))}
+              {totalAgainst===0 && <div style={{textAlign:'center',color:'var(--text3)',fontSize:13,padding:16}}>Geen tegendoelpunten</div>}
+            </div>
+          : <div className="card card-body" style={{display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <div style={{textAlign:'center',color:'var(--text3)'}}>
+                <div style={{fontSize:24,opacity:.3,marginBottom:8}}>🔍</div>
+                <div style={{fontSize:13}}>Selecteer een ploeg voor tegendoelpunten analyse</div>
+              </div>
+            </div>
+        }
+      </div>
+
+      {/* Summary table */}
+      <div className="card" style={{overflow:'hidden'}}>
+        <div className="card-header"><span className="card-title">Detail per tijdzone</span></div>
+        <table className="tbl">
+          <thead><tr>
+            <th>Tijdzone</th>
+            <th className="c">Goals voor</th>
+            {compareSeason && <th className="c" style={{color:'var(--accent)'}}>vs {compareSeason}</th>}
+            {teamFilter && <th className="c">Goals tegen</th>}
+            {teamFilter && compareSeason && <th className="c" style={{color:'var(--red)'}}>vs {compareSeason}</th>}
+            {teamFilter && <th className="c">Balans</th>}
+            <th className="c">% van totaal</th>
+          </tr></thead>
+          <tbody>{ZONES.map((z,i)=>{
+            const forPct = totalFor > 0 ? ((tzData.for[i]/totalFor)*100).toFixed(0) : 0;
+            const bal = tzData.for[i] - tzData.against[i];
+            const dF = tzCompare ? tzData.for[i] - tzCompare.for[i] : 0;
+            const dA = tzCompare ? tzData.against[i] - tzCompare.against[i] : 0;
+            return <tr key={z}>
+              <td><span style={{display:'inline-block',width:10,height:10,borderRadius:2,background:ZONE_COLORS[i],marginRight:8}}></span><span className="mono" style={{fontSize:12}}>{z}'</span></td>
+              <td className="c mono" style={{fontWeight:700,color:'var(--accent)'}}>{tzData.for[i]}</td>
+              {compareSeason && <td className="c mono" style={{fontSize:12}}>
+                <span style={{color:'var(--text3)'}}>{tzCompare.for[i]}</span>
+                {dF !== 0 && <span style={{marginLeft:6,fontWeight:700,color:dF>0?'var(--accent)':'var(--red)'}}>{dF>0?'+':''}{dF}</span>}
+              </td>}
+              {teamFilter && <td className="c mono" style={{fontWeight:700,color:'var(--red)'}}>{tzData.against[i]}</td>}
+              {teamFilter && compareSeason && <td className="c mono" style={{fontSize:12}}>
+                <span style={{color:'var(--text3)'}}>{tzCompare.against[i]}</span>
+                {dA !== 0 && <span style={{marginLeft:6,fontWeight:700,color:dA<0?'var(--accent)':'var(--red)'}}>{dA>0?'+':''}{dA}</span>}
+              </td>}
+              {teamFilter && <td className="c mono" style={{fontWeight:700,color:bal>0?'var(--accent)':bal<0?'var(--red)':'var(--text3)'}}>{bal>0?'+':''}{bal}</td>}
+              <td className="c" style={{color:'var(--text3)',fontSize:12}}>{forPct}%</td>
+            </tr>;
+          })}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// Variant van ZoneBar met gestreepte stijl voor vergelijkingsseizoen
+function ZoneBarCompare({ label, value, max, color }) {
+  const pct = max > 0 ? (value / max) * 100 : 0;
+  return (
+    <div className="zone-bar-wrap" style={{marginTop:-2,marginBottom:8,opacity:.85}}>
+      <div className="zone-bar-label" style={{fontSize:9,fontStyle:'italic'}}>vgl</div>
+      <div className="zone-bar-bg" style={{height:12,background:'transparent',border:`1px dashed ${color}`}}>
+        <div style={{ width: `${pct}%`, height:'100%', background: `repeating-linear-gradient(45deg, ${color} 0 4px, ${color}88 4px 8px)`, borderRadius:3 }}></div>
+      </div>
+      <span style={{fontSize:9,color:'var(--text3)',fontFamily:'var(--mono)',minWidth:14,textAlign:'right'}}>{value}</span>
+    </div>
+  );
+}
+
+// ─── OPPONENT REPORT TAB ────────────────────────────────────────────────────
+
+function OpponentTab({ matches, standings }) {
+  const [team, setTeam] = useState('');
+  const report = useMemo(() => team ? computeOpponentReport(matches, team) : null, [matches, team]);
+  const tzFor = report?.tz.for || Array(6).fill(0);
+  const tzAgainst = report?.tz.against || Array(6).fill(0);
+  const maxFor = Math.max(...tzFor, 1);
+  const maxAgainst = Math.max(...tzAgainst, 1);
+
+  return (
+    <div className="tab-panel">
+      <div className="section-header">
+        <h2 className="section-title">Tegenstander-rapport</h2>
+        <select className="form-input" style={{width:'auto',minWidth:200}} value={team} onChange={e=>setTeam(e.target.value)}>
+          <option value="">Kies tegenstander…</option>
+          {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+
+      {!team && (
+        <div className="card"><div className="empty">
+          <div className="empty-icon">📊</div>
+          <div className="empty-text">Selecteer een ploeg voor het identiteitsverslag</div>
+        </div></div>
+      )}
+
+      {team && report && (
+        <>
+          {/* Header */}
+          <div className="card card-body" style={{marginBottom:16}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+              <div>
+                <div style={{fontSize:22,fontWeight:800}}>{team}</div>
+                <div style={{fontSize:13,color:'var(--text3)',marginTop:2}}>Identiteitsverslag – {COMPETITION}</div>
+              </div>
+              {report.standing && (
+                <div style={{display:'flex',gap:16,alignItems:'center'}}>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:28,fontWeight:800,fontFamily:'var(--mono)',color:'var(--accent)'}}>{report.standing.pts}</div>
+                    <div style={{fontSize:10,color:'var(--text3)',textTransform:'uppercase'}}>Punten</div>
+                  </div>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:22,fontWeight:800,fontFamily:'var(--mono)'}}>{standings.indexOf(report.standing)+1}</div>
+                    <div style={{fontSize:10,color:'var(--text3)',textTransform:'uppercase'}}>Positie</div>
+                  </div>
+                  {report.streak && <StreakBadge streak={report.streak}/>}
+                  {report.standing.form.length>0 && <FormPills form={report.standing.form}/>}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Strengths & vulnerabilities */}
+          <div className="grid-2" style={{marginBottom:16}}>
+            <div className="card card-body">
+              <div style={{fontWeight:700,fontSize:13,color:'var(--accent)',marginBottom:12}}>💪 Sterkste fases</div>
+              {report.dangerZones.length > 0
+                ? report.dangerZones.map((z,i)=>(
+                    <div key={z} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:i<report.dangerZones.length-1?'1px solid var(--border)':'none'}}>
+                      <span style={{width:8,height:8,borderRadius:2,background:'var(--accent)',flexShrink:0,display:'inline-block'}}></span>
+                      <span style={{fontFamily:'var(--mono)',fontSize:13,fontWeight:600}}>{z}'</span>
+                      <span style={{fontSize:12,color:'var(--text2)'}}>— meeste goals gescoord</span>
+                    </div>
+                  ))
+                : <div style={{color:'var(--text3)',fontSize:13}}>Onvoldoende data</div>
+              }
+              {report.topScorer && (
+                <div style={{marginTop:12,padding:'10px',background:'var(--accent-bg)',borderRadius:8}}>
+                  <div style={{fontSize:10,color:'var(--text3)',textTransform:'uppercase',marginBottom:3}}>Gevaarlijkste aanvaller</div>
+                  <div style={{fontWeight:700}}>{report.topScorer.name} — {report.topScorer.goals} goals</div>
+                </div>
+              )}
+            </div>
+
+            <div className="card card-body">
+              <div style={{fontWeight:700,fontSize:13,color:'var(--red)',marginBottom:12}}>🔓 Kwetsbare fases</div>
+              {report.vulnZones.length > 0 && report.vulnZones.some((z,i)=>tzAgainst[ZONES.indexOf(z)]>0)
+                ? report.vulnZones.map((z,i)=>(
+                    <div key={z} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:i<report.vulnZones.length-1?'1px solid var(--border)':'none'}}>
+                      <span style={{width:8,height:8,borderRadius:2,background:'var(--red)',flexShrink:0,display:'inline-block'}}></span>
+                      <span style={{fontFamily:'var(--mono)',fontSize:13,fontWeight:600}}>{z}'</span>
+                      <span style={{fontSize:12,color:'var(--text2)'}}>— meeste tegendoelpunten</span>
+                    </div>
+                  ))
+                : <div style={{color:'var(--text3)',fontSize:13}}>Onvoldoende data</div>
+              }
+            </div>
+          </div>
+
+          {/* Timezone charts */}
+          <div className="grid-2" style={{marginBottom:16}}>
+            <div className="card card-body">
+              <div style={{fontWeight:700,fontSize:13,color:'var(--accent)',marginBottom:14}}>Goals voor</div>
+              {ZONES.map((z,i)=><ZoneBar key={z} label={z} value={tzFor[i]} max={maxFor} color={ZONE_COLORS[i]}/>)}
+            </div>
+            <div className="card card-body">
+              <div style={{fontWeight:700,fontSize:13,color:'var(--red)',marginBottom:14}}>Goals tegen</div>
+              {ZONES.map((z,i)=><ZoneBar key={z} label={z} value={tzAgainst[i]} max={maxAgainst} color="var(--red)"/>)}
+            </div>
+          </div>
+
+          {/* Top players */}
+          {report.players.length > 0 && (
+            <div className="card" style={{overflow:'hidden',marginBottom:16}}>
+              <div className="card-header"><span className="card-title">Spelerskern</span></div>
+              <table className="tbl">
+                <thead><tr>
+                  <th>Speler</th><th className="c">Wed</th><th className="c">Min</th><th className="c">⚽</th><th className="c">🟨</th><th className="c">🟥</th>
+                </tr></thead>
+                <tbody>{report.players.slice(0,15).map((p,i)=>(
+                  <tr key={i}>
+                    <td style={{fontWeight:600}}>{p.name}</td>
+                    <td className="c">{p.matches}</td>
+                    <td className="c mono" style={{color:'var(--accent)',fontWeight:600}}>{p.minutes}</td>
+                    <td className="c" style={{color:p.goals?'#b45309':'var(--text3)',fontWeight:p.goals?700:400}}>{p.goals||'—'}</td>
+                    <td className="c" style={{color:p.yellow?'#a16207':'var(--text3)'}}>{p.yellow||'—'}</td>
+                    <td className="c" style={{color:p.red?'var(--red)':'var(--text3)'}}>{p.red||'—'}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── H2H TAB ───────────────────────────────────────────────────────────────
+
+function H2HTab({ matches }) {
+  const [teamA, setTeamA] = useState('Belisia SV');
+  const [teamB, setTeamB] = useState('');
+  const h2h = useMemo(() => teamA&&teamB ? computeH2H(matches, teamA, teamB) : null, [matches, teamA, teamB]);
+
+  return (
+    <div className="tab-panel">
+      <div className="section-header">
+        <h2 className="section-title">Head-to-Head</h2>
+      </div>
+
+      <div className="card card-body" style={{marginBottom:16}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',gap:16,alignItems:'end'}}>
+          <div>
+            <label className="form-label">Ploeg A</label>
+            <select className="form-input" value={teamA} onChange={e=>setTeamA(e.target.value)}>
+              <option value="">Kies…</option>
+              {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div style={{textAlign:'center',paddingBottom:6,fontWeight:800,fontSize:20,color:'var(--text3)'}}>vs</div>
+          <div>
+            <label className="form-label">Ploeg B</label>
+            <select className="form-input" value={teamB} onChange={e=>setTeamB(e.target.value)}>
+              <option value="">Kies…</option>
+              {TEAMS.filter(t=>t!==teamA).map(t=><option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {teamA && teamB && h2h && (
+        <>
+          {h2h.results.length === 0
+            ? <div className="card"><div className="empty"><div className="empty-icon">🤝</div><div className="empty-text">Nog geen onderlinge wedstrijden ingevoerd</div></div></div>
+            : <>
+                {/* Summary */}
+                <div className="card card-body" style={{marginBottom:16}}>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',gap:20,alignItems:'center',textAlign:'center'}}>
+                    <div>
+                      <div style={{fontSize:38,fontWeight:800,fontFamily:'var(--mono)',color:'var(--accent)'}}>{h2h.wA}</div>
+                      <div style={{fontSize:13,fontWeight:600}}>{teamA}</div>
+                    </div>
+                    <div style={{color:'var(--text3)'}}>
+                      <div style={{fontSize:28,fontWeight:800,fontFamily:'var(--mono)'}}>{h2h.draws}</div>
+                      <div style={{fontSize:12}}>Gelijk</div>
+                    </div>
+                    <div>
+                      <div style={{fontSize:38,fontWeight:800,fontFamily:'var(--mono)',color:'var(--blue)'}}>{h2h.wB}</div>
+                      <div style={{fontSize:13,fontWeight:600}}>{teamB}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Match history */}
+                <div className="card" style={{overflow:'hidden'}}>
+                  <div className="card-header"><span className="card-title">Onderlinge wedstrijden</span></div>
+                  {h2h.results.map((m,i)=>{
+                    const isAHome = m.homeTeam===teamA;
+                    const aGoals = isAHome ? m.score.home : m.score.away;
+                    const bGoals = isAHome ? m.score.away : m.score.home;
+                    const resultA = aGoals>bGoals?'W':aGoals<bGoals?'L':'D';
+                    return (
+                      <div key={i} className="match-row">
+                        <span style={{fontSize:11,color:'var(--text3)',fontFamily:'var(--mono)'}}>{m.date||'—'}</span>
+                        <span className="match-team" style={{textAlign:'right',color:'var(--accent)',fontWeight:700}}>{m.homeTeam}</span>
+                        <span className="match-score">{m.score.label}</span>
+                        <span className="match-team" style={{color:'var(--blue)',fontWeight:700}}>{m.awayTeam}</span>
+                        <span className={`form-pill form-${resultA}`} style={{marginLeft:'auto'}}>{resultA}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+          }
+        </>
+      )}
+
+      {(!teamA || !teamB) && (
+        <div className="card"><div className="empty"><div className="empty-icon">🤝</div><div className="empty-text">Selecteer twee ploegen</div></div></div>
+      )}
+    </div>
+  );
+}
+
+// ─── PDF BLOB GENERATOR ────────────────────────────────────────────────────
+
+function openPdfReport(matches, season) {
+  const dataJson = JSON.stringify(matches);
+  const teamsJson = JSON.stringify(TEAMS);
+  const seasonLabel = season === 'all' ? 'Alle seizoenen' : (season || 'Huidig seizoen');
+
+  // Build HTML as array of strings to avoid template literal / Babel issues
+  const parts = [];
+  parts.push('<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"/>');
+  parts.push('<title>Belisia SV \u2013 Rapport PDF</title>');
+  parts.push('<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>');
+  parts.push('<style>');
+  parts.push('*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}');
+  parts.push(':root{--accent:#1a7a3c;--red:#c0392b;--yellow:#b45309;--text:#1a1917;--text2:#6b6560;--text3:#9c9590;--border:#e4e2df;--surface2:#f5f5f3;--sans:\'DM Sans\',system-ui,sans-serif;--mono:\'DM Mono\',monospace}');
+  parts.push('html,body{background:white;font-family:var(--sans);color:var(--text);font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}');
+  parts.push('@page{size:A4 portrait;margin:1.2cm 1.4cm}');
+  parts.push('.page{width:100%;break-before:page;padding-bottom:12px}.page:first-child{break-before:avoid}');
+  parts.push('.page-header{display:flex;align-items:center;justify-content:space-between;border-bottom:2.5px solid var(--accent);padding-bottom:10px;margin-bottom:18px}');
+  parts.push('.page-title{font-size:18px;font-weight:800}.page-meta{font-size:10px;color:var(--text3);font-family:var(--mono);text-align:right;line-height:1.5}');
+  parts.push('.logo-pill{display:inline-flex;align-items:center;background:var(--accent);color:white;border-radius:8px;padding:4px 12px 4px 8px;font-size:13px;font-weight:700;margin-right:12px}');
+  parts.push('.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}');
+  parts.push('table{width:100%;border-collapse:collapse;font-size:11px}');
+  parts.push('thead th{background:var(--surface2);padding:6px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)}');
+  parts.push('.r{text-align:right}.c{text-align:center}');
+  parts.push('tbody td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text)}tbody tr:last-child td{border-bottom:none}tbody tr:nth-child(even) td{background:#fafaf9}');
+  parts.push('.stat-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}.stat-box{flex:1;min-width:80px;border:1px solid var(--border);border-radius:8px;padding:10px 14px;background:white}');
+  parts.push('.stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);font-weight:700;margin-bottom:3px}.stat-value{font-size:22px;font-weight:800;font-family:var(--mono);line-height:1}');
+  parts.push('.zone-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}.zone-lbl{font-size:10px;font-family:var(--mono);color:var(--text3);width:44px;flex-shrink:0}');
+  parts.push('.zone-bg{flex:1;height:16px;background:#f0f0ee;border-radius:3px;overflow:hidden}.zone-fill{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:5px}');
+  parts.push('.zone-val{font-size:9px;font-weight:700;color:white;font-family:var(--mono)}');
+  parts.push('.form-pill{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;font-size:9px;font-weight:700}');
+  parts.push('.form-W{background:#dcfce7;color:#15803d}.form-D{background:#f1f5f9;color:#64748b}.form-L{background:#fee2e2;color:#b91c1c}');
+  parts.push('.susp{background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700}.warn{background:#ffedd5;color:#c2410c;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700}');
+  parts.push('.divider{border:none;border-top:1px solid var(--border);margin:14px 0}');
+  parts.push('.page-footer{position:fixed;bottom:.6cm;left:1.4cm;right:1.4cm;display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:var(--mono);border-top:1px solid var(--border);padding-top:4px}');
+  parts.push('.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}');
+  parts.push('.opp-header{background:var(--surface2);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}');
+  parts.push('.opp-name{font-size:16px;font-weight:800}.opp-pts{font-size:28px;font-weight:800;font-family:var(--mono);color:var(--accent)}');
+  parts.push('.print-btn{position:fixed;top:16px;right:16px;background:var(--accent);color:white;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;z-index:999}');
+  parts.push('@media print{.print-btn{display:none}}');
+  parts.push('@media screen{body{background:#eee;padding:20px}.page{background:white;max-width:794px;margin:0 auto 30px;padding:40px 50px;box-shadow:0 4px 24px rgba(0,0,0,.12);border-radius:6px}.page-footer{position:static;margin-top:30px}}');
+  parts.push('<\/style><\/head><body>');
+  parts.push('<button class="print-btn" onclick="window.print()">\u2B07 Opslaan als PDF<\/button>');
+  parts.push('<div id="app">Laden\u2026<\/div>');
+  parts.push('<script>');
+  parts.push('var COMPETITION="1e Afdeling VV \u2013 2025-2026";');
+  parts.push('var SEASON_LABEL=' + JSON.stringify(seasonLabel) + ';');
+  parts.push('var ZONES=["0\u201315","16\u201330","31\u201345","46\u201360","61\u201375","76\u201390+"];');
+  parts.push('var ZONE_COLORS=["#3b82f6","#6366f1","#8b5cf6","#f59e0b","#ef4444","#ec4899"];');
+  parts.push('var TEAMS=' + teamsJson + ';');
+  parts.push('var matches=' + dataJson + ';');
+  parts.push(String.raw`
+var _analytics = (function() {
+  function computeMatchScore(m){var h=0,a=0,evts=m.events||{};(m.homePlayers||[]).map(function(p){return Object.assign({},p,{side:"home"});}).concat((m.awayPlayers||[]).map(function(p){return Object.assign({},p,{side:"away"});})).forEach(function(p){(evts[p.id]||[]).forEach(function(e){if(e.type==="goal"){p.side==="home"?h++:a++;}});});return{home:h,away:a,label:h+"-"+a};}
+  function getMinuteZone(min){var m=parseInt(min);if(isNaN(m))return null;if(m<=15)return 0;if(m<=30)return 1;if(m<=45)return 2;if(m<=60)return 3;if(m<=75)return 4;return 5;}
+  function computePlayerStats(ms,tf){var stats={};ms.forEach(function(match){var allP=(match.homePlayers||[]).map(function(p){return Object.assign({},p,{side:"home",team:match.homeTeam});}).concat((match.awayPlayers||[]).map(function(p){return Object.assign({},p,{side:"away",team:match.awayTeam});}));var evts=match.events||{};allP.forEach(function(p){if(tf&&p.team!==tf)return;var key=p.team+"__"+p.name;if(!stats[key])stats[key]={name:p.name,team:p.team,matches:0,minutes:0,goals:0,yellow:0,red:0,starts:0,subIn:0};var s=stats[key];var pEvts=evts[p.id]||[];var played=false;if(!p.isSub){s.starts++;played=true;var so=pEvts.find(function(e){return e.type==="sub_out";});s.minutes+=so?(parseInt(so.minute)||90):90;}else{var si=pEvts.find(function(e){return e.type==="sub_in";});if(si){s.subIn++;played=true;s.minutes+=90-(parseInt(si.minute)||0);}}if(played)s.matches++;pEvts.forEach(function(e){if(e.type==="goal")s.goals++;if(e.type==="yellow")s.yellow++;if(e.type==="red")s.red++;});});});return Object.values(stats).sort(function(a,b){return b.minutes-a.minutes;});}
+  function computeTimezones(ms,tf){var z={for:[0,0,0,0,0,0],against:[0,0,0,0,0,0]};ms.forEach(function(match){var evts=match.events||{};(match.homePlayers||[]).map(function(p){return Object.assign({},p,{side:"home",team:match.homeTeam});}).concat((match.awayPlayers||[]).map(function(p){return Object.assign({},p,{side:"away",team:match.awayTeam});})).forEach(function(p){(evts[p.id]||[]).forEach(function(e){if(e.type!=="goal")return;var zi=getMinuteZone(e.minute);if(zi===null)return;if(!tf){z.for[zi]++;return;}if(p.team===tf){z.for[zi]++;}else{var opp=p.side==="home"?match.awayTeam:match.homeTeam;if(opp===tf)z.against[zi]++;}});});});return z;}
+  function computeStandings(ms){var t={};TEAMS.forEach(function(tm){t[tm]={team:tm,w:0,d:0,l:0,gf:0,ga:0,pts:0,mp:0,form:[]};});ms.forEach(function(m){if(!m.homeTeam||!m.awayTeam)return;var sc=computeMatchScore(m);var gh=sc.home,ga=sc.away;var h=t[m.homeTeam],a=t[m.awayTeam];if(!h||!a)return;h.mp++;a.mp++;h.gf+=gh;h.ga+=ga;a.gf+=ga;a.ga+=gh;if(gh>ga){h.w++;h.pts+=3;a.l++;h.form.push("W");a.form.push("L");}else if(gh<ga){a.w++;a.pts+=3;h.l++;h.form.push("L");a.form.push("W");}else{h.d++;a.d++;h.pts++;a.pts++;h.form.push("D");a.form.push("D");}});return Object.values(t).sort(function(a,b){return b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;});}
+  function getCurrentStreak(form){if(!form.length)return{type:null,count:0};var last=form[form.length-1],count=0;for(var i=form.length-1;i>=0;i--){if(form[i]===last)count++;else break;}return{type:last,count:count};}
+  function computeOpponentReport(ms,team){var tz=computeTimezones(ms,team);var players=computePlayerStats(ms,team);var standings=computeStandings(ms);var standing=standings.find(function(s){return s.team===team;})||null;var streak=standing?getCurrentStreak(standing.form):null;var dangerZones=ZONES.map(function(z,i){return{zone:z,score:tz.for[i]};}).sort(function(a,b){return b.score-a.score;}).slice(0,2).map(function(z){return z.zone;});var vulnZones=ZONES.map(function(z,i){return{zone:z,score:tz.against[i]};}).sort(function(a,b){return b.score-a.score;}).slice(0,2).map(function(z){return z.zone;});var topScorer=players.filter(function(p){return p.goals>0;})[0]||null;return{tz:tz,players:players,standing:standing,streak:streak,dangerZones:dangerZones,vulnZones:vulnZones,topScorer:topScorer};}
+  return{computeMatchScore:computeMatchScore,computePlayerStats:computePlayerStats,computeTimezones:computeTimezones,computeStandings:computeStandings,getCurrentStreak:getCurrentStreak,computeOpponentReport:computeOpponentReport};
+})();
+function zoneBar(lbl,val,max,color){var pct=max>0?Math.round((val/max)*100):0;return'<div class="zone-row"><span class="zone-lbl">'+lbl+''<\/span><div class="zone-bg"><div class="zone-fill" style="width:'+pct+'%;background:'+color+'">'+(val>0?'<span class="zone-val">'+val+'<\/span>':'')+'<\/div><\/div>'+(val===0?'<span style="font-size:9px;color:#9c9590">0<\/span>':'')+'<\/div>';}
+function formPills(form){return form.slice(-5).map(function(f){return'<span class="form-pill form-'+f+'">'+f+'<\/span>';}).join('');}
+function ph(title,sub){var d=new Date().toLocaleDateString("nl-BE",{day:"2-digit",month:"long",year:"numeric"});return'<div class="page-header"><div style="display:flex;align-items:center"><span class="logo-pill">&#x26BD; Belisia SV<\/span><span class="page-title">'+title+'<\/span><\/div><div class="page-meta"><div>'+COMPETITION+'<\/div><div style="font-weight:700;color:var(--accent)">Seizoen: '+SEASON_LABEL+'<\/div><div>'+(sub||d)+'<\/div><\/div><\/div>';}
+function renderPlayers(){var st=_analytics.computePlayerStats(matches,"Belisia SV").sort(function(a,b){return b.minutes-a.minutes;});var tG=st.reduce(function(s,p){return s+p.goals;},0),tY=st.reduce(function(s,p){return s+p.yellow;},0),tR=st.reduce(function(s,p){return s+p.red;},0);var top=st.slice().sort(function(a,b){return b.goals-a.goals;})[0];var rows=st.map(function(p,i){var susp=p.yellow>0&&p.yellow%3===0,warn=p.yellow>0&&p.yellow%3===2;return'<tr><td style="color:#9c9590;font-family:var(--mono);font-size:10px">'+(i+1)+'<\/td><td style="font-weight:600">'+p.name+'<\/td><td class="c">'+p.matches+'<\/td><td class="c">'+p.starts+'<\/td><td class="c">'+p.subIn+'<\/td><td class="c" style="font-family:var(--mono);font-weight:700;color:var(--accent)">'+p.minutes+'<\/td><td class="c" style="font-weight:'+(p.goals?700:400)+';color:'+(p.goals?"#b45309":"#9c9590")+'">'+(p.goals||"&mdash;")+'<\/td><td class="c" style="color:'+(p.yellow?"#a16207":"#9c9590")+'">'+(p.yellow||"&mdash;")+'<\/td><td class="c" style="color:'+(p.red?"var(--red)":"#9c9590")+'">'+(p.red||"&mdash;")+'<\/td><td>'+(susp?'<span class="susp">&#x26A0; Geschorst<\/span>':warn?'<span class="warn">! Drempel<\/span>':'')+'<\/td><\/tr>';}).join('');return'<div class="page">'+ph("Spelersstatistieken","Belisia Bilzen &ndash; volledig seizoen")+'<div class="stat-row"><div class="stat-box"><div class="stat-label">Spelers<\/div><div class="stat-value">'+st.length+'<\/div><\/div><div class="stat-box"><div class="stat-label">Wedstrijden<\/div><div class="stat-value">'+matches.length+'<\/div><\/div><div class="stat-box"><div class="stat-label">Goals<\/div><div class="stat-value" style="color:var(--accent)">'+tG+'<\/div><\/div><div class="stat-box"><div class="stat-label">Gele kaarten<\/div><div class="stat-value" style="color:#b45309">'+tY+'<\/div><\/div><div class="stat-box"><div class="stat-label">Rode kaarten<\/div><div class="stat-value" style="color:var(--red)">'+tR+'<\/div><\/div>'+(top?'<div class="stat-box"><div class="stat-label">Topschutter<\/div><div class="stat-value" style="color:#b45309;font-size:15px;margin-top:2px">'+top.name+'<\/div><div style="font-size:10px;color:#9c9590">'+top.goals+' goals<\/div><\/div>':'')+'<\/div><table><thead><tr><th style="width:24px">#<\/th><th>Speler<\/th><th class="c">Wed<\/th><th class="c">Basis<\/th><th class="c">Inv<\/th><th class="c">Min<\/th><th class="c">Goals<\/th><th class="c">Geel<\/th><th class="c">Rood<\/th><th>Status<\/th><\/tr><\/thead><tbody>'+rows+'<\/tbody><\/table><\/div>';}
+function renderTimezones(){var tz=_analytics.computeTimezones(matches,"Belisia SV"),tzA=_analytics.computeTimezones(matches,"");var mxF=Math.max.apply(null,tz.for.concat([1])),mxAg=Math.max.apply(null,tz.against.concat([1])),mxAl=Math.max.apply(null,tzA.for.concat([1]));var tF=tz.for.reduce(function(a,b){return a+b;},0),tAg=tz.against.reduce(function(a,b){return a+b;},0);var bI=tz.for.indexOf(Math.max.apply(null,tz.for)),wI=tz.against.indexOf(Math.max.apply(null,tz.against));var bF=ZONES.map(function(z,i){return zoneBar(z,tz.for[i],mxF,ZONE_COLORS[i]);}).join(''),bAg=ZONES.map(function(z,i){return zoneBar(z,tz.against[i],mxAg,"var(--red)");}).join(''),bAl=ZONES.map(function(z,i){return zoneBar(z,tzA.for[i],mxAl,ZONE_COLORS[i]);}).join('');var tblR=ZONES.map(function(z,i){var bal=tz.for[i]-tz.against[i],pct=tF>0?Math.round((tz.for[i]/tF)*100):0;return'<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+ZONE_COLORS[i]+';margin-right:6px;vertical-align:middle"><\/span><span style="font-family:var(--mono);font-size:10px">'+z+"'<\/span><\/td><td class=\"c\" style=\"font-weight:700;color:var(--accent);font-family:var(--mono)\">"+tz.for[i]+'<\/td><td class="c" style="font-weight:700;color:var(--red);font-family:var(--mono)">'+tz.against[i]+'<\/td><td class="c" style="font-weight:700;font-family:var(--mono);color:'+(bal>0?"var(--accent)":bal<0?"var(--red)":"#9c9590")+'">'+(bal>0?"+":"")+bal+'<\/td><td class="c" style="color:#9c9590;font-size:10px">'+pct+'%<\/td><\/tr>';}).join('');return'<div class="page">'+ph("Tijdzone-analyse","Doelpunten per 15-minuten zone")+'<div class="stat-row"><div class="stat-box"><div class="stat-label">Goals gescoord<\/div><div class="stat-value" style="color:var(--accent)">'+tF+'<\/div><\/div><div class="stat-box"><div class="stat-label">Goals tegen<\/div><div class="stat-value" style="color:var(--red)">'+tAg+'<\/div><\/div><div class="stat-box"><div class="stat-label">Beste zone<\/div><div class="stat-value" style="font-size:16px;color:var(--accent)">'+ZONES[bI]+"'<\/div><\/div><div class=\"stat-box\"><div class=\"stat-label\">Kwetsbare zone<\/div><div class=\"stat-value\" style=\"font-size:16px;color:var(--red)\">"+ZONES[wI]+"'<\/div><\/div><\/div><div class=\"two-col\" style=\"margin-bottom:20px\"><div><div style=\"font-size:10px;font-weight:700;text-transform:uppercase;margin-bottom:8px;color:var(--accent)\">Goals voor Belisia ("+tF+')<\/div>'+bF+'<\/div><div><div style="font-size:10px;font-weight:700;text-transform:uppercase;margin-bottom:8px;color:var(--red)">Goals tegen Belisia ('+tAg+')<\/div>'+bAg+'<\/div><\/div><hr class="divider"\/><div class="section-title">Detail tabel<\/div><table><thead><tr><th>Tijdzone<\/th><th class="c">Voor<\/th><th class="c">Tegen<\/th><th class="c">Balans<\/th><th class="c">%<\/th><\/tr><\/thead><tbody>'+tblR+'<\/tbody><\/table><hr class="divider"\/><div class="section-title">Alle ploegen &ndash; goals per zone<\/div><div style="margin-top:8px">'+bAl+'<\/div><\/div>';}
+function renderOpponent(team,standings){var r=_analytics.computeOpponentReport(matches,team);var tz=r.tz;var mxF=Math.max.apply(null,tz.for.concat([1])),mxAg=Math.max.apply(null,tz.against.concat([1]));var tF=tz.for.reduce(function(a,b){return a+b;},0),tAg=tz.against.reduce(function(a,b){return a+b;},0);var pos=standings.indexOf(r.standing)+1;var sL={W:"Winning",D:"Gelijk",L:"Verlies"},sC={W:"#15803d",D:"#64748b",L:"#b91c1c"};var bF=ZONES.map(function(z,i){return zoneBar(z,tz.for[i],mxF,ZONE_COLORS[i]);}).join(''),bAg=ZONES.map(function(z,i){return zoneBar(z,tz.against[i],mxAg,"var(--red)");}).join('');var plR=r.players.slice(0,12).map(function(p){return'<tr><td style="font-weight:600">'+p.name+'<\/td><td class="c">'+p.matches+'<\/td><td class="c" style="font-family:var(--mono);font-weight:700;color:var(--accent)">'+p.minutes+'<\/td><td class="c" style="color:'+(p.goals?"#b45309":"#9c9590")+';font-weight:'+(p.goals?700:400)+'">'+(p.goals||"&mdash;")+'<\/td><td class="c" style="color:'+(p.yellow?"#a16207":"#9c9590")+'">'+(p.yellow||"&mdash;")+'<\/td><td class="c" style="color:'+(p.red?"var(--red)":"#9c9590")+'">'+(p.red||"&mdash;")+'<\/td><\/tr>';}).join('');var stHtml=r.standing?'<div style="font-size:11px;color:#6b6560;margin-top:3px">'+r.standing.mp+' wed &middot; '+r.standing.w+'W '+r.standing.d+'G '+r.standing.l+'V<\/div><div style="margin-top:6px">'+formPills(r.standing.form)+'<\/div>':'';var pHtml=r.standing?'<div style="font-size:10px;color:#9c9590">Positie / Punten<\/div><div style="display:flex;gap:16px;margin-top:4px;align-items:baseline"><span style="font-size:28px;font-weight:800;font-family:var(--mono)">#'+pos+'<\/span><span class="opp-pts">'+r.standing.pts+'<\/span><\/div>':'';var skHtml=r.streak&&r.streak.type?'<div style="margin-top:4px;display:inline-block;background:'+(r.streak.type==="W"?"#dcfce7":r.streak.type==="L"?"#fee2e2":"#f1f5f9")+';color:'+sC[r.streak.type]+';border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700">'+sL[r.streak.type]+' x'+r.streak.count+'<\/div>':'';var dH=r.dangerZones.map(function(z){return'<div style="display:flex;align-items:center;gap:8px;padding:5px 0"><span style="width:7px;height:7px;border-radius:2px;background:var(--accent);display:inline-block"><\/span><span style="font-family:var(--mono);font-weight:700;font-size:12px">'+z+"'<\/span><span style=\"font-size:11px;color:#6b6560\">meeste goals<\/span><\/div>";}).join(''),vH=r.vulnZones.map(function(z){return'<div style="display:flex;align-items:center;gap:8px;padding:5px 0"><span style="width:7px;height:7px;border-radius:2px;background:var(--red);display:inline-block"><\/span><span style="font-family:var(--mono);font-weight:700;font-size:12px">'+z+"'<\/span><span style=\"font-size:11px;color:#6b6560\">meeste tegendoelpunten<\/span><\/div>";}).join('');var tH=r.topScorer?'<div style="margin-top:10px;padding:8px 10px;background:#f0faf3;border-radius:6px;border:1px solid #bbf7d0"><div style="font-size:9px;color:#9c9590;text-transform:uppercase;margin-bottom:2px">Gevaarlijkste aanvaller<\/div><div style="font-weight:700;font-size:12px">'+r.topScorer.name+' &mdash; '+r.topScorer.goals+' goals<\/div><\/div>':'';return'<div class="page">'+ph('Identiteitsverslag: '+team)+'<div class="opp-header"><div><div class="opp-name">'+team+'<\/div>'+stHtml+'<\/div><div style="text-align:right">'+pHtml+skHtml+'<\/div><\/div><div class="two-col" style="margin-bottom:16px"><div><div style="font-weight:700;font-size:11px;color:var(--accent);text-transform:uppercase;margin-bottom:8px">Sterkste fases<\/div>'+dH+tH+'<\/div><div><div style="font-weight:700;font-size:11px;color:var(--red);text-transform:uppercase;margin-bottom:8px">Kwetsbare fases<\/div>'+vH+'<\/div><\/div><div class="two-col" style="margin-bottom:16px"><div><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Goals voor ('+tF+')<\/div>'+bF+'<\/div><div><div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:6px">Goals tegen ('+tAg+')<\/div>'+bAg+'<\/div><\/div>'+(r.players.length>0?'<div class="section-title">Spelerskern<\/div><table><thead><tr><th>Speler<\/th><th class="c">Wed<\/th><th class="c">Min<\/th><th class="c">Goals<\/th><th class="c">Geel<\/th><th class="c">Rood<\/th><\/tr><\/thead><tbody>'+plR+'<\/tbody><\/table>':'')+'<\/div>';}
+var _st=_analytics.computeStandings(matches);
+var _seen={},_opps=[];matches.forEach(function(m){[m.homeTeam,m.awayTeam].forEach(function(t){if(t&&t!=="Belisia SV"&&!_seen[t]){_seen[t]=true;_opps.push(t);}});});_opps.sort();
+var _d=new Date().toLocaleDateString("nl-BE",{day:"2-digit",month:"long",year:"numeric"});
+var _footer='<div class="page-footer"><span>Belisia SV &ndash; '+COMPETITION+'<\/span><span>Gegenereerd op '+_d+'<\/span><\/div>';
+document.getElementById("app").innerHTML=_footer+renderPlayers()+renderTimezones()+(_opps.length===0?'<div class="page">'+ph("Tegenstander-rapport")+'<div style="padding:40px 0;text-align:center;color:#9c9590;font-size:13px">Nog geen data.<\/div><\/div>':_opps.map(function(t){return renderOpponent(t,_st);}).join(""));
+document.fonts.ready.then(function(){setTimeout(function(){window.print();},600);});
+`);
+  parts.push('<\/script><\/body><\/html>');
+
+  const html = parts.join('');
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank');
+  if (!w) alert('Pop-up geblokkeerd! Sta pop-ups toe voor deze pagina en probeer opnieuw.');
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+// ─── ROOT APP ──────────────────────────────────────────────────────────────
+
+const TABS = [
+  { id:"dashboard",  label:"Dashboard",     icon:"📊" },
+  { id:"matches",    label:"Wedstrijden",   icon:"📋" },
+  { id:"add",        label:"+ Invoer",      icon:"✏️" },
+  { id:"players",    label:"Spelers",       icon:"👤" },
+  { id:"timezones",  label:"Tijdzones",     icon:"⏱" },
+  { id:"opponent",   label:"Tegenstander",  icon:"🔍" },
+  { id:"h2h",        label:"Head-to-Head",  icon:"🤝" },
+];
+
+function App() {
+  const [tab, setTab] = useState("dashboard");
+  const [matches, setMatches] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const [editMatch, setEditMatch] = useState(null);
+  const [teamFilter, setTeamFilter] = useState('');
+  const [showApiModal, setShowApiModal] = useState(false);
+  const [showCloudModal, setShowCloudModal] = useState(false);
+  const [season, setSeason] = useState(() => localStorage.getItem('selected_season') || getCurrentSeason());
+  const importRef = useRef();
+
+  const [syncStatus, setSyncStatus] = useState(''); // '', 'syncing', 'synced', 'error'
+
+  useEffect(()=>{ loadMatches().then(m=>{setMatches(m);setLoaded(true);}); },[]);
+  useEffect(()=>{
+    if (!loaded) return;
+    setSyncStatus('syncing');
+    saveMatches(matches).then(()=>setSyncStatus('synced')).catch(()=>setSyncStatus('error'));
+  },[matches, loaded]);
+
+  useEffect(()=>{ localStorage.setItem('selected_season', season); },[season]);
+
+  // Beschikbare seizoenen op basis van wedstrijddata
+  const allSeasons = useMemo(()=>getAllSeasons(matches),[matches]);
+
+  // Wedstrijden gefilterd op seizoen — gebruikt door Dashboard, Wedstrijden, Spelers, Tijdzones
+  const seasonMatches = useMemo(()=>filterMatchesBySeason(matches, season),[matches, season]);
+
+  const standings = useMemo(()=>computeStandings(seasonMatches),[seasonMatches]);
+  const playerStats = useMemo(()=>computePlayerStats(seasonMatches,teamFilter),[seasonMatches,teamFilter]);
+  const topScorers = useMemo(()=>[...playerStats].sort((a,b)=>b.goals-a.goals).filter(p=>p.goals>0).slice(0,15),[playerStats]);
+
+  const onSave = useCallback(()=>{
+    if (!editMatch) return;
+    // Stempel het seizoen op de wedstrijd zodat filtering en exports stabiel blijven
+    const stamped = { ...editMatch, season: editMatch.season || getSeasonForDate(editMatch.date) || getCurrentSeason() };
+    setMatches(prev=>{
+      const idx = prev.findIndex(m=>m.id===stamped.id);
+      if (idx>=0){const n=[...prev];n[idx]=stamped;return n;}
+      return [...prev,stamped];
+    });
+    setEditMatch(null); setTab("matches");
+  },[editMatch]);
+
+  const onCancel = useCallback(()=>{ setEditMatch(null); },[]);
+  const onEdit = useCallback((m)=>{ setEditMatch(m); setTab("add"); },[]);
+  const onDelete = useCallback((id)=>{ setMatches(prev=>prev.filter(m=>m.id!==id)); },[]);
+
+  return (
+    <>
+      <div className="accent-strip"></div>
+      <nav className="nav">
+        <div className="nav-brand">
+          <div className="nav-logo">⚽</div>
+          <div>
+            <div className="nav-title">Belisia SV</div>
+            <div className="nav-sub">{COMPETITION}</div>
+          </div>
+        </div>
+        {TABS.map(t=>(
+          <button key={t.id} className={`nav-tab${tab===t.id?' active':''}`}
+            onClick={()=>{ setTab(t.id); if(t.id==='add') setEditMatch(null); }}>
+            <span style={{fontSize:13}}>{t.icon}</span>{t.label}
+          </button>
+        ))}
+        <div className="nav-spacer"></div>
+        <div className="nav-actions">
+          {/* Seizoen-keuze */}
+          <div style={{display:'flex',alignItems:'center',gap:6,padding:'4px 10px',background:'var(--accent-bg)',border:'1px solid #bbf7d0',borderRadius:8,marginRight:4}} title="Seizoen loopt van juli t/m mei">
+            <span style={{fontSize:11,color:'var(--accent)',fontWeight:700,letterSpacing:.04}}>SEIZOEN</span>
+            <select value={season} onChange={e=>setSeason(e.target.value)}
+              style={{border:'none',background:'transparent',fontSize:12,fontWeight:700,fontFamily:'var(--mono)',color:'var(--accent)',cursor:'pointer',outline:'none',padding:'2px 4px'}}>
+              {allSeasons.map(s=><option key={s} value={s}>{s}</option>)}
+              <option value="all">Alle seizoenen</option>
+            </select>
+          </div>
+          {syncStatus==='syncing' && <span style={{fontSize:11,color:'var(--text3)',display:'flex',alignItems:'center',gap:4}}>⏳ Sync…</span>}
+          {syncStatus==='synced' && getJSONBinConfig().binId && <span style={{fontSize:11,color:'var(--accent)',display:'flex',alignItems:'center',gap:4}}>✓ Gesynchroniseerd</span>}
+          {syncStatus==='error' && <span style={{fontSize:11,color:'var(--red)',display:'flex',alignItems:'center',gap:4}}>⚠ Sync mislukt</span>}
+          <button className="btn btn-ghost btn-sm" onClick={()=>openPdfReport(seasonMatches, season)} title="Exporteer als PDF">📄 PDF</button>
+          <button className="btn btn-ghost btn-sm" onClick={()=>exportData(matches)} title="Exporteer JSON">⬇ Export</button>
+          <button className="btn btn-ghost btn-sm" onClick={()=>importRef.current?.click()} title="Importeer JSON">⬆ Import</button>
+          <input ref={importRef} type="file" accept=".json" hidden onChange={e=>{if(e.target.files[0])importData(e.target.files[0],(data)=>{if(Array.isArray(data)){setMatches(data);}});}}/>
+          <button className="btn btn-ghost btn-sm" onClick={()=>setShowCloudModal(true)} title="Cloud opslag instellen"
+            style={{borderColor: getJSONBinConfig().binId ? 'var(--accent)' : 'var(--border2)', color: getJSONBinConfig().binId ? 'var(--accent)' : 'var(--text2)'}}>
+            {getJSONBinConfig().binId ? '☁️ Cloud ✓' : '☁️ Cloud'}
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={()=>setShowApiModal(true)} title="API sleutel instellen" style={{gap:6}}>🔑 API-sleutel</button>
+        </div>
+      </nav>
+
+      {showApiModal && <ApiKeyModal onClose={()=>setShowApiModal(false)}/>}
+      {showCloudModal && <CloudSettingsModal onClose={()=>setShowCloudModal(false)} matches={matches}/>}
+
+      <main className="main">
+        {tab==="dashboard" && <DashboardTab matches={seasonMatches} standings={standings} topScorers={topScorers} teamFilter={teamFilter} setTeamFilter={setTeamFilter} setTab={setTab}/>}
+        {tab==="matches"   && <MatchesTab matches={seasonMatches} onEdit={onEdit} onDelete={onDelete} setTab={setTab}/>}
+        {tab==="add"       && <AddMatchTab editMatch={editMatch} setEditMatch={setEditMatch} matchCount={matches.length} onSave={onSave} onCancel={onCancel}/>}
+        {tab==="players"   && <PlayersTab matches={seasonMatches} allMatches={matches} season={season} allSeasons={allSeasons}/>}
+        {tab==="timezones" && <TimezonesTab matches={seasonMatches} allMatches={matches} season={season} allSeasons={allSeasons}/>}
+        {tab==="opponent"  && <OpponentTab matches={seasonMatches} standings={standings}/>}
+        {tab==="h2h"       && <H2HTab matches={matches}/>}
+      </main>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 56">
+  <rect width="80" height="56" fill="#f8f7f5"/>
+  <rect x="4" y="4" width="72" height="6" rx="2" fill="#1a7a3c" opacity=".15"/>
+  <rect x="4" y="14" width="34" height="20" rx="3" fill="#1a7a3c" opacity=".1"/>
+  <rect x="42" y="14" width="34" height="20" rx="3" fill="#1d4ed8" opacity=".1"/>
+  <rect x="4" y="38" width="72" height="14" rx="3" fill="#e2e8f0"/>
+  <circle cx="14" cy="19" r="5" fill="#1a7a3c"/>
+  <text x="12" y="21" font-size="6" fill="white" font-family="sans-serif">⚽</text>
+</svg>
+</template>
+</body>
+</html>
