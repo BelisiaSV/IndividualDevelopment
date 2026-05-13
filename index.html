@@ -1097,10 +1097,10 @@ function viewOef(id) {
   const w=window.open('','_blank');
   const h=[
     '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+o.name+'</title>',
-    '<style>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}',
+    '<st'+'yle>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}',
     'h1{font-size:20px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}',
     '.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}',
-    '@media print{button{display:none}}</style></head><body>',
+    '@media print{button{display:none}}<\/style></head><body>',
     '<h1>'+o.name+'</h1>',
     '<p style="color:#94A3B8">'+o.cat+' · '+o.intens+' · '+(o.dur||'—')+' min · '+(o.field||'—')+'</p>',
     o.video_url?'<video src="'+o.video_url+'" controls style="width:100%;border-radius:8px;margin:10px 0;max-height:240px;background:#000"></video>':'',
@@ -1172,7 +1172,7 @@ function printExport() {
   const w = window.open('','_blank');
   const h = [
     '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Belisia SV Export</title>',
-    '<style>body{font-family:sans-serif;padding:30px}pre{font-size:12px;line-height:1.6;white-space:pre-wrap}@media print{button{display:none}}</style>',
+    '<st'+'yle>body{font-family:sans-serif;padding:30px}pre{font-size:12px;line-height:1.6;white-space:pre-wrap}@media print{button{display:none}}<\/style>',
     '</head><body>',
     '<h2>Belisia SV — Export</h2>',
     '<p style="color:#999">'+new Date().toLocaleDateString('nl-BE')+'</p>',
