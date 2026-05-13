@@ -1100,7 +1100,7 @@ function filterOef() {
 function viewOef(id) {
   const o=(window.OEFENVORMEN||[]).find(x=>x.id==id);if(!o)return;
   const w=window.open('','_blank');
-  w.document.write(`<html><head><title>${o.name}</title><style>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}h1{font-size:20px;margin-bottom:5px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}@media print{button{display:none}}<\/style>\n  \n<\/head><body>
+  w.document.write(`<'+'html><'+'head><title>${o.name}</title><'+'style>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}h1{font-size:20px;margin-bottom:5px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}@media print{button{display:none}}<\/style>\n  \n<\/head><'+'body>
     <h1>${o.name}</h1><p style="color:#94A3B8">${o.cat} · ${o.intens} · ${o.dur||'—'} min · ${o.field||'—'}</p>
     ${o.video_url?`<video src="${o.video_url}" controls style="width:100%;border-radius:8px;margin:10px 0;max-height:240px;background:#000"></video>`:''}
     <p style="margin:10px 0;line-height:1.6;font-size:14px">${o.description||'Geen omschrijving.'}</p>
@@ -1165,7 +1165,7 @@ function doExport(type) {
 function printExport() {
   const text = document.getElementById('expTxt')?.textContent||'';
   const w = window.open('','_blank');
-  w.document.write(`<html><head><title>Belisia SV Export</title><style>body{font-family:sans-serif;padding:30px}pre{font-size:12px;line-height:1.6;white-space:pre-wrap}@media print{button{display:none}}<\/style>\n<\/head><body><h2>Belisia SV — Export</h2><p style="color:#999">${new Date().toLocaleDateString('nl-BE')}</p><pre>${text}</pre><button onclick="window.print()" style="padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer;margin-top:14px">🖨 Afdrukken / PDF</button><\/body><\/html>`);
+  w.document.write(`<'+'html><'+'head><title>Belisia SV Export</title><'+'style>body{font-family:sans-serif;padding:30px}pre{font-size:12px;line-height:1.6;white-space:pre-wrap}@media print{button{display:none}}<\/style>\n<\/head><'+'body><h2>Belisia SV — Export</h2><p style="color:#999">${new Date().toLocaleDateString('nl-BE')}</p><pre>${text}</pre><button onclick="window.print()" style="padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer;margin-top:14px">🖨 Afdrukken / PDF</button><\/body><\/html>`);
   w.document.close();
 }
 
@@ -3623,10 +3623,10 @@ function openPdfReport(matches, season) {
 
   // Build HTML as array of strings to avoid template literal / Babel issues
   const parts = [];
-  parts.push('<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"/>');
+  parts.push('<!DOCTYPE html><html lang="nl"><'+'head><meta charset="UTF-8"/>');
   parts.push('<title>Belisia SV \u2013 Rapport PDF</title>');
   parts.push('<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>');
-  parts.push('<style>');
+  parts.push('<'+'style>');
   parts.push('*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}');
   parts.push(':root{--accent:#1a7a3c;--red:#c0392b;--yellow:#b45309;--text:#1a1917;--text2:#6b6560;--text3:#9c9590;--border:#e4e2df;--surface2:#f5f5f3;--sans:\'DM Sans\',system-ui,sans-serif;--mono:\'DM Mono\',monospace}');
   parts.push('html,body{background:white;font-family:var(--sans);color:var(--text);font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}');
@@ -3656,7 +3656,7 @@ function openPdfReport(matches, season) {
   parts.push('.print-btn{position:fixed;top:16px;right:16px;background:var(--accent);color:white;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;z-index:999}');
   parts.push('@media print{.print-btn{display:none}}');
   parts.push('@media screen{body{background:#eee;padding:20px}.page{background:white;max-width:794px;margin:0 auto 30px;padding:40px 50px;box-shadow:0 4px 24px rgba(0,0,0,.12);border-radius:6px}.page-footer{position:static;margin-top:30px}}');
-  parts.push('<\/style><\/head><body>');
+  parts.push('<\/style><\/head><'+'body>');
   parts.push('<button class="print-btn" onclick="window.print()">\u2B07 Opslaan als PDF<\/button>');
   parts.push('<div id="app">Laden\u2026<\/div>');
   parts.push('<script>');
