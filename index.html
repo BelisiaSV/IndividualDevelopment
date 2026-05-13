@@ -517,12 +517,29 @@ async function logout() {
 async function init() {
   const tok = localStorage.getItem('sb_tok');
   const uid = localStorage.getItem('sb_uid');
-  if (!tok || !uid) { showSpinner(false); return; }
+  // No token = show login immediately, no spinner
+  if (!tok || !uid) {
+    showSpinner(false);
+    document.getElementById('loginScreen').style.display = 'flex';
+    return;
+  }
   TOKEN = tok; USER_ID = uid;
-  // Verify token
+  // Hard timeout: if init takes more than 6 seconds, show login
+  const timeout = setTimeout(() => {
+    showSpinner(false);
+    TOKEN = null; USER_ID = null;
+    localStorage.removeItem('sb_tok'); localStorage.removeItem('sb_uid');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginErr').textContent = 'Sessie verlopen. Log opnieuw in.';
+    document.getElementById('loginErr').style.display = 'block';
+  }, 6000);
   try {
-    const r = await fetch(`${SB_URL}/auth/v1/user`, {headers: hdrs()});
+    const r = await fetch(`${SB_URL}/auth/v1/user`, {
+      headers: hdrs(),
+      signal: AbortSignal.timeout(5000)
+    });
     const d = await r.json();
+    clearTimeout(timeout);
     if (d.id) {
       USER_ID = d.id;
       localStorage.setItem('sb_uid', d.id);
@@ -530,8 +547,16 @@ async function init() {
     } else {
       TOKEN=null; localStorage.removeItem('sb_tok'); localStorage.removeItem('sb_uid');
       showSpinner(false);
+      document.getElementById('loginScreen').style.display = 'flex';
     }
-  } catch(e) { showSpinner(false); }
+  } catch(e) {
+    clearTimeout(timeout);
+    // Network error or timeout - clear token and show login
+    TOKEN=null; USER_ID=null;
+    localStorage.removeItem('sb_tok'); localStorage.removeItem('sb_uid');
+    showSpinner(false);
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
 }
 
 async function startApp() {
@@ -1118,7 +1143,8 @@ function notify(msg='✓ Opgeslagen') { const n=document.getElementById('notif')
 // ============================================================
 // START
 // ============================================================
-showSpinner(true);
+// Only show spinner if we have a stored token to verify
+if (localStorage.getItem('sb_tok')) { showSpinner(true); }
 init();
 </script>
 <script>
@@ -1240,7 +1266,8 @@ function notify(msg='✓ Opgeslagen') { const n=document.getElementById('notif')
 // ============================================================
 // START
 // ============================================================
-showSpinner(true);
+// Only show spinner if we have a stored token to verify
+if (localStorage.getItem('sb_tok')) { showSpinner(true); }
 init();
 </script>
 </body>
