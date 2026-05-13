@@ -1100,18 +1100,26 @@ function filterOef() {
 function viewOef(id) {
   const o=(window.OEFENVORMEN||[]).find(x=>x.id==id);if(!o)return;
   const w=window.open('','_blank');
-  w.document.write(`<html><head><title>${o.name}</title><style>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}h1{font-size:20px;margin-bottom:5px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}@media print{button{display:none}}</style>
-  
-</head><body>
-    <h1>${o.name}</h1><p style="color:#94A3B8">${o.cat} · ${o.intens} · ${o.dur||'—'} min · ${o.field||'—'}</p>
-    ${o.video_url?`<video src="${o.video_url}" controls style="width:100%;border-radius:8px;margin:10px 0;max-height:240px;background:#000"></video>`:''}
-    <p style="margin:10px 0;line-height:1.6;font-size:14px">${o.description||'Geen omschrijving.'}</p>
-    <h3 style="font-size:14px;margin-bottom:6px">Load data</h3>
-    <div class="grid">${[['Afstand',(o.load?.dist||0)+' km'],['HSR',(o.load?.hsr||0)+' m'],['Sprints',(o.load?.spr||0)+'x'],['Max snelh.',(o.load?.spd||0)+' km/h'],['RPE',(o.load?.rpe||0)+'/10'],['Hartslag',(o.load?.hr||0)+' bpm']].map(([l,v])=>`<div class="box"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join('')}</div>
-    <button onclick="window.print()" style="margin-top:14px;padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer">🖨 Print/PDF</button>
-    </body></html>`);
-  w.document.close();
+  const d=w.document;
+  d.open();
+  d.write('<!DOCTYPE html><html><head><meta charset="UTF-8">');
+  d.write('<title>'+o.name+'<\/title>');
+  d.write('<'+'style>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}h1{font-size:20px;margin-bottom:5px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}@media print{button{display:none}}<\/style>');
+  d.write('<\/head><body>');
+  d.write('<h1>'+o.name+'<\/h1>');
+  d.write('<p style="color:#94A3B8">'+o.cat+' · '+o.intens+' · '+(o.dur||'—')+' min · '+(o.field||'—')+'<\/p>');
+  if(o.video_url) d.write('<video src="'+o.video_url+'" controls style="width:100%;border-radius:8px;margin:10px 0;max-height:240px;background:#000"><\/video>');
+  d.write('<p style="margin:10px 0;line-height:1.6;font-size:14px">'+(o.description||'Geen omschrijving.')+'<\/p>');
+  d.write('<h3 style="font-size:14px;margin-bottom:6px">Load data<\/h3><div class="grid">');
+  [['Afstand',(o.load?.dist||0)+' km'],['HSR',(o.load?.hsr||0)+' m'],['Sprints',(o.load?.spr||0)+'x'],
+   ['Max snelh.',(o.load?.spd||0)+' km/h'],['RPE',(o.load?.rpe||0)+'/10'],['HR',(o.load?.hr||0)+' bpm']
+  ].forEach(function(x){d.write('<div class="box"><div class="lbl">'+x[0]+'<\/div><div class="val">'+x[1]+'<\/div><\/div>');});
+  d.write('<\/div>');
+  d.write('<button onclick="window.print()" style="margin-top:14px;padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer">Afdrukken \/ PDF<\/button>');
+  d.write('<\/body><\/html>');
+  d.close();
 }
+
 
 let _editOefId=null,_oefVidData=null;
 function openOefModal(id) {
@@ -1167,11 +1175,20 @@ function doExport(type) {
 function printExport() {
   const text = document.getElementById('expTxt')?.textContent||'';
   const w = window.open('','_blank');
-  w.document.write(`<html><head><title>Belisia SV Export</title><style>body{font-family:sans-serif;padding:30px}pre{font-size:12px;line-height:1.6;white-space:pre-wrap}@media print{button{display:none}}</style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-</head><body><h2>Belisia SV — Export</h2><p style="color:#999">${new Date().toLocaleDateString('nl-BE')}</p><pre>${text}</pre><button onclick="window.print()" style="padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer;margin-top:14px">🖨 Afdrukken / PDF</button></body></html>`);
-  w.document.close();
+  const d = w.document;
+  d.open();
+  d.write('<!DOCTYPE html><html>');
+  d.write('<head><meta charset="UTF-8"><title>Belisia SV Export<\/title>');
+  d.write('<'+'style>body{font-family:sans-serif;padding:30px}pre{font-size:12px;line-height:1.6;white-space:pre-wrap}@media print{button{display:none}}<\/style>');
+  d.write('<\/head><body>');
+  d.write('<h2>Belisia SV — Export<\/h2>');
+  d.write('<p style="color:#999">' + new Date().toLocaleDateString('nl-BE') + '<\/p>');
+  d.write('<pre>' + text.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '<\/pre>');
+  d.write('<button onclick="window.print()" style="padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer;margin-top:14px">Afdrukken \/ PDF<\/button>');
+  d.write('<\/body><\/html>');
+  d.close();
 }
+
 
 
 
