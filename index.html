@@ -7,9 +7,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
+
 :root{--blue:#4FA8D1;--bg:#F2F4F6;--txt:#161F2B;--t2:#4A5568;--t3:#94A3B8;--brd:#DDE3EA;--green:#2EAA6A;--red:#E05252;--f:'Barlow',sans-serif;--fc:'Barlow Condensed',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
+
+/* LOGIN */
 #loginScreen{display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--txt);}
 .loginBox{background:#fff;border-radius:16px;padding:40px;width:380px;max-width:95vw;}
 .loginBox h1{font-family:var(--fc);font-size:24px;margin-bottom:4px;}
@@ -23,13 +26,17 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
 .errBox{background:#FEE2E2;color:#991B1B;padding:8px 12px;border-radius:7px;font-size:12px;margin-bottom:12px;display:none;}
 .switchLink{text-align:center;font-size:13px;color:var(--t3);margin-top:14px;}
 .switchLink a{color:var(--blue);cursor:pointer;font-weight:600;}
-#app{display:none;min-height:100vh;}
+
+/* APP */
+#app{display:none;min-height:100vh;display:none;}
 .layout{display:flex;min-height:100vh;}
 #sidebar{width:230px;background:var(--txt);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;}
 .main{margin-left:230px;flex:1;display:flex;flex-direction:column;}
 .topbar{background:#fff;border-bottom:1px solid var(--brd);height:54px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:50;}
 .topbar h2{font-family:var(--fc);font-size:19px;font-weight:700;flex:1;}
 .content{padding:20px;flex:1;}
+
+/* SIDEBAR */
 .sbHead{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
 .sbLogo{width:34px;height:34px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--fc);font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
 .sbTitle{font-family:var(--fc);font-size:16px;font-weight:700;color:#fff;}
@@ -43,6 +50,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
 .sbUser{display:flex;align-items:center;gap:9px;padding:8px 10px;}
 .sbAvatar{width:30px;height:30px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
 .sbLogout{width:100%;margin-top:5px;padding:6px;background:rgba(255,255,255,.06);border:none;border-radius:6px;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;font-family:var(--f);}
+
+/* COMPONENTS */
 .card{background:#fff;border:1px solid var(--brd);border-radius:10px;padding:18px;}
 .cardTitle{font-family:var(--fc);font-size:15px;font-weight:700;margin-bottom:12px;}
 .btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--f);}
@@ -87,6 +96,97 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
 .spinnerRing{width:38px;height:38px;border:3px solid var(--brd);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px;}
+
+/* ── Analyse tab styles ─────────────────────────────────── */
+#pgAnalyse { padding: 0; }
+#analyseRoot { 
+  --bg: #f8f7f5; --surface: #ffffff; --surface2: #f1f0ee;
+  --border: #e4e2df; --border2: #d1cec9; --text: #1a1917;
+  --text2: #6b6560; --text3: #9c9590;
+  --accent: #1a7a3c; --accent2: #15692f; --accent-bg: #f0faf3;
+  --red: #c0392b; --red-bg: #fdf2f0; --yellow: #b45309; --yellow-bg: #fffbeb;
+  --blue: #1d4ed8; --blue-bg: #eff6ff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow: 0 4px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+  --r: 10px; --r-sm: 6px;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+#analyseRoot * { font-family: var(--sans, var(--f)); }
+#analyseRoot .card { background: #fff; border: 1px solid #e4e2df; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+#analyseRoot .card-header { padding: 14px 18px; border-bottom: 1px solid #e4e2df; display: flex; align-items: center; justify-content: space-between; }
+#analyseRoot .card-title { font-size: 12px; font-weight: 700; color: #1a1917; letter-spacing: .03em; text-transform: uppercase; }
+#analyseRoot .card-body { padding: 18px; }
+#analyseRoot .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+#analyseRoot .stat-card { background: #fff; border: 1px solid #e4e2df; border-radius: 10px; padding: 14px 16px; }
+#analyseRoot .stat-label { font-size: 10px; color: #9c9590; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-bottom: 5px; }
+#analyseRoot .stat-value { font-size: 26px; font-weight: 800; line-height: 1; font-family: monospace; color: #1a1917; }
+#analyseRoot .stat-sub { font-size: 11px; color: #9c9590; margin-top: 4px; }
+#analyseRoot .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+#analyseRoot .tbl th { padding: 9px 11px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #9c9590; background: #f1f0ee; border-bottom: 1px solid #e4e2df; }
+#analyseRoot .tbl th.r, #analyseRoot .tbl td.r { text-align: right; }
+#analyseRoot .tbl th.c, #analyseRoot .tbl td.c { text-align: center; }
+#analyseRoot .tbl td { padding: 8px 11px; border-bottom: 1px solid #e4e2df; color: #1a1917; }
+#analyseRoot .tbl tr:last-child td { border-bottom: none; }
+#analyseRoot .tbl tbody tr:hover td { background: #f1f0ee; }
+#analyseRoot .btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 7px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+#analyseRoot .btn-primary { background: #1a7a3c; color: white; }
+#analyseRoot .btn-primary:hover { background: #15692f; }
+#analyseRoot .btn-ghost { background: transparent; color: #6b6560; border: 1px solid #e4e2df; }
+#analyseRoot .btn-ghost:hover { background: #f1f0ee; color: #1a1917; }
+#analyseRoot .btn-sm { padding: 4px 9px; font-size: 11px; }
+#analyseRoot .btn-danger { background: #fdf2f0; color: #c0392b; border: 1px solid #fdd; }
+#analyseRoot .badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+#analyseRoot .badge-goal { background: #dcfce7; color: #15803d; }
+#analyseRoot .badge-yellow { background: #fef9c3; color: #a16207; }
+#analyseRoot .badge-red { background: #fee2e2; color: #b91c1c; }
+#analyseRoot .badge-sub-out { background: #ffedd5; color: #c2410c; }
+#analyseRoot .badge-sub-in { background: #f0fdf4; color: #15803d; }
+#analyseRoot .form-label { font-size: 11px; font-weight: 600; color: #6b6560; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 4px; display: block; }
+#analyseRoot .form-input { width: 100%; padding: 7px 10px; background: #fff; border: 1px solid #d1cec9; border-radius: 7px; font-size: 13px; color: #1a1917; outline: none; }
+#analyseRoot .form-input:focus { border-color: #1a7a3c; box-shadow: 0 0 0 3px rgba(26,122,60,.1); }
+#analyseRoot select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239c9590' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px; cursor: pointer; }
+#analyseRoot .form-pill { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+#analyseRoot .form-W { background: #dcfce7; color: #15803d; }
+#analyseRoot .form-D { background: #f1f5f9; color: #64748b; }
+#analyseRoot .form-L { background: #fee2e2; color: #b91c1c; }
+#analyseRoot .match-row { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #e4e2df; gap: 10px; }
+#analyseRoot .match-row:hover { background: #f1f0ee; }
+#analyseRoot .match-team { flex: 1; font-size: 13px; font-weight: 600; }
+#analyseRoot .match-score { font-size: 18px; font-weight: 800; font-family: monospace; color: #1a1917; min-width: 54px; text-align: center; }
+#analyseRoot .match-day { font-size: 10px; color: #9c9590; font-family: monospace; min-width: 26px; }
+#analyseRoot .zone-bar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+#analyseRoot .zone-bar-label { font-size: 11px; color: #9c9590; font-family: monospace; width: 48px; flex-shrink: 0; }
+#analyseRoot .zone-bar-bg { flex: 1; height: 20px; background: #f1f0ee; border-radius: 4px; overflow: hidden; }
+#analyseRoot .zone-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; }
+#analyseRoot .zone-bar-val { font-size: 10px; font-weight: 700; color: white; font-family: monospace; }
+#analyseRoot .player-row { display: flex; align-items: center; gap: 8px; padding: 5px 11px; border-bottom: 1px solid #e4e2df; }
+#analyseRoot .player-num { font-family: monospace; font-size: 11px; color: #9c9590; min-width: 22px; text-align: center; }
+#analyseRoot .player-name { font-size: 12px; font-weight: 500; min-width: 130px; }
+#analyseRoot .player-name.starter { font-weight: 700; color: #1a1917; }
+#analyseRoot .player-name.sub { color: #6b6560; }
+#analyseRoot .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+#analyseRoot .section-title { font-size: 17px; font-weight: 700; color: #1a1917; }
+#analyseRoot .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+#analyseRoot .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+#analyseRoot .pill-tabs { display: flex; gap: 4px; background: #f1f0ee; border-radius: 8px; padding: 4px; }
+#analyseRoot .pill-tab { padding: 5px 12px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; color: #6b6560; cursor: pointer; background: transparent; }
+#analyseRoot .pill-tab.active { background: #fff; color: #1a1917; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+#analyseRoot .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 20px; color: #9c9590; gap: 10px; }
+#analyseRoot .empty-icon { font-size: 32px; opacity: .4; }
+#analyseRoot .tab-panel { animation: fadeIn .15s ease; }
+#analyseRoot .dropzone { flex: 1; min-height: 110px; border-radius: 10px; border: 2px dashed #d1cec9; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: #f1f0ee; }
+#analyseRoot .dropzone:hover, #analyseRoot .dropzone-active { border-color: #1a7a3c; background: #f0faf3; }
+#analyseRoot .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+#analyseRoot .modal, .analyse-modal { background: #fff; border-radius: 14px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,.12); }
+#analyseRoot .modal-header { padding: 18px 22px; border-bottom: 1px solid #e4e2df; display: flex; align-items: center; justify-content: space-between; }
+#analyseRoot .modal-body { padding: 22px; }
+#analyseRoot .modal-footer { padding: 14px 22px; border-top: 1px solid #e4e2df; display: flex; justify-content: flex-end; gap: 10px; }
+#analyseRoot .susp-warn { background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px; padding: 3px 7px; font-size: 10px; font-weight: 700; color: #92400e; }
+#analyseRoot .accent-strip { height: 3px; background: linear-gradient(90deg, #1a7a3c 0%, #22c55e 100%); border-radius: 2px; margin-bottom: 8px; }
+
+
 #pgAnalyse{padding:0;}
 .analyse-frame{width:100%;border:none;display:block;border-radius:10px;min-height:calc(100vh - 100px);}
 </style>
@@ -365,7 +465,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
     <div class="modalFoot"><button class="btn btnG" onclick="closeModal('refModal')">Annuleer</button><button class="btn btnP" onclick="saveRef()">Opslaan</button></div>
   </div>
 </div>
-
 <script>
 
 // ============================================================
@@ -517,29 +616,12 @@ async function logout() {
 async function init() {
   const tok = localStorage.getItem('sb_tok');
   const uid = localStorage.getItem('sb_uid');
-  // No token = show login immediately, no spinner
-  if (!tok || !uid) {
-    showSpinner(false);
-    document.getElementById('loginScreen').style.display = 'flex';
-    return;
-  }
+  if (!tok || !uid) { showSpinner(false); return; }
   TOKEN = tok; USER_ID = uid;
-  // Hard timeout: if init takes more than 6 seconds, show login
-  const timeout = setTimeout(() => {
-    showSpinner(false);
-    TOKEN = null; USER_ID = null;
-    localStorage.removeItem('sb_tok'); localStorage.removeItem('sb_uid');
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('loginErr').textContent = 'Sessie verlopen. Log opnieuw in.';
-    document.getElementById('loginErr').style.display = 'block';
-  }, 6000);
+  // Verify token
   try {
-    const r = await fetch(`${SB_URL}/auth/v1/user`, {
-      headers: hdrs(),
-      signal: AbortSignal.timeout(5000)
-    });
+    const r = await fetch(`${SB_URL}/auth/v1/user`, {headers: hdrs()});
     const d = await r.json();
-    clearTimeout(timeout);
     if (d.id) {
       USER_ID = d.id;
       localStorage.setItem('sb_uid', d.id);
@@ -547,16 +629,8 @@ async function init() {
     } else {
       TOKEN=null; localStorage.removeItem('sb_tok'); localStorage.removeItem('sb_uid');
       showSpinner(false);
-      document.getElementById('loginScreen').style.display = 'flex';
     }
-  } catch(e) {
-    clearTimeout(timeout);
-    // Network error or timeout - clear token and show login
-    TOKEN=null; USER_ID=null;
-    localStorage.removeItem('sb_tok'); localStorage.removeItem('sb_uid');
-    showSpinner(false);
-    document.getElementById('loginScreen').style.display = 'flex';
-  }
+  } catch(e) { showSpinner(false); }
 }
 
 async function startApp() {
@@ -1021,16 +1095,24 @@ function filterOef() {
 function viewOef(id) {
   const o=(window.OEFENVORMEN||[]).find(x=>x.id==id);if(!o)return;
   const w=window.open('','_blank');
-  w.document.write(`<html><head><title>${o.name}</title><style>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}h1{font-size:20px;margin-bottom:5px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}@media print{button{display:none}}</style>
-  
-<\/head><body>
-    <h1>${o.name}</h1><p style="color:#94A3B8">${o.cat} · ${o.intens} · ${o.dur||'—'} min · ${o.field||'—'}</p>
-    ${o.video_url?`<video src="${o.video_url}" controls style="width:100%;border-radius:8px;margin:10px 0;max-height:240px;background:#000"></video>`:''}
-    <p style="margin:10px 0;line-height:1.6;font-size:14px">${o.description||'Geen omschrijving.'}</p>
-    <h3 style="font-size:14px;margin-bottom:6px">Load data</h3>
-    <div class="grid">${[['Afstand',(o.load?.dist||0)+' km'],['HSR',(o.load?.hsr||0)+' m'],['Sprints',(o.load?.spr||0)+'x'],['Max snelh.',(o.load?.spd||0)+' km/h'],['RPE',(o.load?.rpe||0)+'/10'],['Hartslag',(o.load?.hr||0)+' bpm']].map(([l,v])=>`<div class="box"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join('')}</div>
-    <button onclick="window.print()" style="margin-top:14px;padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer">🖨 Print/PDF</button>
-    <\/body><\/html>`);
+  const h=[
+    '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+o.name+'</title>',
+    '<style>body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}',
+    'h1{font-size:20px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}',
+    '.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}',
+    '@media print{button{display:none}}</style></head><body>',
+    '<h1>'+o.name+'</h1>',
+    '<p style="color:#94A3B8">'+o.cat+' · '+o.intens+' · '+(o.dur||'—')+' min · '+(o.field||'—')+'</p>',
+    o.video_url?'<video src="'+o.video_url+'" controls style="width:100%;border-radius:8px;margin:10px 0;max-height:240px;background:#000"></video>':'',
+    '<p style="margin:10px 0;line-height:1.6;font-size:14px">'+(o.description||'Geen omschrijving.')+'</p>',
+    '<h3 style="font-size:14px;margin-bottom:6px">Load data</h3><div class="grid">',
+    [['Afstand',(o.load?.dist||0)+' km'],['HSR',(o.load?.hsr||0)+' m'],['Sprints',(o.load?.spr||0)+'x'],
+     ['Max snelh.',(o.load?.spd||0)+' km/h'],['RPE',(o.load?.rpe||0)+'/10'],['HR',(o.load?.hr||0)+' bpm']]
+    .map(function(x){return'<div class="box"><div class="lbl">'+x[0]+'</div><div class="val">'+x[1]+'</div></div>';}).join(''),
+    '</div><button onclick="window.print()" style="margin-top:14px;padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer">Afdrukken / PDF</button>',
+    '</body></html>'
+  ];
+  w.document.write(h.join(''));
   w.document.close();
 }
 
@@ -1088,73 +1170,699 @@ function doExport(type) {
 function printExport() {
   const text = document.getElementById('expTxt')?.textContent||'';
   const w = window.open('','_blank');
-  w.document.write(`<html><head><title>Belisia SV Export</title><style>body{font-family:sans-serif;padding:30px}pre{font-size:12px;line-height:1.6;white-space:pre-wrap}@media print{button{display:none}}</style><\/head><body><h2>Belisia SV — Export</h2><p style="color:#999">${new Date().toLocaleDateString('nl-BE')}</p><pre>${text}</pre><button onclick="window.print()" style="padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer;margin-top:14px">🖨 Afdrukken / PDF</button><\/body><\/html>`);t.videos=vids||[];}LICENSE_TOPICS=topics||[];REFLECTIES=refs||[];try{const ll=await sbGet('leerlog','&order=date.desc');LEERLOG=ll||[];}catch(e){LEERLOG=[];}}
-  const total=LICENSE_TOPICS.length,done=LICENSE_TOPICS.filter(t=>(t.videos||[]).length>0).length,pct=total?Math.round(done/total*100):0;
-  document.getElementById('pgLicentie').innerHTML=`
-    <div style="background:var(--txt);border-radius:10px;padding:16px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff">Pro License traject</span><span style="font-size:13px;color:rgba(255,255,255,.5)">${pct}%</span></div><div style="background:rgba(255,255,255,.1);border-radius:4px;height:7px"><div style="background:#4FA8D1;height:100%;border-radius:4px;width:${pct}%"></div></div></div>
-    <div style="display:flex;gap:2px;border-bottom:1px solid var(--brd);margin-bottom:14px">
-      ${['Topics & Materiaal','Leerlog','Reflecties'].map((t,i)=>`<div onclick="showLicTab(${i})" id="ltab${i}" style="padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;${i===0?'color:#4FA8D1;border-bottom:2px solid #4FA8D1;margin-bottom:-1px':'color:var(--t3)'}">${t}</div>`).join('')}
+  const h = [
+    '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Belisia SV Export</title>',
+    '<style>body{font-family:sans-serif;padding:30px}pre{font-size:12px;line-height:1.6;white-space:pre-wrap}@media print{button{display:none}}</style>',
+    '</head><body>',
+    '<h2>Belisia SV — Export</h2>',
+    '<p style="color:#999">'+new Date().toLocaleDateString('nl-BE')+'</p>',
+    '<pre>'+text+'</pre>',
+    '<button onclick="window.print()" style="padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer;margin-top:14px">Afdrukken / PDF</button>',
+    '</body></html>'
+  ];
+  w.document.write(h.join(''));
+  w.document.close();
+}
+/ ============================================================
+// CONFIG
+// ============================================================
+const SB_URL = 'https://raraiqlmuauzdzufgzmj.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhcmFpcWxtdWF1emR6dWZnem1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNzc5MzYsImV4cCI6MjA5Mzg1MzkzNn0.vl_TVQK_FggfAsrM6kucrwsvIdKE4JVd7C9OBDEFNmw';
+
+// ============================================================
+// STATE
+// ============================================================
+let TOKEN = null;
+let USER_ID = null;
+let PROFILE = null;
+let PLAYERS = [];
+let KPIS = [{id:'k1',name:'Passes %',unit:'pct',default_val:70},{id:'k2',name:'Sprints/90',unit:'num',default_val:60},{id:'k3',name:'Toplopen/90',unit:'num',default_val:55},{id:'k4',name:'Afstand km',unit:'km',default_val:8}];
+let PRINCIPES = [{id:1,label:'Passing in final third',color:'chip-blue'},{id:2,label:'Pressing trigger',color:'chip-amber'},{id:3,label:'Finishing 1v1',color:'chip-green'},{id:4,label:'Balrecirculatie',color:'chip-blue'},{id:5,label:'Compactheid',color:'chip-amber'}];
+let WEEK_SESSIONS = {};
+let WEEK_OFFSET = 0;
+let ACTIVE_PLAYER = null;
+let ACTIVE_WP = null;
+let EDIT_POP = null;
+let CLUB_LOGO = localStorage.getItem('clubLogo') || null;
+let CLUB_NAME = localStorage.getItem('clubName') || 'Belisia SV';
+let COLORS = ['#4FA8D1','#2EAA6A','#D4860A','#7C5CBF','#E05252','#16A085','#E67E22','#2980B9'];
+
+const isCoach = () => PROFILE?.role === 'coach';
+const ini = n => (n||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+
+// ============================================================
+// SUPABASE HELPERS
+// ============================================================
+function hdrs(extra={}) {
+  return {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':`Bearer ${TOKEN||SB_KEY}`,...extra};
+}
+
+async function sbGet(table, filters='') {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}?select=*${filters}`, {headers: hdrs({'Accept':'application/json'})});
+    const d = await r.json();
+    return Array.isArray(d) ? d : [];
+  } catch(e) { return []; }
+}
+
+async function sbInsert(table, data) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}`, {method:'POST', headers:hdrs({'Prefer':'return=representation'}), body:JSON.stringify(data)});
+    const d = await r.json();
+    return Array.isArray(d) ? d[0] : d;
+  } catch(e) { return null; }
+}
+
+async function sbUpdate(table, id, data) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {method:'PATCH', headers:hdrs({'Prefer':'return=representation'}), body:JSON.stringify(data)});
+    const d = await r.json();
+    return Array.isArray(d) ? d[0] : d;
+  } catch(e) { return null; }
+}
+
+async function sbDelete(table, id) {
+  try {
+    await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {method:'DELETE', headers:hdrs()});
+    return true;
+  } catch(e) { return false; }
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function showReg() { document.getElementById('loginView').style.display='none'; document.getElementById('regView').style.display='block'; }
+function showLogin() { document.getElementById('loginView').style.display='block'; document.getElementById('regView').style.display='none'; }
+function showErr(id, msg) { const e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
+
+async function login() {
+  const email = document.getElementById('lEmail').value.trim();
+  const pass = document.getElementById('lPass').value;
+  if (!email || !pass) { showErr('loginErr','Vul e-mail en wachtwoord in.'); return; }
+  document.getElementById('loginErr').style.display='none';
+  showSpinner(true);
+  try {
+    const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY},
+      body: JSON.stringify({email, password:pass})
+    });
+    const d = await r.json();
+    showSpinner(false);
+    if (d.access_token) {
+      TOKEN = d.access_token;
+      USER_ID = d.user.id;
+      localStorage.setItem('sb_tok', TOKEN);
+      localStorage.setItem('sb_uid', USER_ID);
+      await startApp();
+    } else {
+      showErr('loginErr', d.error_description || d.msg || 'Login mislukt. Controleer je gegevens.');
+    }
+  } catch(e) {
+    showSpinner(false);
+    showErr('loginErr', 'Verbindingsfout. Probeer opnieuw.');
+  }
+}
+
+async function register() {
+  const name = document.getElementById('rName').value.trim();
+  const email = document.getElementById('rEmail').value.trim();
+  const pass = document.getElementById('rPass').value;
+  if (!name||!email||!pass) { showErr('regErr','Vul alle velden in.'); return; }
+  if (pass.length < 8) { showErr('regErr','Wachtwoord min. 8 tekens.'); return; }
+  showSpinner(true);
+  try {
+    const r = await fetch(`${SB_URL}/auth/v1/signup`, {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SB_KEY},
+      body: JSON.stringify({email, password:pass, data:{name}})
+    });
+    const d = await r.json();
+    showSpinner(false);
+    if (d.error) { showErr('regErr', d.error.message || 'Registratie mislukt.'); return; }
+    // Auto-login after register
+    if (d.access_token) {
+      TOKEN = d.access_token;
+      USER_ID = d.user.id;
+      localStorage.setItem('sb_tok', TOKEN);
+      localStorage.setItem('sb_uid', USER_ID);
+      await startApp();
+    } else {
+      const e = document.getElementById('regErr');
+      e.style.background='#D1FAE5'; e.style.color='#065F46';
+      e.textContent='✓ Account aangemaakt! Log nu in.';
+      e.style.display='block';
+      showLogin();
+    }
+  } catch(e) {
+    showSpinner(false);
+    showErr('regErr','Verbindingsfout.');
+  }
+}
+
+async function logout() {
+  try { await fetch(`${SB_URL}/auth/v1/logout`, {method:'POST', headers:hdrs()}); } catch(e){}
+  TOKEN=null; USER_ID=null; PROFILE=null;
+  localStorage.removeItem('sb_tok'); localStorage.removeItem('sb_uid');
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+async function init() {
+  const tok = localStorage.getItem('sb_tok');
+  const uid = localStorage.getItem('sb_uid');
+  if (!tok || !uid) { showSpinner(false); return; }
+  TOKEN = tok; USER_ID = uid;
+  // Verify token
+  try {
+    const r = await fetch(`${SB_URL}/auth/v1/user`, {headers: hdrs()});
+    const d = await r.json();
+    if (d.id) {
+      USER_ID = d.id;
+      localStorage.setItem('sb_uid', d.id);
+      await startApp();
+    } else {
+      TOKEN=null; localStorage.removeItem('sb_tok'); localStorage.removeItem('sb_uid');
+      showSpinner(false);
+    }
+  } catch(e) { showSpinner(false); }
+}
+
+async function startApp() {
+  showSpinner(true);
+  try {
+    // Load profile
+    const profs = await sbGet('profiles', `&id=eq.${USER_ID}`);
+    PROFILE = profs[0] || null;
+    if (!PROFILE) {
+      // Create profile
+      PROFILE = await sbInsert('profiles', {id: USER_ID, name:'Gebruiker', role:'player'}) || {id:USER_ID,name:'Gebruiker',role:'player'};
+    }
+    // Load players
+    await loadPlayers();
+    // Show app
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+    buildSidebar();
+    goPage('Dashboard', 'pgDashboard', renderDashboard);
+  } catch(e) {
+    console.error('startApp error:', e);
+    showSpinner(false);
+    showErr('loginErr', 'Fout bij laden. Probeer opnieuw.');
+    document.getElementById('loginScreen').style.display='flex';
+  }
+  showSpinner(false);
+}
+
+async function loadPlayers() {
+  const players = await sbGet('players', '&order=name.asc');
+  for (const p of players) {
+    const [wps, pops, wh] = await Promise.all([
+      sbGet('werkpunten', `&player_id=eq.${p.id}`),
+      sbGet('pop_history', `&player_id=eq.${p.id}&order=created_at.desc`),
+      sbGet('weight_history', `&player_id=eq.${p.id}&order=measured_at.asc`)
+    ]);
+    p.werkpunten = (wps||[]).map(w=>({...w, principes:w.principes||[], acties:w.acties||[]}));
+    p.popHistory = pops||[];
+    p.weight = (wh||[]).map(w=>({d:new Date(w.measured_at).toLocaleDateString('nl-BE',{day:'numeric',month:'short'}), w:w.weight_kg}));
+    if (!p.weight.length) p.weight = [{d:'Start', w:p.weight_kg||75}];
+    p.kpis = p.kpis||{};
+    p.presenceLog = p.presence_log||[];
+  }
+  PLAYERS = players;
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function buildSidebar() {
+  const logo = CLUB_LOGO ? `<img src="${CLUB_LOGO}" style="width:34px;height:34px;border-radius:7px;object-fit:cover">` : `<div class="sbLogo">BSV</div>`;
+  const coachMenu = isCoach() ? `
+    <div class="sbLabel">Kern</div>
+    <div class="sbItem" onclick="goPage('Kern','pgKern',renderKern)">👥 Kern (${PLAYERS.length})</div>
+    <div class="sbItem" onclick="goPage('Werkpunten','pgWerkpunten',renderWerkpunten)">✅ Werkpunten</div>
+    <div class="sbItem" onclick="goPage('Analyse seizoen','pgAnalyse',renderAnalyse)">📈 Analyse seizoen</div>
+    <div class="sbItem" onclick="goPage('Fysiek & KPI','pgFysiek',renderFysiek)">📊 Fysiek & KPI</div>
+    <div class="sbLabel">Planning</div>
+    <div class="sbItem" onclick="goPage('Trainingsplan','pgTraining',renderTraining)">📅 Trainingsplan</div>
+    <div class="sbItem" onclick="goPage('Oefenvormen','pgOefenvormen',renderOefenvormen)">🎬 Oefenvormen</div>
+    <div class="sbLabel">Meer</div>
+    <div class="sbItem" onclick="goPage('Export','pgExport',renderExport)">📥 Export</div>
+    <div class="sbItem" onclick="goPage('Portfolio','pgPortfolio',renderPortfolio)">🏅 Portfolio</div>
+    <div class="sbItem" onclick="goPage('Pro License','pgLicentie',renderLicentie)">🎓 Pro License</div>` : `
+    <div class="sbLabel">Mijn profiel</div>
+    <div class="sbItem" onclick="openMyProfile()">👤 Mijn dashboard</div>`;
+  document.getElementById('sidebar').innerHTML = `
+    <div class="sbHead">${logo}<div><div class="sbTitle">${CLUB_NAME}</div><div class="sbSub">Performance Platform</div></div></div>
+    <div class="sbSection">
+      <div class="sbItem active" onclick="goPage('Dashboard','pgDashboard',renderDashboard)">🏠 Dashboard</div>
+      ${coachMenu}
     </div>
-    <div id="ltab0">
-      ${LICENSE_TOPICS.map((t,ti)=>`<div class="card" style="margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-          <div style="font-weight:600;flex:1">${t.name}</div>
-          <span class="bdg blue">${(t.videos||[]).length} items</span>
-          <button class="btn btnP sm" onclick="event.stopPropagation();_editTopicIdx=${ti};openModal('vidModal')">+ Video/Link</button>
-          <button class="btn btnD sm" onclick="event.stopPropagation();delTopic(${ti},'${t.id||''}')">✕</button>
-        </div>
-        <div style="display:none;margin-top:10px">
-          <p style="font-size:13px;color:var(--t2);margin-bottom:8px">${t.description||''}</p>
-          ${(t.videos||[]).map((v,vi)=>`<div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--brd)"><div style="width:42px;height:28px;background:#E6F4FB;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0">▶</div><div style="flex:1"><div style="font-size:13px;font-weight:600">${v.title}</div>${v.url?`<a href="${v.url}" target="_blank" style="font-size:11px;color:#4FA8D1">${v.url}</a>`:''}</div><button class="btn btnD sm" onclick="delVid(${ti},${vi},'${v.id||''}')">✕</button></div>`).join('')||'<div style="font-size:12px;color:var(--t3)">Nog geen items.</div>'}
-        </div>
-      </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen topics.</p></div>'}
-    </div>
-    <div id="ltab1" style="display:none">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="document.getElementById('llDate').value=new Date().toISOString().split('T')[0];openModal('leerlogModal')">+ Leerlog</button></div>
-      ${LEERLOG.map((l,i)=>`<div class="card" style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-weight:700">${l.date}</span>${l.topic?`<span class="bdg blue">${l.topic}</span>`:''}<button class="btn btnD sm" style="margin-left:auto" onclick="delLeerlog(${i},'${l.id||''}')">✕</button></div><div style="font-size:13px;color:var(--t2);line-height:1.6"><div style="margin-bottom:4px"><strong>Wat:</strong> ${l.wat}</div>${l.hoe?`<div style="margin-bottom:4px"><strong>Hoe:</strong> ${l.hoe}</div>`:''}${l.resultaat?`<div><strong>Resultaat:</strong> ${l.resultaat}</div>`:''}</div></div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen leerlog.</p></div>'}
-    </div>
-    <div id="ltab2" style="display:none">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="document.getElementById('refDate').value=new Date().toISOString().split('T')[0];openModal('refModal')">+ Reflectie</button></div>
-      ${REFLECTIES.map((r,i)=>`<div class="card" style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-weight:700">${r.date}</span><button class="btn btnD sm" style="margin-left:auto" onclick="delRef(${i},'${r.id||''}')">✕</button></div><div style="font-size:13px;color:var(--t2)">${r.text}</div></div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen reflecties.</p></div>'}
+    <div class="sbFoot">
+      <div class="sbUser">
+        <div class="sbAvatar">${ini(PROFILE?.name)}</div>
+        <div><div style="font-size:12px;color:rgba(255,255,255,.7);font-weight:500">${PROFILE?.name||'Gebruiker'}</div><div style="font-size:10px;color:rgba(255,255,255,.35)">${isCoach()?'Coach':'Speler'}</div></div>
+      </div>
+      <button class="sbLogout" onclick="logout()">Uitloggen</button>
     </div>`;
 }
 
-function showLicTab(idx){[0,1,2].forEach(i=>{const c=document.getElementById('ltab'+i);if(c)c.style.display=i===idx?'block':'none';const t=document.getElementById('ltab'+i+'header'||'ltab'+i);});['ltab0','ltab1','ltab2'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.style.display=i===idx?'block':'none';});const tabs=['ltab0','ltab1','ltab2'];tabs.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.style.display=i===idx?'block':'none';});document.querySelectorAll('[id^="ltab"]').forEach(el=>{if(el.id==='ltab'+idx){el.style.display='block';}else if(['ltab0','ltab1','ltab2'].includes(el.id)){el.style.display='none';}});}
-
-async function saveTopic(){const name=document.getElementById('topicName').value.trim();if(!name)return;const t={name,description:document.getElementById('topicDesc').value};const d=await sbInsert('license_topics',t);LICENSE_TOPICS.push({...t,id:d?.id,videos:[]});closeModal('topicModal');renderLicentie();notify();}
-async function delTopic(ti,id){if(id)await sbDelete('license_topics',id);LICENSE_TOPICS.splice(ti,1);renderLicentie();}
-async function saveVid(){const ti=_editTopicIdx;const t=LICENSE_TOPICS[ti];const v={topic_id:t.id,title:document.getElementById('vidTitle').value,url:document.getElementById('vidUrl').value,note:document.getElementById('vidNote').value};const d=await sbInsert('license_videos',v);t.videos=[...(t.videos||[]),(d||v)];['vidTitle','vidUrl','vidNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});closeModal('vidModal');renderLicentie();notify();}
-async function delVid(ti,vi,id){if(id)await sbDelete('license_videos',id);LICENSE_TOPICS[ti].videos.splice(vi,1);renderLicentie();}
-async function saveLeerlog(){const wat=document.getElementById('llWat').value.trim();if(!wat)return;const l={date:document.getElementById('llDate').value,topic:document.getElementById('llTopic').value,wat,hoe:document.getElementById('llHoe').value,resultaat:document.getElementById('llResultaat').value};try{const d=await sbInsert('leerlog',l);if(d?.id)l.id=d.id;}catch(e){}LEERLOG.unshift(l);closeModal('leerlogModal');showLicTab(1);renderLicentie();notify();}
-async function delLeerlog(i,id){if(id){try{await sbDelete('leerlog',id);}catch(e){}}LEERLOG.splice(i,1);renderLicentie();}
-async function saveRef(){const text=document.getElementById('refText').value.trim();if(!text)return;const r={date:document.getElementById('refDate').value,text};const d=await sbInsert('reflecties',r);REFLECTIES.unshift({...r,id:d?.id});closeModal('refModal');showLicTab(2);renderLicentie();notify();}
-async function delRef(i,id){if(id)await sbDelete('reflecties',id);REFLECTIES.splice(i,1);renderLicentie();}
-
-
-// ============================================================
-// UTILITIES
-// ============================================================
-function openModal(id) { document.getElementById(id)?.classList.add('open'); }
-function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
-document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-function showSpinner(v) { document.getElementById('spinner').style.display=v?'flex':'none'; }
-function notify(msg='✓ Opgeslagen') { const n=document.getElementById('notif'); n.textContent=msg; n.style.display='block'; setTimeout(()=>n.style.display='none',2500); }
-
-// ============================================================
-// START
-// ============================================================
-// Only show spinner if we have a stored token to verify
-if (localStorage.getItem('sb_tok')) { showSpinner(true); }
-init();
-</script>
-<script>
-
-function renderAnalyse() {
+function goPage(title, pageId, renderFn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sbItem').forEach(i=>i.classList.remove('active'));
+  document.getElementById(pageId)?.classList.add('active');
+  document.getElementById('pageTitle').textContent = title;
   document.getElementById('topActions').innerHTML = '';
-  document.getElementById('pgAnalyse').innerHTML =
-    '<iframe src="/analyse.html" class="analyse-frame" allowfullscreen></iframe>';
+  renderFn?.();
 }
 
+function openMyProfile() {
+  const me = PLAYERS.find(p=>p.profile_id===USER_ID);
+  if (me) openSpeler(me.id);
+  else { document.getElementById('pgDashboard').innerHTML='<div class="card"><p style="color:var(--t3)">Je account is nog niet gekoppeld. Vraag je coach.</p></div>'; goPage('Dashboard','pgDashboard',null); }
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const el = document.getElementById('pgDashboard');
+  if (isCoach()) {
+    const att = PLAYERS.length ? Math.round(PLAYERS.reduce((a,p)=>a+(p.presenceLog||[]).filter(e=>e.status==='aanwezig').length/Math.max((p.presenceLog||[]).length,1),0)/PLAYERS.length*100) : 0;
+    el.innerHTML = `
+      <div class="statsRow">
+        <div class="statCard"><div class="statLbl">Kern</div><div class="statVal">${PLAYERS.length}</div></div>
+        <div class="statCard"><div class="statLbl">Werkpunten</div><div class="statVal">${PLAYERS.reduce((a,p)=>a+(p.werkpunten||[]).length,0)}</div></div>
+        <div class="statCard"><div class="statLbl">POP gesprekken</div><div class="statVal">${PLAYERS.reduce((a,p)=>a+(p.popHistory||[]).length,0)}</div></div>
+        <div class="statCard"><div class="statLbl">Gem. aanwezigheid</div><div class="statVal">${att}%</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><div class="cardTitle">Aandacht vereist</div>
+          <table class="tbl"><thead><tr><th>Speler</th><th>Reden</th><th></th></tr></thead><tbody>
+          ${PLAYERS.filter(p=>!(p.werkpunten||[]).length).slice(0,5).map(p=>`<tr><td><b>${p.name}</b></td><td><span class="bdg gray">Geen werkpunt</span></td><td><button class="btn btnG sm" onclick="openSpeler(${p.id})">Open</button></td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--t3)">Alles in orde ✓</td></tr>'}
+          </tbody></table>
+        </div>
+        <div class="card"><div class="cardTitle">Recente POP/PAP</div>
+          ${PLAYERS.flatMap(p=>(p.popHistory||[]).map(h=>({...h,player:p}))).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,4).map(h=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--brd)"><div style="width:28px;height:28px;border-radius:50%;background:${h.player.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">${ini(h.player.name)}</div><div style="flex:1"><div style="font-size:13px;font-weight:600">${h.player.name}</div><div style="font-size:11px;color:var(--t3)">${h.date} · ${h.type}</div></div></div>`).join('')||'<div style="color:var(--t3);font-size:13px">Nog geen gesprekken.</div>'}
+        </div>
+      </div>`;
+  } else {
+    const me = PLAYERS.find(p=>p.profile_id===USER_ID);
+    if (me) {
+      renderSpelerDashboard(me, document.getElementById('pgDashboard'));
+    } else {
+      el.innerHTML = '<div class="card"><p style="color:var(--t3)">Je account is nog niet gekoppeld aan een spelersprofiel. Vraag je coach.</p></div>';
+    }
+  }
+}
+
+function renderSpelerDashboard(p, el) {
+  const aanw = (p.presenceLog||[]).filter(e=>e.status==='aanwezig').length;
+  const totaal = (p.presenceLog||[]).length;
+  const pct = totaal ? Math.round(aanw/totaal*100) : 0;
+  el.innerHTML = `
+    <div style="background:var(--txt);border-radius:10px;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;gap:16px">
+      <div style="width:56px;height:56px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff">${ini(p.name)}</div>
+      <div><div style="font-family:var(--fc);font-size:22px;font-weight:700;color:#fff">${p.name}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.5)">${p.pos||'—'} · ${p.age||'—'} jaar · ${(p.weight||[])[(p.weight||[]).length-1]?.w||'—'} kg</div></div>
+    </div>
+    <div class="statsRow">
+      <div class="statCard"><div class="statLbl">Aanwezigheid</div><div class="statVal" style="color:${pct>=75?'#2EAA6A':pct>=60?'#D4860A':'#E05252'}">${pct}%</div><div class="statSub">${aanw}/${totaal} sessies</div></div>
+      <div class="statCard"><div class="statLbl">Werkpunten</div><div class="statVal">${(p.werkpunten||[]).length}</div></div>
+      <div class="statCard"><div class="statLbl">Gewicht</div><div class="statVal">${(p.weight||[])[(p.weight||[]).length-1]?.w||'—'} kg</div></div>
+      <div class="statCard"><div class="statLbl">POP gesprekken</div><div class="statVal">${(p.popHistory||[]).length}</div></div>
+    </div>
+    <div class="grid2">
+      <div>
+        ${(p.werkpunten||[]).map(w=>`<div class="card" style="margin-bottom:12px">
+          <div class="cardTitle">${w.text} <span class="bdg blue">${w.cat}</span></div>
+          ${(w.acties||[]).map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brd);font-size:13px">
+            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${a.done?'#2EAA6A':'var(--brd)'};background:${a.done?'#2EAA6A':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0">${a.done?'✓':''}</div>
+            <span style="flex:1;${a.done?'text-decoration:line-through;opacity:.5':''}">${a.t}</span>
+            <span style="font-size:10px;padding:1px 6px;border-radius:20px;background:var(--bg);border:1px solid var(--brd);color:var(--t3)">${a.p}</span>
+          </div>`).join('')}
+          ${w.feedback?`<div style="margin-top:8px;background:#E6F4FB;border-radius:6px;padding:8px;font-size:12px;color:#2B7FA8"><strong>Coach:</strong> ${w.feedback}</div>`:''}
+        </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen werkpunten.</p></div>'}
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px"><div class="cardTitle">📊 KPI's</div>
+          ${KPIS.map(k=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:3px"><span>${k.name}</span><span style="font-weight:700">${p.kpis?.[k.id]||k.default_val}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</span></div><div class="kpiBar"><div class="kpiBarFill" style="width:${Math.min(100,k.unit==='km'?(p.kpis?.[k.id]||k.default_val)/12*100:(p.kpis?.[k.id]||k.default_val))}%"></div></div></div>`).join('')}
+        </div>
+        <div class="card"><div class="cardTitle">📅 Laatste aanwezigheid</div>
+          ${(p.presenceLog||[]).slice(-8).reverse().map(e=>{
+            const bg=e.status==='aanwezig'?'#D1FAE5':e.status==='afwezig'?'#FEE2E2':e.status==='blessure'?'#FEF3C7':'#E9D5FF';
+            const c=e.status==='aanwezig'?'#065F46':e.status==='afwezig'?'#991B1B':e.status==='blessure'?'#92400E':'#6B21A8';
+            return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);font-size:12px"><span style="color:var(--t3);width:70px">${e.date}</span><span style="background:${bg};color:${c};font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600">${e.status}</span><span style="color:var(--t3)">${e.note||''}</span></div>`;
+          }).join('')||'<div style="color:var(--t3);font-size:13px">Nog geen aanwezigheid.</div>'}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// KERN
+// ============================================================
+function renderKern() {
+  document.getElementById('topActions').innerHTML = `<button class="btn btnP sm" onclick="openModal('addSpelerModal')">+ Speler</button>`;
+  const LIJNEN = {'Alle lijnen':null,'Keepers':['GK'],'Verdedigers':['CB','LB','RB'],'Middenvelders':['CDM','CM','CAM'],'Aanvallers':['LW','RW','ST']};
+  document.getElementById('pgKern').innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <input id="kernSearch" placeholder="Speler zoeken..." style="padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:#fff;min-width:180px">
+      <select id="lijnFilter" style="padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:#fff">
+        ${Object.keys(LIJNEN).map(l=>`<option value="${l}">${l}</option>`).join('')}
+      </select>
+    </div>
+    <div id="kernGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px"></div>`;
+  document.getElementById('kernSearch').addEventListener('input', filterKern);
+  document.getElementById('lijnFilter').addEventListener('change', filterKern);
+  filterKern();
+}
+
+function filterKern() {
+  const q = (document.getElementById('kernSearch')?.value||'').toLowerCase();
+  const lijn = document.getElementById('lijnFilter')?.value||'Alle lijnen';
+  const lijnen = {'Keepers':['GK'],'Verdedigers':['CB','LB','RB'],'Middenvelders':['CDM','CM','CAM'],'Aanvallers':['LW','RW','ST']};
+  const filtered = PLAYERS.filter(p => {
+    if (q && !p.name.toLowerCase().includes(q)) return false;
+    if (lijn !== 'Alle lijnen' && !(lijnen[lijn]||[]).includes(p.pos)) return false;
+    return true;
+  });
+  const grid = document.getElementById('kernGrid');
+  if (!grid) return;
+  grid.innerHTML = filtered.map(p => {
+    const aanw = (p.presenceLog||[]).filter(e=>e.status==='aanwezig').length;
+    const tot = (p.presenceLog||[]).length;
+    const pct = tot ? Math.round(aanw/tot*100) : 0;
+    return `<div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:15px;cursor:pointer" onclick="openSpeler(${p.id})" onmouseenter="this.style.borderColor='#4FA8D1'" onmouseleave="this.style.borderColor='var(--brd)'">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+        <div style="width:38px;height:38px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff">${ini(p.name)}</div>
+        <div><div style="font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--t3)">${p.pos||'—'} · ${p.age||'—'} jr</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+        ${[['Gewicht',(p.weight||[])[(p.weight||[]).length-1]?.w+' kg'],['Aanw.',pct+'%'],['Werkpunten',(p.werkpunten||[]).length],["POP's",(p.popHistory||[]).length]].map(([l,v])=>`<div style="background:var(--bg);border-radius:5px;padding:5px 7px"><div style="font-size:10px;color:var(--t3)">${l}</div><div style="font-size:13px;font-weight:600">${v}</div></div>`).join('')}
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--t3);font-size:13px;padding:20px">Geen spelers gevonden.</div>';
+}
+
+function openSpeler(id) {
+  ACTIVE_PLAYER = id;
+  const p = PLAYERS.find(x=>x.id==id);
+  if (!p) return;
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('pgSpelerDetail').classList.add('active');
+  document.getElementById('pageTitle').textContent = p.name;
+  document.getElementById('topActions').innerHTML = `<button class="btn btnG sm" onclick="goPage('Kern','pgKern',renderKern)">← Kern</button><button class="btn btnP sm" onclick="openModal('addPopModal')">+ POP/PAP</button>`;
+  renderSpelerDetail(p);
+}
+
+function renderSpelerDetail(p) {
+  const maxW = Math.max(...(p.weight||[{w:75}]).map(x=>x.w));
+  const minW = Math.min(...(p.weight||[{w:75}]).map(x=>x.w));
+  document.getElementById('pgSpelerDetail').innerHTML = `
+    <div style="background:var(--txt);border-radius:10px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;gap:14px">
+      <div style="width:52px;height:52px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff">${ini(p.name)}</div>
+      <div><div style="font-family:var(--fc);font-size:20px;font-weight:700;color:#fff">${p.name}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5)">${p.pos||'—'} · ${p.age||'—'} jaar · ${(p.weight||[])[(p.weight||[]).length-1]?.w||'—'} kg</div></div>
+    </div>
+    <div style="display:flex;gap:2px;border-bottom:1px solid var(--brd);margin-bottom:16px">
+      ${['Overzicht','Werkpunten','POP/PAP','Aanwezigheid'].map((t,i)=>`<div onclick="showSpelerTab(${i})" id="stab${i}" style="padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;${i===0?'color:#4FA8D1;border-bottom:2px solid #4FA8D1;margin-bottom:-1px':'color:var(--t3)'}">${t}</div>`).join('')}
+    </div>
+    <div id="stabContent0" class="stabContent">
+      <div class="grid2">
+        <div class="card"><div class="cardTitle">Gewicht</div>
+          <div style="display:flex;align-items:flex-end;gap:7px;height:65px">
+            ${(p.weight||[]).map(w=>{const h=maxW===minW?40:Math.round(14+((w.w-minW)/(maxW-minW))*48);return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;background:#4FA8D1;border-radius:3px 3px 0 0;height:${h}px;position:relative"><span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:#2B7FA8;white-space:nowrap">${w.w}</span></div><div style="font-size:8px;color:var(--t3)">${w.d}</div></div>`;}).join('')}
+          </div>
+          ${isCoach()?`<div style="margin-top:12px;display:flex;gap:7px"><input type="number" id="nwVal" style="flex:1;padding:7px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg)" placeholder="Nieuw gewicht kg"><button class="btn btnP sm" onclick="saveGewicht(${p.id})">Opslaan</button></div>`:''}
+        </div>
+        <div class="card"><div class="cardTitle">KPI ${isCoach()?`<button class="btn btnG sm" style="margin-left:auto" onclick="openKpiEdit(${p.id})">✏</button>`:''}</div>
+          ${KPIS.map(k=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:2px"><span>${k.name}</span><span style="font-weight:700">${p.kpis?.[k.id]||k.default_val}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</span></div><div class="kpiBar"><div class="kpiBarFill" style="width:${Math.min(100,k.unit==='km'?(p.kpis?.[k.id]||k.default_val)/12*100:(p.kpis?.[k.id]||k.default_val))}%"></div></div></div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div id="stabContent1" class="stabContent" style="display:none">
+      ${isCoach()?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="openWpForPlayer(${p.id})">+ Werkpunt</button></div>`:''}
+      <div class="card" style="margin-bottom:10px">
+        <div style="font-size:12px;color:var(--t3);margin-bottom:8px;font-weight:600">PRINCIPES (sleep naar werkpunt)</div>
+        <div id="prinBank" style="display:flex;flex-wrap:wrap;gap:5px;padding:8px;background:var(--bg);border-radius:7px">
+          ${PRINCIPES.map(pr=>`<span class="${pr.color} chip" draggable="true" data-label="${pr.label}" ondragstart="event.dataTransfer.setData('text/plain',event.target.dataset.label)">${pr.label}</span>`).join('')}
+        </div>
+      </div>
+      ${(p.werkpunten||[]).map(w=>`<div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="font-weight:600;flex:1">${w.text}</div>
+          <span class="bdg blue">${w.cat}</span>
+          ${isCoach()?`<button class="btn btnD sm" onclick="delWerkpunt(${p.id},'${w.id}')">✕</button>`:''}
+        </div>
+        <div class="dropzone" id="dz${w.id}" ondragover="event.preventDefault();this.classList.add('over')" ondrop="dropPrincipe(event,${p.id},'${w.id}')" ondragleave="this.classList.remove('over')">
+          ${(w.principes||[]).map(pr=>`<span class="${(PRINCIPES.find(x=>x.label===pr)||{color:'chip-blue'}).color} chip">${pr}${isCoach()?`<span onclick="removePrincipe(${p.id},'${w.id}','${pr}')" style="margin-left:3px;opacity:.4;cursor:pointer">×</span>`:''}</span>`).join('')}
+          ${!(w.principes||[]).length?`<span style="font-size:11px;color:var(--t3);font-style:italic">${isCoach()?'Sleep principes...':'Geen.'}</span>`:''}
+        </div>
+        <div style="margin-top:8px">
+          <div style="font-size:11px;font-weight:600;color:var(--t3);margin-bottom:5px;display:flex;justify-content:space-between">ACTIEPUNTEN ${isCoach()?`<button class="btn btnG sm" onclick="addActie(${p.id},'${w.id}')">+ Actie</button>`:''}</div>
+          ${(w.acties||[]).map((a,ai)=>`<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--brd);font-size:13px">
+            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${a.done?'#2EAA6A':'var(--brd)'};background:${a.done?'#2EAA6A':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;cursor:pointer;flex-shrink:0" ${isCoach()?`onclick="toggleActie(${p.id},'${w.id}',${ai})"`:''}>${a.done?'✓':''}</div>
+            <span style="flex:1;${a.done?'text-decoration:line-through;opacity:.5':''}">${a.t}</span>
+            <span style="font-size:10px;padding:1px 6px;border-radius:20px;background:var(--bg);border:1px solid var(--brd);color:var(--t3)">${a.p}</span>
+          </div>`).join('')}
+        </div>
+        ${isCoach()?`<div style="margin-top:8px"><textarea id="fb${w.id}" rows="2" style="width:100%;padding:7px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:7px;background:#fff" placeholder="Coach feedback...">${w.feedback||''}</textarea><button class="btn btnG sm" style="margin-top:4px" onclick="saveFeedback(${p.id},'${w.id}')">Opslaan</button></div>`:`${w.feedback?`<div style="margin-top:8px;background:#E6F4FB;border-radius:6px;padding:8px;font-size:12px;color:#2B7FA8"><strong>Coach:</strong> ${w.feedback}</div>`:''}` }
+      </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Geen werkpunten.</p></div>'}
+    </div>
+    <div id="stabContent2" class="stabContent" style="display:none">
+      ${isCoach()?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="openModal('addPopModal')">+ Gesprek</button></div>`:''}
+      ${(p.popHistory||[]).map((h,hi)=>`<div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <span style="font-weight:700">${h.date||''}</span>
+          <span class="bdg ${h.type==='POP'?'blue':h.type==='PAP'?'green':'gray'}">${h.type}</span>
+          ${isCoach()?`<button class="btn btnG sm" style="margin-left:auto" onclick="openEditPop(${p.id},${hi})">✏</button><button class="btn btnD sm" onclick="delPop(${p.id},'${h.id||''}',${hi})">✕</button>`:''}
+        </div>
+        <div style="font-size:13px;color:var(--t2);line-height:1.6">
+          ${h.goed?`<div style="margin-bottom:4px"><strong>Goed:</strong> ${h.goed}</div>`:''}
+          ${h.werkpunten?`<div style="margin-bottom:4px"><strong>Werkpunten:</strong> ${h.werkpunten}</div>`:''}
+          ${h.acties?`<div><strong>Afspraken:</strong> ${h.acties}</div>`:''}
+        </div>
+      </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Geen gesprekken.</p></div>'}
+    </div>
+    <div id="stabContent3" class="stabContent" style="display:none">
+      ${isCoach()?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="openAanwModal(${p.id})">+ Dag registreren</button></div>`:''}
+      <div class="card">
+        <table class="tbl"><thead><tr><th>Datum</th><th>Type</th><th>Status</th><th>Notitie</th>${isCoach()?'<th></th>':''}</tr></thead>
+        <tbody>${(p.presenceLog||[]).slice().reverse().map((e,ri)=>{
+          const i=(p.presenceLog||[]).length-1-ri;
+          const bg=e.status==='aanwezig'?'#D1FAE5':e.status==='afwezig'?'#FEE2E2':e.status==='blessure'?'#FEF3C7':e.status==='wedstrijd'?'#E6F4FB':'#E9D5FF';
+          const c=e.status==='aanwezig'?'#065F46':e.status==='afwezig'?'#991B1B':e.status==='blessure'?'#92400E':e.status==='wedstrijd'?'#2B7FA8':'#6B21A8';
+          return`<tr><td style="font-weight:500">${e.date||'—'}</td><td style="color:var(--t3)">${e.type||'—'}</td><td><span style="background:${bg};color:${c};font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600">${e.status}</span></td><td style="color:var(--t3)">${e.note||'—'}</td>${isCoach()?`<td><button class="btn btnD sm" onclick="delAanwEntry(${p.id},${i})">✕</button></td>`:''}</tr>`;
+        }).join('')||`<tr><td colspan="${isCoach()?5:4}" style="color:var(--t3);text-align:center;padding:16px">Nog geen aanwezigheid geregistreerd.</td></tr>`}
+        </tbody></table>
+        <div style="margin-top:10px;display:flex;gap:12px;font-size:12px;color:var(--t2)">
+          <span>✅ ${(p.presenceLog||[]).filter(e=>e.status==='aanwezig').length} aanwezig</span>
+          <span>❌ ${(p.presenceLog||[]).filter(e=>e.status==='afwezig').length} afwezig</span>
+          <span>🤕 ${(p.presenceLog||[]).filter(e=>e.status==='blessure').length} blessure</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function showSpelerTab(idx) {
+  document.querySelectorAll('.stabContent').forEach(e=>e.style.display='none');
+  document.getElementById('stabContent'+idx).style.display='block';
+  for(let i=0;i<4;i++){
+    const t=document.getElementById('stab'+i);
+    if(t){t.style.color=i===idx?'#4FA8D1':'var(--t3)';t.style.borderBottom=i===idx?'2px solid #4FA8D1':'none';t.style.marginBottom=i===idx?'-1px':'0';}
+  }
+}
+
+// ============================================================
+// WERKPUNTEN / POP / FYSIEK (simplified)
+// ============================================================
+function renderWerkpunten() {
+  document.getElementById('topActions').innerHTML = `<button class="btn btnP sm" onclick="openModal('addWpModal');populateSelects()">+ Werkpunt</button>`;
+  const rows = [];
+  PLAYERS.forEach(p=>(p.werkpunten||[]).forEach(w=>{
+    const done=(w.acties||[]).filter(a=>a.done).length, tot=(w.acties||[]).length||1;
+    rows.push(`<tr onclick="openSpeler(${p.id})" style="cursor:pointer"><td><b>${p.name}</b></td><td>${p.pos||'—'}</td><td>${w.text}</td><td><span class="bdg blue">${w.cat}</span></td><td>${done}/${(w.acties||[]).length}</td><td><div style="width:70px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="height:100%;background:#4FA8D1;width:${Math.round(done/tot*100)}%"></div></div></td></tr>`);
+  }));
+  document.getElementById('pgWerkpunten').innerHTML = `<div class="card"><table class="tbl"><thead><tr><th>Speler</th><th>Pos</th><th>Werkpunt</th><th>Cat</th><th>Acties</th><th>Voortgang</th></tr></thead><tbody>${rows.join('')||'<tr><td colspan="6" style="color:var(--t3);text-align:center;padding:16px">Geen werkpunten.</td></tr>'}</tbody></table></div>`;
+}
+
+function renderPop() {
+  document.getElementById('topActions').innerHTML = `<button class="btn btnP sm" onclick="openModal('addPopModal');populateSelects()">+ Gesprek</button>`;
+  const all = PLAYERS.flatMap(p=>(p.popHistory||[]).map(h=>({...h,player:p}))).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('pgPop').innerHTML = `
+    <div class="statsRow" style="grid-template-columns:repeat(3,1fr)">
+      <div class="statCard"><div class="statLbl">Totaal gesprekken</div><div class="statVal">${all.length}</div></div>
+      <div class="statCard"><div class="statLbl">Spelers met gesprek</div><div class="statVal">${PLAYERS.filter(p=>(p.popHistory||[]).length>0).length}</div></div>
+      <div class="statCard"><div class="statLbl">Nog te plannen</div><div class="statVal">${PLAYERS.filter(p=>!(p.popHistory||[]).length).length}</div></div>
+    </div>
+    ${all.map(h=>`<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <div style="width:30px;height:30px;border-radius:50%;background:${h.player.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">${ini(h.player.name)}</div>
+        <span style="font-weight:600">${h.player.name}</span>
+        <span style="font-size:13px;font-weight:700">${h.date||''}</span>
+        <span class="bdg ${h.type==='POP'?'blue':h.type==='PAP'?'green':'gray'}">${h.type}</span>
+        <button class="btn btnG sm" style="margin-left:auto" onclick="openEditPopGlobal('${h.player.id}','${h.id||''}')">✏</button>
+      </div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">
+        ${h.goed?`<div><strong>Goed:</strong> ${h.goed}</div>`:''}
+        ${h.werkpunten?`<div><strong>WP:</strong> ${h.werkpunten}</div>`:''}
+        ${h.acties?`<div><strong>Actie:</strong> ${h.acties}</div>`:''}
+      </div>
+    </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Geen gesprekken.</p></div>'}`;
+}
+
+function renderFysiek() {
+  document.getElementById('pgFysiek').innerHTML = `<div class="card"><table class="tbl"><thead><tr><th>Speler</th><th>Pos</th><th>Gewicht</th>${KPIS.map(k=>`<th>${k.name}</th>`).join('')}<th></th></tr></thead>
+    <tbody>${PLAYERS.map(p=>`<tr onclick="openSpeler(${p.id})" style="cursor:pointer">
+      <td><b>${p.name}</b></td><td>${p.pos||'—'}</td><td>${(p.weight||[])[(p.weight||[]).length-1]?.w||'—'} kg</td>
+      ${KPIS.map(k=>`<td>${p.kpis?.[k.id]||k.default_val}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</td>`).join('')}
+      <td><button class="btn btnG sm" onclick="event.stopPropagation();openKpiEdit(${p.id})">✏</button></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderTraining() {
+  document.getElementById('topActions').innerHTML = `<button class="btn btnP sm" onclick="openModal('addSessionModal');populateSelects()">+ Sessie</button>`;
+  const dates = getWeekDates();
+  const days = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+  const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  const ws = WEEK_SESSIONS[WEEK_OFFSET]||{};
+  document.getElementById('pgTraining').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btnG sm" onclick="WEEK_OFFSET--;renderTraining()">◀</button>
+        <strong>Week ${1+WEEK_OFFSET} — ${months[dates[0].getMonth()]} ${dates[0].getFullYear()}</strong>
+        <button class="btn btnG sm" onclick="WEEK_OFFSET++;renderTraining()">▶</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px">
+      ${dates.map((d,i)=>`<div style="background:#fff;border:1px solid var(--brd);border-radius:8px;padding:11px;min-height:120px">
+        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:7px">${days[i]} ${d.getDate()}/${d.getMonth()+1}</div>
+        ${(ws[i]||[]).map(s=>{const tc=s.type==='match'?'#FEF3C7':s.type==='indiv'?'#D1FAE5':s.type==='rest'?'var(--bg)':'#E6F4FB';const c=s.type==='match'?'#92400E':s.type==='indiv'?'#065F46':s.type==='rest'?'var(--t3)':'#2B7FA8';return`<div style="background:${tc};border-radius:5px;padding:5px 7px;margin-bottom:4px;position:relative" onmouseenter="this.querySelector('.sd').style.display='flex'" onmouseleave="this.querySelector('.sd').style.display='none'"><div style="font-size:11px;font-weight:600;color:${c}">${s.title}</div><div style="font-size:10px;color:${c};opacity:.7">${s.time||''}</div><span class="sd" style="display:none;position:absolute;top:2px;right:2px;background:rgba(0,0,0,.2);color:#fff;border-radius:50%;width:14px;height:14px;align-items:center;justify-content:center;font-size:9px;cursor:pointer" onclick="delSession(${WEEK_OFFSET},${i},'${s.id||''}')">✕</span></div>`;}).join('')}
+        ${!(ws[i]||[]).length?'<div style="font-size:10px;color:var(--t3);font-style:italic">Vrij</div>':''}
+      </div>`).join('')}
+    </div>`;
+}
+
+function getWeekDates() {
+  const b = new Date(2025,6,7);
+  b.setDate(b.getDate()+WEEK_OFFSET*7);
+  return Array(6).fill(0).map((_,i)=>{const d=new Date(b);d.setDate(d.getDate()+i);return d;});
+}
+
+function renderOefenvormen() {
+  document.getElementById('topActions').innerHTML = `<button class="btn btnP sm" onclick="openOefModal()">+ Oefenvorm</button>`;
+  document.getElementById('pgOefenvormen').innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <input id="oefQ" placeholder="Zoeken..." style="padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:#fff;min-width:160px">
+      <select id="oefCat" style="padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:#fff">
+        <option value="">Alle categorieën</option>
+        ${['Passing','Finishing','Pressing','Positiespel','Conditie','Kracht','Herstel'].map(c=>`<option>${c}</option>`).join('')}
+      </select>
+      <span style="font-size:12px;color:var(--t2);display:flex;align-items:center;gap:4px">Afstand:
+        <input type="number" id="oefMin" step="0.1" placeholder="min" style="width:55px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:6px;background:#fff">–
+        <input type="number" id="oefMax" step="0.1" placeholder="max" style="width:55px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:6px;background:#fff"> km
+        <button class="btn btnP sm" onclick="filterOef()">Filter</button>
+      </span>
+    </div>
+    <div id="oefGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:12px"></div>`;
+  document.getElementById('oefQ').addEventListener('input', filterOef);
+  document.getElementById('oefCat').addEventListener('change', filterOef);
+  loadAndFilterOef();
+}
+
+async function loadAndFilterOef() {
+  if (!window.OEFENVORMEN) {
+    const data = await sbGet('oefenvormen','&order=created_at.asc');
+    window.OEFENVORMEN = data||[];
+  }
+  filterOef();
+}
+
+function filterOef() {
+  const q=(document.getElementById('oefQ')?.value||'').toLowerCase();
+  const cat=document.getElementById('oefCat')?.value||'';
+  const minD=parseFloat(document.getElementById('oefMin')?.value)||0;
+  const maxD=parseFloat(document.getElementById('oefMax')?.value)||999;
+  const filtered=(window.OEFENVORMEN||[]).filter(o=>(!q||o.name.toLowerCase().includes(q))&&(!cat||o.cat===cat)&&(o.load?.dist||0)>=minD&&(o.load?.dist||0)<=maxD);
+  const ic={laag:'green',middel:'blue',hoog:'amber',max:'red'};
+  const grid=document.getElementById('oefGrid');
+  if(!grid)return;
+  grid.innerHTML=filtered.map(o=>`<div style="background:#fff;border:1px solid var(--brd);border-radius:10px;overflow:hidden;cursor:pointer" onmouseenter="this.style.borderColor='#4FA8D1'" onmouseleave="this.style.borderColor='var(--brd)'" onclick="viewOef('${o.id}')">
+    <div style="height:95px;background:var(--txt);display:flex;align-items:center;justify-content:center;position:relative">
+      ${o.video_url?`<video src="${o.video_url}" style="width:100%;height:100%;object-fit:cover;opacity:.7"></video>`:'<div style="font-size:26px;opacity:.2">🎬</div>'}
+      <span class="bdg ${ic[o.intens]||'gray'}" style="position:absolute;top:6px;left:6px">${o.intens||'—'}</span>
+      <span class="bdg blue" style="position:absolute;top:6px;right:6px">${o.cat||'—'}</span>
+    </div>
+    <div style="padding:11px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:6px">${o.name}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px">
+        ${[['Afstand',(o.load?.dist||0)+' km'],['HSR',(o.load?.hsr||0)+' m'],['Sprints',(o.load?.spr||0)+'x']].map(([l,v])=>`<div style="background:var(--bg);border-radius:5px;padding:4px 6px"><div style="font-size:9px;color:var(--t3)">${l}</div><div style="font-size:12px;font-weight:700">${v}</div></div>`).join('')}
+      </div>
+      <div style="display:flex;gap:5px">
+        <button class="btn btnP sm" onclick="event.stopPropagation();editOef('${o.id}')">✏ Bewerken</button>
+        <button class="btn btnD sm" onclick="event.stopPropagation();delOef('${o.id}')">✕</button>
+      </div>
+    </div>
+  </div>`).join('')||'<div style="color:var(--t3);font-size:13px">Geen oefenvormen.</div>';
+}
+
+
+let _editOefId=null,_oefVidData=null;
+function openOefModal(id) {
+  _editOefId=id||null;
+  const o=id?(window.OEFENVORMEN||[]).find(x=>x.id==id):null;
+  ['oefMName','oefMDur','oefMField','oefMPlayers','oefMDesc','oefMDist','oefMHsr','oefMSpr','oefMSpd','oefMRpe','oefMHr','oefMVidUrl'].forEach(fid=>{
+    const map={oefMName:'name',oefMDur:'dur',oefMField:'field',oefMPlayers:'players',oefMDesc:'description'};
+    const lmap={oefMDist:'dist',oefMHsr:'hsr',oefMSpr:'spr',oefMSpd:'spd',oefMRpe:'rpe',oefMHr:'hr'};
+    const el=document.getElementById(fid);if(!el)return;
+    if(map[fid])el.value=o?.[map[fid]]||'';
+    else if(lmap[fid])el.value=o?.load?.[lmap[fid]]||'';
+    else if(fid==='oefMVidUrl')el.value=o?.video_url||'';
+  });
+  document.getElementById('oefMCat').value=o?.cat||'Passing';
+  document.getElementById('oefMIntens').value=o?.intens||'middel';
+  document.getElementById('oefMTitle').textContent=id?'Oefenvorm bewerken':'Oefenvorm toevoegen';
+  _oefVidData=null;
+  openModal('oefModal');
+}
+function editOef(id){openOefModal(id);}
+function handleOefVid(input){if(!input.files[0])return;const r=new FileReader();r.onload=e=>{_oefVidData=e.target.result;document.getElementById('oefVidLbl').textContent='✓ '+input.files[0].name;};r.readAsDataURL(input.files[0]);}
+async function saveOef(){
+  const name=document.getElementById('oefMName').value.trim();if(!name){notify('Naam verplicht','#E05252');return;}
+  const load={dist:parseFloat(document.getElementById('oefMDist').value)||0,hsr:parseFloat(document.getElementById('oefMHsr').value)||0,spr:parseFloat(document.getElementById('oefMSpr').value)||0,spd:parseFloat(document.getElementById('oefMSpd').value)||0,rpe:parseFloat(document.getElementById('oefMRpe').value)||0,hr:parseFloat(document.getElementById('oefMHr').value)||0};
+  const pay={name,cat:document.getElementById('oefMCat').value,dur:parseInt(document.getElementById('oefMDur').value)||0,field:document.getElementById('oefMField').value,players:document.getElementById('oefMPlayers').value,intens:document.getElementById('oefMIntens').value,description:document.getElementById('oefMDesc').value,load,principes:[],video_url:_oefVidData||document.getElementById('oefMVidUrl').value||null};
+  if(_editOefId){await sbUpdate('oefenvormen',_editOefId,pay);const idx=(window.OEFENVORMEN||[]).findIndex(o=>o.id==_editOefId);if(idx>=0)(window.OEFENVORMEN||[])[idx]={...(window.OEFENVORMEN||[])[idx],...pay};}
+  else{const d=await sbInsert('oefenvormen',pay);if(!window.OEFENVORMEN)window.OEFENVORMEN=[];window.OEFENVORMEN.push({...pay,id:d?.id});}
+  _oefVidData=null;closeModal('oefModal');filterOef();notify('Oefenvorm opgeslagen');
+}
+async function delOef(id){if(!confirm('Verwijderen?'))return;await sbDelete('oefenvormen',id);window.OEFENVORMEN=(window.OEFENVORMEN||[]).filter(o=>o.id!=id);filterOef();notify('Verwijderd');}
+
+function renderExport() {
+  document.getElementById('pgExport').innerHTML = `<div class="card"><div class="cardTitle">Export</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btnP" onclick="doExport('pop')">📋 POP/PAP rapport</button>
+      <button class="btn btnP" onclick="doExport('kern')">📊 Kern CSV</button>
+    </div><div id="exportOut" style="margin-top:14px"></div></div>`;
+}
+
+function doExport(type) {
+  let lines = [];
+  if (type==='pop') {
+    lines = ['BELISIA SV — POP/PAP RAPPORT','='.repeat(40),''];
+    PLAYERS.forEach(p=>{if(!(p.popHistory||[]).length)return;lines.push(p.name+' ('+p.pos+')');(p.popHistory||[]).forEach(h=>{lines.push(h.date+' — '+h.type);lines.push('Goed: '+(h.goed||'—'));lines.push('WP: '+(h.werkpunten||'—'));lines.push('Actie: '+(h.acties||'—'));lines.push('');});});
+  } else {
+    lines = [['Naam','Pos','Leeftijd','Gewicht',...KPIS.map(k=>k.name)].join(',')];
+    PLAYERS.forEach(p=>lines.push([p.name,p.pos||'—',p.age||'—',(p.weight||[])[(p.weight||[]).length-1]?.w||'—',...KPIS.map(k=>p.kpis?.[k.id]||k.default_val)].join(',')));
+  }
+  const text = lines.join('\n');
+  document.getElementById('exportOut').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong>Export</strong><div style="display:flex;gap:6px"><button class="btn btnP sm" onclick="navigator.clipboard?.writeText(document.getElementById('expTxt').textContent);notify('Gekopieerd')">📋 Kopieer</button><button class="btn btnG sm" onclick="printExport()">🖨 PDF</button></div></div><pre id="expTxt" style="font-size:11px;font-family:monospace;white-space:pre-wrap;background:var(--bg);padding:12px;border-radius:7px;max-height:300px;overflow:auto;border:1px solid var(--brd)">${text}</pre>`;
+}
+
+
+</script>
+<script>
 async function renderPortfolio(){
   document.getElementById('topActions').innerHTML=`<button class="btn btnP sm" onclick="document.getElementById('carrYear').dataset.editIdx='';openModal('carrModal')">+ Carrièrepunt</button>`;
   if(!CARRIERE.length){const[carr,comp]=await Promise.all([sbGet('carriere','&order=sort_order.asc'),sbGet('competenties','&order=created_at.asc')]);CARRIERE=carr||[];COMPETENTIES=(comp||[]).map(c=>c.name);}
@@ -1266,7 +1974,12 @@ function notify(msg='✓ Opgeslagen') { const n=document.getElementById('notif')
 // ============================================================
 // START
 // ============================================================
-// Only show spinner if we have a stored token to verify
+function renderAnalyse() {
+  document.getElementById('topActions').innerHTML = '';
+  document.getElementById('pgAnalyse').innerHTML =
+    '<iframe src="/analyse.html" class="analyse-frame" allowfullscreen></iframe>';
+}
+
 if (localStorage.getItem('sb_tok')) { showSpinner(true); }
 init();
 </script>
