@@ -1109,6 +1109,14 @@ function AddMatchTab({ editMatch, setEditMatch, matchCount, onSave, onCancel }) 
     });
   }, []);
 
+  const updatePlayer = useCallback((side, pid, field, val) => {
+    setEditMatch(prev => {
+      const key = side === 'home' ? 'homePlayers' : 'awayPlayers';
+      const players = (prev[key]||[]).map(p => p.id===pid ? {...p, [field]:val} : p);
+      return {...prev, [key]:players};
+    });
+  }, []);
+
   const handleAnalyse = useCallback(async () => {
     const apiKey = localStorage.getItem('claude_api_key');
     if (!apiKey) { setError('Stel eerst je Claude API-sleutel in via het slotje rechtsboven.'); return; }
@@ -1241,12 +1249,8 @@ function AddMatchTab({ editMatch, setEditMatch, matchCount, onSave, onCancel }) 
                   <div key={p.id||pi}>
                     {sep && <div style={{background:'#f8f7f5',borderBottom:'1px solid var(--border)',padding:'4px 12px',fontSize:10,fontWeight:700,color:'var(--text3)',textTransform:'uppercase',letterSpacing:2}}>↑ Wisselspelers</div>}
                     <div className="player-row" style={{background:p.isSub?'var(--surface2)':'var(--surface)'}}>
-                      <span className="player-num">{p.number}</span>
-                      <span className={`player-name ${p.isSub?'sub':'starter'}`} style={{flex:'0 0 130px'}}>
-                        {p.name||<span style={{color:'var(--text3)'}}>Naam…</span>}
-                        {p.captain&&<span style={{fontSize:9,marginLeft:4,color:'var(--yellow)'}}>©</span>}
-                        {p.gk&&<span style={{fontSize:9,marginLeft:4,color:'var(--text3)'}}>GK</span>}
-                      </span>
+                      <input className="player-num" value={p.number||''} onChange={e=>updatePlayer(side,p.id,'number',e.target.value)} style={{width:28,border:'1px solid var(--border)',borderRadius:4,background:'var(--surface2)',fontFamily:'var(--mono)',fontSize:11,color:'var(--text3)',padding:'2px 3px',textAlign:'center'}} />
+                      <input className={`player-name ${p.isSub?'sub':'starter'}`} value={p.name||''} onChange={e=>updatePlayer(side,p.id,'name',e.target.value)} placeholder="Naam…" style={{flex:'0 0 130px',border:'1px solid var(--border)',borderRadius:4,background:'var(--surface)',fontSize:12,padding:'2px 5px',fontFamily:'var(--sans)'}} />
                       <div style={{display:'flex',flexWrap:'wrap',gap:4,flex:1,alignItems:'center'}}>
                         {(editMatch.events[p.id]||[]).map((ev,i)=>{
                           const missingMin = ev.type==='goal' && (!ev.minute || ev.minute.trim()==='' || isNaN(parseInt(ev.minute)));
@@ -2019,7 +2023,29 @@ function App() {
           <button className="btn btn-ghost btn-sm" onClick={()=>openPdfReport(seasonMatches, season)} title="Exporteer als PDF">📄 PDF</button>
           <button className="btn btn-ghost btn-sm" onClick={()=>exportData(matches)} title="Exporteer JSON">⬇ Export</button>
           <button className="btn btn-ghost btn-sm" onClick={()=>importRef.current?.click()} title="Importeer JSON">⬆ Import</button>
-          <input ref={importRef} type="file" accept=".json" hidden onChange={e=>{if(e.target.files[0])importData(e.target.files[0],(data)=>{if(Array.isArray(data)){setMatches(data);}});}}/>
+          <input ref={importRef} type="file" accept=".json" hidden onChange={e=>{
+            if(!e.target.files[0]) return;
+            importData(e.target.files[0], (raw) => {
+              let matches = null;
+              if (Array.isArray(raw)) {
+                matches = raw;
+              } else if (Array.isArray(raw && raw.matches)) {
+                matches = raw.matches;
+              } else if (raw && raw.record && Array.isArray(raw.record.matches)) {
+                matches = raw.record.matches;
+              }
+              if (matches !== null && matches.length > 0) {
+                setMatches(matches);
+                saveMatches(matches);
+                alert(matches.length + ' wedstrijden succesvol geimporteerd!');
+              } else if (matches !== null) {
+                alert('Het bestand bevat geen wedstrijden.');
+              } else {
+                alert('Onbekend formaat. Verwacht een JSON array van wedstrijden.');
+              }
+            });
+            e.target.value = '';
+          }}/>
           <button className="btn btn-ghost btn-sm" onClick={()=>setShowCloudModal(true)} title="Cloud opslag instellen"
             style={{borderColor: getJSONBinConfig().binId ? 'var(--accent)' : 'var(--border2)', color: getJSONBinConfig().binId ? 'var(--accent)' : 'var(--text2)'}}>
             {getJSONBinConfig().binId ? '☁️ Cloud ✓' : '☁️ Cloud'}
