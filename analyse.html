@@ -1117,6 +1117,30 @@ function AddMatchTab({ editMatch, setEditMatch, matchCount, onSave, onCancel }) 
     });
   }, []);
 
+  const addSubstitute = useCallback((side) => {
+    setEditMatch(prev => {
+      const key = side === 'home' ? 'homePlayers' : 'awayPlayers';
+      const existing = prev[key]||[];
+      const newSub = {
+        id: side+'_sub_'+Date.now(),
+        name: '',
+        number: String(existing.length + 1),
+        isSub: true,
+        side
+      };
+      return {...prev, [key]: [...existing, newSub]};
+    });
+  }, []);
+
+  const removePlayer = useCallback((side, pid) => {
+    setEditMatch(prev => {
+      const key = side === 'home' ? 'homePlayers' : 'awayPlayers';
+      const evs = {...prev.events};
+      delete evs[pid];
+      return {...prev, [key]: (prev[key]||[]).filter(p => p.id !== pid), events: evs};
+    });
+  }, []);
+
   const handleAnalyse = useCallback(async () => {
     const apiKey = localStorage.getItem('claude_api_key');
     if (!apiKey) { setError('Stel eerst je Claude API-sleutel in via het slotje rechtsboven.'); return; }
@@ -1270,10 +1294,19 @@ function AddMatchTab({ editMatch, setEditMatch, matchCount, onSave, onCancel }) 
                         })}
                         <button onClick={()=>addEv(p.id)} style={{background:'none',border:'1px dashed var(--border2)',borderRadius:10,padding:'1px 7px',fontSize:10,cursor:'pointer',color:'var(--text3)'}}>+</button>
                       </div>
+                      {p.isSub && <button onClick={()=>removePlayer(side,p.id)} style={{marginLeft:'auto',flexShrink:0,background:'none',border:'none',cursor:'pointer',color:'var(--text3)',fontSize:14,padding:'0 4px',lineHeight:1}} title="Verwijder wisselspeler">×</button>}
                     </div>
                   </div>
                 );
               })}
+              <button
+                onClick={()=>addSubstitute(side)}
+                style={{display:'flex',alignItems:'center',gap:6,width:'100%',padding:'8px 14px',background:'none',border:'none',borderTop:'1px dashed var(--border)',cursor:'pointer',color:'var(--text3)',fontSize:12,fontWeight:600,fontFamily:'var(--sans)'}}
+                onMouseEnter={e=>{e.currentTarget.style.background='var(--accent-bg)';e.currentTarget.style.color='var(--accent)';}}
+                onMouseLeave={e=>{e.currentTarget.style.background='none';e.currentTarget.style.color='var(--text3)';}}
+              >
+                <span style={{fontSize:16,lineHeight:1}}>+</span> Wisselspeler toevoegen
+              </button>
             </div>
           );
         })}
