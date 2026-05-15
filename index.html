@@ -493,7 +493,42 @@ function loadKPIS() {
 }
 let KPIS = loadKPIS();
 function saveKPIS() { localStorage.setItem('custom_kpis', JSON.stringify(KPIS)); }
-let PRINCIPES = [{id:1,label:'Passing in final third',color:'chip-blue'},{id:2,label:'Pressing trigger',color:'chip-amber'},{id:3,label:'Finishing 1v1',color:'chip-green'},{id:4,label:'Balrecirculatie',color:'chip-blue'},{id:5,label:'Compactheid',color:'chip-amber'}];
+function loadPRINCIPES() {
+  try {
+    const s = localStorage.getItem('custom_principes');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return [{id:1,label:'Passing in final third',color:'chip-blue'},{id:2,label:'Pressing trigger',color:'chip-amber'},{id:3,label:'Finishing 1v1',color:'chip-green'},{id:4,label:'Balrecirculatie',color:'chip-blue'},{id:5,label:'Compactheid',color:'chip-amber'}];
+}
+let PRINCIPES = loadPRINCIPES();
+function savePRINCIPES() { localStorage.setItem('custom_principes', JSON.stringify(PRINCIPES)); }
+function addPrincipe() {
+  const label = prompt('Naam van het nieuwe principe:');
+  if (!label || !label.trim()) return;
+  const colors = ['chip-blue','chip-green','chip-amber'];
+  const color = colors[PRINCIPES.length % colors.length];
+  PRINCIPES.push({id: Date.now(), label: label.trim(), color});
+  savePRINCIPES();
+  // Re-render the principes bank if visible
+  const bank = document.getElementById('prinBank');
+  if (bank) {
+    bank.innerHTML = PRINCIPES.map(pr =>
+      `<span class="${pr.color} chip" draggable="true" data-label="${pr.label}" ondragstart="event.dataTransfer.setData('text/plain',event.target.dataset.label)">${pr.label}<span onclick="removePrincipleFromBank(${pr.id})" style="margin-left:4px;opacity:.4;cursor:pointer;font-size:11px">×</span></span>`
+    ).join('') + `<button class="btn btnG sm" onclick="addPrincipe()" style="border-style:dashed;font-size:11px">+ Nieuw</button>`;
+  }
+  notify(label.trim() + ' toegevoegd');
+}
+function removePrincipleFromBank(id) {
+  if (!confirm('Principe verwijderen?')) return;
+  PRINCIPES = PRINCIPES.filter(p => p.id !== id);
+  savePRINCIPES();
+  const bank = document.getElementById('prinBank');
+  if (bank) {
+    bank.innerHTML = PRINCIPES.map(pr =>
+      `<span class="${pr.color} chip" draggable="true" data-label="${pr.label}" ondragstart="event.dataTransfer.setData('text/plain',event.target.dataset.label)">${pr.label}<span onclick="removePrincipleFromBank(${pr.id})" style="margin-left:4px;opacity:.4;cursor:pointer;font-size:11px">×</span></span>`
+    ).join('') + `<button class="btn btnG sm" onclick="addPrincipe()" style="border-style:dashed;font-size:11px">+ Nieuw</button>`;
+  }
+}
 let WEEK_SESSIONS = {};
 let WEEK_OFFSET = 0;
 let ACTIVE_PLAYER = null;
@@ -889,9 +924,19 @@ function renderSpelerDetail(p) {
       <div class="grid2">
         <div class="card"><div class="cardTitle">Gewicht</div>
           <div style="display:flex;align-items:flex-end;gap:7px;height:65px">
-            ${(p.weight||[]).map(w=>{const h=maxW===minW?40:Math.round(14+((w.w-minW)/(maxW-minW))*48);return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;background:#4FA8D1;border-radius:3px 3px 0 0;height:${h}px;position:relative"><span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:#2B7FA8;white-space:nowrap">${w.w}</span></div><div style="font-size:8px;color:var(--t3)">${w.d}</div></div>`;}).join('')}
+            ${[...(p.weight||[])].sort((a,b)=>(a.date_iso||a.d||'').localeCompare(b.date_iso||b.d||'')).map(w=>{const h=maxW===minW?40:Math.round(14+((w.w-minW)/(maxW-minW))*48);return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;background:#4FA8D1;border-radius:3px 3px 0 0;height:${h}px;position:relative"><span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:#2B7FA8;white-space:nowrap">${w.w}</span></div><div style="font-size:8px;color:var(--t3)">${w.d.split(' ').slice(0,2).join(' ')}</div></div>`;}).join('')}
           </div>
-          ${isCoach()?`<div style="margin-top:12px;display:flex;gap:7px"><input type="number" id="nwVal" style="flex:1;padding:7px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg)" placeholder="Nieuw gewicht kg"><button class="btn btnP sm" onclick="saveGewicht(${p.id})">Opslaan</button></div>`:''}
+          ${isCoach()?`<div style="margin-top:12px">
+            <div style="display:flex;gap:7px;margin-bottom:6px">
+              <input type="number" id="nwVal" style="flex:1;padding:7px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);font-family:var(--f)" placeholder="Gewicht (kg)">
+              <input type="date" id="nwDate" value="${new Date().toISOString().split('T')[0]}" style="padding:7px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);font-family:var(--f)">
+              <button class="btn btnP sm" onclick="saveGewicht(${p.id})">Opslaan</button>
+            </div>
+            <table style="width:100%;font-size:12px;border-collapse:collapse">
+              <thead><tr><th style="text-align:left;padding:3px 6px;color:var(--t3);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--brd)">Datum</th><th style="text-align:right;padding:3px 6px;color:var(--t3);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--brd)">Gewicht</th><th style="border-bottom:1px solid var(--brd)"></th></tr></thead>
+              <tbody>${(p.weight||[]).slice().reverse().map((w,ri)=>{const i=(p.weight||[]).length-1-ri;return`<tr><td style="padding:3px 6px;color:var(--t2)">${w.d}</td><td style="padding:3px 6px;text-align:right;font-weight:600">${w.w} kg</td><td style="padding:3px 6px;text-align:right"><button style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:12px" onclick="delGewicht(${p.id},${i})" title="Verwijder">×</button></td></tr>`;}).join('')}</tbody>
+            </table>
+          </div>`:''}
         </div>
         <div class="card"><div class="cardTitle">KPI ${isCoach()?`<button class="btn btnG sm" style="margin-left:auto" onclick="openKpiEdit(${p.id})">✏</button>`:''}</div>
           ${KPIS.map(k=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:2px"><span>${k.name}</span><span style="font-weight:700">${p.kpis?.[k.id]||k.default_val}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</span></div><div class="kpiBar"><div class="kpiBarFill" style="width:${Math.min(100,k.unit==='km'?(p.kpis?.[k.id]||k.default_val)/12*100:(p.kpis?.[k.id]||k.default_val))}%"></div></div></div>`).join('')}
@@ -903,7 +948,8 @@ function renderSpelerDetail(p) {
       <div class="card" style="margin-bottom:10px">
         <div style="font-size:12px;color:var(--t3);margin-bottom:8px;font-weight:600">PRINCIPES (sleep naar werkpunt)</div>
         <div id="prinBank" style="display:flex;flex-wrap:wrap;gap:5px;padding:8px;background:var(--bg);border-radius:7px">
-          ${PRINCIPES.map(pr=>`<span class="${pr.color} chip" draggable="true" data-label="${pr.label}" ondragstart="event.dataTransfer.setData('text/plain',event.target.dataset.label)">${pr.label}</span>`).join('')}
+          ${PRINCIPES.map(pr=>`<span class="${pr.color} chip" draggable="true" data-label="${pr.label}" ondragstart="event.dataTransfer.setData('text/plain',event.target.dataset.label)">${pr.label}<span onclick="removePrincipleFromBank(${pr.id})" style="margin-left:4px;opacity:.4;cursor:pointer;font-size:11px">×</span></span>`).join('')}
+          <button class="btn btnG sm" onclick="addPrincipe()" style="border-style:dashed;font-size:11px">+ Nieuw</button>
         </div>
       </div>
       ${(p.werkpunten||[]).map(w=>`<div class="card" style="margin-bottom:10px">
@@ -929,7 +975,7 @@ function renderSpelerDetail(p) {
     </div>
     <div id="stabContent2" class="stabContent" style="display:none">
       ${isCoach()?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="openModal('addPopModal')">+ Gesprek</button></div>`:''}
-      ${(p.popHistory||[]).map((h,hi)=>`<div class="card" style="margin-bottom:10px">
+      ${[...(p.popHistory||[])].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map((h,hi)=>`<div class="card" style="margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
           <span style="font-weight:700">${h.date||''}</span>
           <span class="bdg ${h.type==='POP'?'blue':h.type==='PAP'?'green':'gray'}">${h.type}</span>
@@ -1298,35 +1344,74 @@ function filterOef() {
 }
 
 function viewOef(id) {
-  var o=(window.OEFENVORMEN||[]).find(function(x){return x.id==id;});
-  if(!o) return;
-  var w=window.open('','_blank');
-  var d=w.document;
-  var root=d.createElement('html');
-  var head=d.createElement('head');
-  var meta=d.createElement('meta');meta.charset='UTF-8';head.appendChild(meta);
-  var title=d.createElement('title');title.textContent=o.name;head.appendChild(title);
-  var style=d.createElement('style');
-  style.textContent='body{font-family:sans-serif;padding:24px;max-width:680px;margin:0 auto}h1{font-size:20px;margin-bottom:5px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.box{background:#F2F4F6;border-radius:7px;padding:8px}.lbl{font-size:10px;color:#94A3B8}.val{font-size:15px;font-weight:700}@media print{button{display:none}}';
-  head.appendChild(style);
-  var body=d.createElement('body');
-  var h1=d.createElement('h1');h1.textContent=o.name;body.appendChild(h1);
-  var meta2=d.createElement('p');meta2.style.color='#94A3B8';meta2.textContent=o.cat+' · '+o.intens+' · '+(o.dur||'—')+' min · '+(o.field||'—');body.appendChild(meta2);
-  if(o.video_url){var vid=d.createElement('video');vid.src=o.video_url;vid.controls=true;vid.style.cssText='width:100%;border-radius:8px;margin:10px 0;max-height:240px;background:#000';body.appendChild(vid);}
-  var desc=d.createElement('p');desc.style.cssText='margin:10px 0;line-height:1.6;font-size:14px';desc.textContent=o.description||'Geen omschrijving.';body.appendChild(desc);
-  var h3=d.createElement('h3');h3.style.cssText='font-size:14px;margin-bottom:6px';h3.textContent='Load data';body.appendChild(h3);
-  var grid=d.createElement('div');grid.className='grid';
-  [['Afstand',(o.load&&o.load.dist||0)+' km'],['HSR',(o.load&&o.load.hsr||0)+' m'],['Sprints',(o.load&&o.load.spr||0)+'x'],['Max snelh.',(o.load&&o.load.spd||0)+' km/h'],['RPE',(o.load&&o.load.rpe||0)+'/10'],['Hartslag',(o.load&&o.load.hr||0)+' bpm']].forEach(function(item){
-    var box=d.createElement('div');box.className='box';
-    var lbl=d.createElement('div');lbl.className='lbl';lbl.textContent=item[0];
-    var val=d.createElement('div');val.className='val';val.textContent=item[1];
-    box.appendChild(lbl);box.appendChild(val);grid.appendChild(box);
+  var o = (window.OEFENVORMEN||[]).find(function(x){return x.id==id;});
+  if (!o) { notify('Oefenvorm niet gevonden'); return; }
+  var w = window.open('','_blank','width=800,height=700');
+  if (!w) { notify('Schakel pop-ups in voor deze site'); return; }
+  // Build page using safe document.open/write
+  var MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  var COLORS = {laag:'#D1FAE5',middel:'#E6F4FB',hoog:'#FEF3C7',max:'#FEE2E2'};
+  var COLORST = {laag:'#065F46',middel:'#2B7FA8',hoog:'#92400E',max:'#991B1B'};
+  var intBg = COLORS[o.intens]||'#E6F4FB';
+  var intC = COLORST[o.intens]||'#2B7FA8';
+  var load = o.load||{};
+  var loadItems = [
+    ['Afstand', (load.dist||0)+' km'],
+    ['HSR', (load.hsr||0)+' m'],
+    ['Sprints', (load.spr||0)+'x'],
+    ['Max snelh.', (load.spd||0)+' km/h'],
+    ['RPE', (load.rpe||0)+'/10'],
+    ['Hartslag', (load.hr||0)+' bpm']
+  ];
+  var css = 'body{font-family:system-ui,sans-serif;margin:0;background:#F2F4F6;color:#161F2B}'+
+    '.header{background:#161F2B;padding:24px 30px;color:#fff}'+
+    '.header h1{margin:0 0 6px;font-size:22px}'+
+    '.header p{margin:0;opacity:.6;font-size:13px}'+
+    '.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px}'+
+    '.content{padding:24px 30px;max-width:760px;margin:0 auto}'+
+    '.card{background:#fff;border-radius:10px;border:1px solid #DDE3EA;padding:18px;margin-bottom:16px}'+
+    '.card-title{font-size:12px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}'+
+    '.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}'+
+    '.box{background:#F2F4F6;border-radius:8px;padding:10px 12px}'+
+    '.lbl{font-size:10px;color:#94A3B8;margin-bottom:3px}'+
+    '.val{font-size:18px;font-weight:700}'+
+    'video{width:100%;border-radius:8px;background:#000;max-height:320px;display:block}'+
+    '.btn{display:inline-block;padding:9px 18px;background:#4FA8D1;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px}'+
+    '@media print{.btn,.no-print{display:none}}';
+
+  var parts = [];
+  parts.push('<!DOCTYPE html><html lang="nl"><'+'head><meta charset="UTF-8">');
+  parts.push('<title>' + o.name + ' - Belisia SV<'+'/title>');
+  parts.push('<'+'style>' + css + '<'+'/style><'+'/head><'+'body>');
+  parts.push('<div class="header">');
+  parts.push('<h1>' + o.name + ' <span class="badge" style="background:'+intBg+';color:'+intC+'">'+o.intens+'<'+'/span><'+'/h1>');
+  parts.push('<p>' + (o.cat||'') + (o.dur?' &nbsp;·&nbsp; '+o.dur+' min':'') + (o.field?' &nbsp;·&nbsp; '+o.field:'') + (o.players?' &nbsp;·&nbsp; '+o.players+' spelers':'') + '<'+'/p>');
+  parts.push('<'+'/div>');
+  parts.push('<div class="content">');
+  if (o.video_url) {
+    parts.push('<div class="card"><div class="card-title">Video<'+'/div>');
+    parts.push('<video src="'+o.video_url+'" controls><'+'/video>');
+    parts.push('<'+'/div>');
+  }
+  if (o.description) {
+    parts.push('<div class="card"><div class="card-title">Omschrijving<'+'/div>');
+    parts.push('<p style="margin:0;line-height:1.7;font-size:14px;color:#4A5568">'+o.description+'<'+'/p>');
+    parts.push('<'+'/div>');
+  }
+  parts.push('<div class="card"><div class="card-title">Load data<'+'/div>');
+  parts.push('<div class="grid">');
+  loadItems.forEach(function(item){
+    parts.push('<div class="box"><div class="lbl">'+item[0]+'<'+'/div><div class="val">'+item[1]+'<'+'/div><'+'/div>');
   });
-  body.appendChild(grid);
-  var btn=d.createElement('button');btn.textContent='Afdrukken / PDF';btn.style.cssText='margin-top:14px;padding:8px 16px;background:#4FA8D1;color:#fff;border:none;border-radius:7px;cursor:pointer';btn.onclick=function(){w.print();};body.appendChild(btn);
-  root.appendChild(head);root.appendChild(body);
-  d.appendChild(root);
+  parts.push('<'+'/div><'+'/div>');
+  parts.push('<button class="btn" onclick="window.print()">Afdrukken / PDF<'+'/button>');
+  parts.push('<'+'/div><'+'/body><'+'/html>');
+
+  w.document.open();
+  w.document.write(parts.join(''));
+  w.document.close();
 }
+
 
 let _editOefId=null,_oefVidData=null;
 function openOefModal(id) {
@@ -1404,14 +1489,33 @@ function printExport() {
 // ============================================================
 async function saveGewicht(pid) {
   const val = parseFloat(document.getElementById('nwVal')?.value);
-  if (!val) return;
+  const dateStr = document.getElementById('nwDate')?.value;
+  if (!val) { notify('Vul een gewicht in'); return; }
   const p = PLAYERS.find(x=>x.id==pid);
   if (!p) return;
-  await sbInsert('weight_history', {player_id:pid, weight_kg:val, measured_at:new Date().toISOString()});
-  const d = new Date();
-  p.weight.push({d:d.getDate()+' '+['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][d.getMonth()], w:val});
+  const measured_at = dateStr ? new Date(dateStr).toISOString() : new Date().toISOString();
+  const d = new Date(measured_at);
+  const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  const entry = {d: d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear(), w: val, date_iso: dateStr || new Date().toISOString().split('T')[0]};
+  // Insert and sort chronologically
+  p.weight.push(entry);
+  p.weight.sort((a,b) => (a.date_iso||'').localeCompare(b.date_iso||''));
+  await sbInsert('weight_history', {player_id:pid, weight_kg:val, measured_at});
+  // Clear inputs
+  document.getElementById('nwVal').value = '';
   renderSpelerDetail(p);
   notify('Gewicht opgeslagen');
+}
+
+async function delGewicht(pid, idx) {
+  const p = PLAYERS.find(x=>x.id==pid);
+  if (!p) return;
+  p.weight.splice(idx, 1);
+  // Also delete from DB - find matching entry
+  const history = await sbGet('weight_history', `&player_id=eq.${pid}&order=measured_at.asc`);
+  if (history[idx]?.id) await sbDelete('weight_history', history[idx].id);
+  renderSpelerDetail(p);
+  notify('Gewicht verwijderd');
 }
 
 function openKpiEdit(pid) {
