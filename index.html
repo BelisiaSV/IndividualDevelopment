@@ -808,48 +808,439 @@ function renderDashboard() {
   }
 }
 
+// ============================================================
+// SPELER DASHBOARD — volledig nieuw
+// ============================================================
+
+// Globale state voor actieve spelersweergave
+let SPELER_VIEW = 'overzicht'; // overzicht | aanwezigheid | werkpunten | gewicht | pop | kpis
+
 function renderSpelerDashboard(p, el) {
+  el.innerHTML = buildSpelerDashboard(p);
+}
+
+function buildSpelerDashboard(p) {
   const aanw = (p.presenceLog||[]).filter(e=>e.status==='aanwezig').length;
   const totaal = (p.presenceLog||[]).length;
   const pct = totaal ? Math.round(aanw/totaal*100) : 0;
-  el.innerHTML = `
-    <div style="background:var(--txt);border-radius:10px;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;gap:16px">
-      <div style="width:56px;height:56px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff">${ini(p.name)}</div>
-      <div><div style="font-family:var(--fc);font-size:22px;font-weight:700;color:#fff">${p.name}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.5)">${p.pos||'—'} · ${p.age||'—'} jaar · ${(p.weight||[])[(p.weight||[]).length-1]?.w||'—'} kg</div></div>
+  const lastW = (p.weight||[])[(p.weight||[]).length-1]?.w||'—';
+  const popCount = (p.popHistory||[]).length;
+  const wpCount = (p.werkpunten||[]).length;
+
+  const views = {
+    overzicht: buildSpelerOverzicht(p, pct, aanw, totaal),
+    aanwezigheid: buildSpelerAanwezigheid(p),
+    werkpunten: buildSpelerWerkpunten(p),
+    gewicht: buildSpelerGewicht(p),
+    pop: buildSpelerPop(p),
+    kpis: buildSpelerKpis(p),
+  };
+
+  const tabStyle = (id) => SPELER_VIEW === id
+    ? 'background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);transition:all .15s'
+    : 'background:#fff;color:var(--t2);border:1px solid var(--brd);border-radius:8px;padding:10px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f);transition:all .15s';
+
+  return `
+    <div style="background:var(--txt);border-radius:10px;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="width:56px;height:56px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff">${ini(p.name)}</div>
+        <div>
+          <div style="font-family:var(--fc);font-size:22px;font-weight:700;color:#fff">${p.name}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.5)">${p.pos||'—'} · ${p.age||'—'} jaar · ${lastW} kg</div>
+        </div>
+      </div>
     </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+      <button style="${tabStyle('overzicht')}" onclick="SPELER_VIEW='overzicht';refreshSpelerDashboard('${p.id}')">🏠 Overzicht</button>
+      <button style="${tabStyle('aanwezigheid')}" onclick="SPELER_VIEW='aanwezigheid';refreshSpelerDashboard('${p.id}')">📅 Aanwezigheid <span style="background:rgba(255,255,255,.2);border-radius:20px;padding:1px 7px;font-size:11px;margin-left:4px">${totaal}</span></button>
+      <button style="${tabStyle('werkpunten')}" onclick="SPELER_VIEW='werkpunten';refreshSpelerDashboard('${p.id}')">✅ Werkpunten <span style="background:rgba(255,255,255,.2);border-radius:20px;padding:1px 7px;font-size:11px;margin-left:4px">${wpCount}</span></button>
+      <button style="${tabStyle('gewicht')}" onclick="SPELER_VIEW='gewicht';refreshSpelerDashboard('${p.id}')">⚖ Gewicht</button>
+      <button style="${tabStyle('pop')}" onclick="SPELER_VIEW='pop';refreshSpelerDashboard('${p.id}')">💬 POP / PAP <span style="background:rgba(255,255,255,.2);border-radius:20px;padding:1px 7px;font-size:11px;margin-left:4px">${popCount}</span></button>
+      <button style="${tabStyle('kpis')}" onclick="SPELER_VIEW='kpis';refreshSpelerDashboard('${p.id}')">📊 KPI's</button>
+    </div>
+    <div id="spelerViewContent">
+      ${views[SPELER_VIEW] || views.overzicht}
+    </div>`;
+}
+
+function refreshSpelerDashboard(pid) {
+  const p = PLAYERS.find(x=>x.id==pid);
+  if (!p) return;
+  const el = document.getElementById('pgDashboard');
+  if (el) el.innerHTML = buildSpelerDashboard(p);
+}
+
+// ── OVERZICHT ──────────────────────────────────────────────
+function buildSpelerOverzicht(p, pct, aanw, totaal) {
+  const lastW = (p.weight||[])[(p.weight||[]).length-1]?.w||'—';
+  return `
     <div class="statsRow">
-      <div class="statCard"><div class="statLbl">Aanwezigheid</div><div class="statVal" style="color:${pct>=75?'#2EAA6A':pct>=60?'#D4860A':'#E05252'}">${pct}%</div><div class="statSub">${aanw}/${totaal} sessies</div></div>
-      <div class="statCard"><div class="statLbl">Werkpunten</div><div class="statVal">${(p.werkpunten||[]).length}</div></div>
-      <div class="statCard"><div class="statLbl">Gewicht</div><div class="statVal">${(p.weight||[])[(p.weight||[]).length-1]?.w||'—'} kg</div></div>
-      <div class="statCard"><div class="statLbl">POP gesprekken</div><div class="statVal">${(p.popHistory||[]).length}</div></div>
+      <div class="statCard" style="cursor:pointer" onclick="SPELER_VIEW='aanwezigheid';refreshSpelerDashboard('${p.id}')">
+        <div class="statLbl">Aanwezigheid</div>
+        <div class="statVal" style="color:${pct>=75?'#2EAA6A':pct>=60?'#D4860A':'#E05252'}">${pct}%</div>
+        <div class="statSub">${aanw}/${totaal} sessies</div>
+      </div>
+      <div class="statCard" style="cursor:pointer" onclick="SPELER_VIEW='werkpunten';refreshSpelerDashboard('${p.id}')">
+        <div class="statLbl">Werkpunten</div>
+        <div class="statVal">${(p.werkpunten||[]).length}</div>
+        <div class="statSub">Klik voor detail</div>
+      </div>
+      <div class="statCard" style="cursor:pointer" onclick="SPELER_VIEW='gewicht';refreshSpelerDashboard('${p.id}')">
+        <div class="statLbl">Gewicht</div>
+        <div class="statVal">${lastW} kg</div>
+        <div class="statSub">Klik voor grafiek</div>
+      </div>
+      <div class="statCard" style="cursor:pointer" onclick="SPELER_VIEW='pop';refreshSpelerDashboard('${p.id}')">
+        <div class="statLbl">POP gesprekken</div>
+        <div class="statVal">${(p.popHistory||[]).length}</div>
+        <div class="statSub">Klik voor detail</div>
+      </div>
     </div>
     <div class="grid2">
-      <div>
-        ${(p.werkpunten||[]).map(w=>`<div class="card" style="margin-bottom:12px">
-          <div class="cardTitle">${w.text} <span class="bdg blue">${w.cat}</span></div>
-          ${(w.acties||[]).map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brd);font-size:13px">
-            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${a.done?'#2EAA6A':'var(--brd)'};background:${a.done?'#2EAA6A':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0">${a.done?'✓':''}</div>
-            <span style="flex:1;${a.done?'text-decoration:line-through;opacity:.5':''}">${a.t}</span>
-            <span style="font-size:10px;padding:1px 6px;border-radius:20px;background:var(--bg);border:1px solid var(--brd);color:var(--t3)">${a.p}</span>
-          </div>`).join('')}
-          ${w.feedback?`<div style="margin-top:8px;background:#E6F4FB;border-radius:6px;padding:8px;font-size:12px;color:#2B7FA8"><strong>Coach:</strong> ${w.feedback}</div>`:''}
-        </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen werkpunten.</p></div>'}
+      <div class="card">
+        <div class="cardTitle">📊 KPI's <span style="font-size:11px;font-weight:400;color:var(--t3);cursor:pointer" onclick="SPELER_VIEW='kpis';refreshSpelerDashboard('${p.id}')">→ Alles zien</span></div>
+        ${KPIS.map(k=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:3px"><span>${k.name}</span><span style="font-weight:700">${p.kpis?.[k.id]??k.default_val}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</span></div><div class="kpiBar"><div class="kpiBarFill" style="width:${Math.min(100,k.unit==='km'?(p.kpis?.[k.id]??k.default_val)/12*100:(p.kpis?.[k.id]??k.default_val))}%"></div></div></div>`).join('')}
       </div>
-      <div>
-        <div class="card" style="margin-bottom:12px"><div class="cardTitle">📊 KPI's</div>
-          ${KPIS.map(k=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:3px"><span>${k.name}</span><span style="font-weight:700">${p.kpis?.[k.id]||k.default_val}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</span></div><div class="kpiBar"><div class="kpiBarFill" style="width:${Math.min(100,k.unit==='km'?(p.kpis?.[k.id]||k.default_val)/12*100:(p.kpis?.[k.id]||k.default_val))}%"></div></div></div>`).join('')}
-        </div>
-        <div class="card"><div class="cardTitle">📅 Laatste aanwezigheid</div>
-          ${(p.presenceLog||[]).slice(-8).reverse().map(e=>{
-            const bg=e.status==='aanwezig'?'#D1FAE5':e.status==='afwezig'?'#FEE2E2':e.status==='blessure'?'#FEF3C7':'#E9D5FF';
-            const c=e.status==='aanwezig'?'#065F46':e.status==='afwezig'?'#991B1B':e.status==='blessure'?'#92400E':'#6B21A8';
-            return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);font-size:12px"><span style="color:var(--t3);width:70px">${e.date}</span><span style="background:${bg};color:${c};font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600">${e.status}</span><span style="color:var(--t3)">${e.note||''}</span></div>`;
-          }).join('')||'<div style="color:var(--t3);font-size:13px">Nog geen aanwezigheid.</div>'}
-        </div>
+      <div class="card">
+        <div class="cardTitle">📅 Recente aanwezigheid <span style="font-size:11px;font-weight:400;color:var(--t3);cursor:pointer" onclick="SPELER_VIEW='aanwezigheid';refreshSpelerDashboard('${p.id}')">→ Alles</span></div>
+        ${[...(p.presenceLog||[])].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6).map(e=>{
+          const bg=e.status==='aanwezig'?'#D1FAE5':e.status==='afwezig'?'#FEE2E2':e.status==='blessure'?'#FEF3C7':'#E9D5FF';
+          const c=e.status==='aanwezig'?'#065F46':e.status==='afwezig'?'#991B1B':e.status==='blessure'?'#92400E':'#6B21A8';
+          return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);font-size:12px"><span style="color:var(--t3);width:75px">${e.date}</span><span style="background:${bg};color:${c};font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600">${e.status}</span><span style="color:var(--t3);font-size:11px">${e.note||''}</span></div>`;
+        }).join('')||'<div style="color:var(--t3)">Nog geen aanwezigheid.</div>'}
       </div>
     </div>`;
 }
+
+// ── AANWEZIGHEID ───────────────────────────────────────────
+function buildSpelerAanwezigheid(p) {
+  const log = [...(p.presenceLog||[])].sort((a,b)=>b.date.localeCompare(a.date));
+  const counts = {aanwezig:0,afwezig:0,blessure:0,rtp:0,wedstrijd:0};
+  log.forEach(e=>{ if(counts[e.status]!==undefined) counts[e.status]++; });
+  const totaal = log.length;
+  const pct = totaal ? Math.round(counts.aanwezig/totaal*100) : 0;
+
+  return `
+    <div class="statsRow" style="grid-template-columns:repeat(5,1fr)">
+      <div class="statCard"><div class="statLbl">Aanwezig</div><div class="statVal" style="color:#2EAA6A">${counts.aanwezig}</div></div>
+      <div class="statCard"><div class="statLbl">Afwezig</div><div class="statVal" style="color:#E05252">${counts.afwezig}</div></div>
+      <div class="statCard"><div class="statLbl">Blessure</div><div class="statVal" style="color:#D4860A">${counts.blessure}</div></div>
+      <div class="statCard"><div class="statLbl">Herstel / RTP</div><div class="statVal" style="color:#7C3AED">${counts.rtp}</div></div>
+      <div class="statCard"><div class="statLbl">% aanwezig</div><div class="statVal" style="color:${pct>=75?'#2EAA6A':pct>=60?'#D4860A':'#E05252'}">${pct}%</div></div>
+    </div>
+    <div class="card">
+      <div class="cardTitle">Alle registraties (${totaal})</div>
+      <table class="tbl">
+        <thead><tr><th>Datum</th><th>Dag</th><th>Type</th><th>Status</th><th>Notitie</th></tr></thead>
+        <tbody>${log.map(e=>{
+          const bg=e.status==='aanwezig'?'#D1FAE5':e.status==='afwezig'?'#FEE2E2':e.status==='blessure'?'#FEF3C7':e.status==='wedstrijd'?'#E6F4FB':'#E9D5FF';
+          const c=e.status==='aanwezig'?'#065F46':e.status==='afwezig'?'#991B1B':e.status==='blessure'?'#92400E':e.status==='wedstrijd'?'#2B7FA8':'#6B21A8';
+          return`<tr><td style="font-weight:500">${e.date}</td><td style="color:var(--t3)">${e.day||'—'}</td><td style="color:var(--t3)">${e.type||'—'}</td><td><span style="background:${bg};color:${c};font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600">${e.status}</span></td><td style="color:var(--t3)">${e.note||'—'}</td></tr>`;
+        }).join('')||'<tr><td colspan="5" style="color:var(--t3);text-align:center;padding:16px">Nog geen aanwezigheid geregistreerd.</td></tr>'}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ── WERKPUNTEN ──────────────────────────────────────────────
+function buildSpelerWerkpunten(p) {
+  return `
+    <div id="wpSpelerContent">
+    ${(p.werkpunten||[]).map((w,wi)=>`
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <span style="font-weight:700;font-size:15px">${w.text}</span>
+          <span class="bdg blue">${w.cat}</span>
+        </div>
+        ${(w.principes||[]).length ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">${w.principes.map(pr=>`<span class="chip chip-blue">${pr}</span>`).join('')}</div>` : ''}
+        ${(w.acties||[]).length ? `<div style="margin-bottom:10px">${(w.acties||[]).map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brd);font-size:13px">
+          <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${a.done?'#2EAA6A':'var(--brd)'};background:${a.done?'#2EAA6A':'transparent'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0">${a.done?'✓':''}</div>
+          <span style="flex:1;${a.done?'text-decoration:line-through;opacity:.5':''}">${a.t}</span>
+          <span style="font-size:10px;padding:1px 6px;border-radius:20px;background:var(--bg);border:1px solid var(--brd);color:var(--t3)">${a.p}</span>
+        </div>`).join('')}</div>` : ''}
+        ${w.feedback ? `<div style="background:#E6F4FB;border-radius:7px;padding:10px 12px;margin-bottom:10px;font-size:13px"><strong style="color:#2B7FA8">Coach feedback:</strong> <span style="color:var(--t2)">${w.feedback}</span></div>` : ''}
+        
+        <!-- Clips sectie -->
+        <div style="border-top:1px solid var(--brd);padding-top:10px;margin-top:4px">
+          <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🎬 Mijn clips (max 3)</div>
+          <div id="wpClips_${w.id}">${buildClipsSection(w.clips||[], 'werkpunt', w.id, p.id)}</div>
+          ${(w.clips||[]).length < 3 ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            <input id="hudlInput_${w.id}" placeholder="HUDL of video link..." style="flex:1;min-width:180px;padding:7px 10px;font-size:12px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);font-family:var(--f)">
+            <button class="btn btnP sm" onclick="addClipLink('werkpunt','${w.id}','${p.id}')">+ Link</button>
+            <label class="btn btnG sm" style="cursor:pointer">📁 Bestand<input type="file" accept="video/*" style="display:none" onchange="addClipFile('werkpunt','${w.id}','${p.id}',this)"></label>
+          </div>` : '<div style="font-size:11px;color:var(--t3)">Maximum van 3 clips bereikt.</div>'}
+        </div>
+        
+        <!-- Speler feedback aan coach -->
+        <div style="border-top:1px solid var(--brd);padding-top:10px;margin-top:8px">
+          <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">💬 Mijn feedback aan coach</div>
+          ${w.spelerFeedback ? `<div style="background:#F0FDF4;border-radius:7px;padding:8px 12px;margin-bottom:6px;font-size:13px;color:#065F46">${w.spelerFeedback}</div>` : ''}
+          <textarea id="sfInput_${w.id}" rows="2" placeholder="Geef hier je feedback of vragen aan de coach..." style="width:100%;padding:8px 10px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:7px;background:var(--bg)">${w.spelerFeedback||''}</textarea>
+          <button class="btn btnP sm" style="margin-top:5px" onclick="saveSpelerFeedbackWp('${p.id}','${w.id}')">Opslaan</button>
+        </div>
+      </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen werkpunten van de coach.</p></div>'}
+    </div>`;
+}
+
+// ── GEWICHT ──────────────────────────────────────────────────
+function buildSpelerGewicht(p) {
+  const weights = [...(p.weight||[])].sort((a,b)=>(a.date_iso||a.d||'').localeCompare(b.date_iso||b.d||''));
+  if (!weights.length) return '<div class="card"><p style="color:var(--t3)">Nog geen gewichtsmetingen.</p></div>';
+  
+  const maxW = Math.max(...weights.map(x=>x.w));
+  const minW = Math.min(...weights.map(x=>x.w));
+  const range = maxW - minW || 1;
+  const first = weights[0]?.w;
+  const last = weights[weights.length-1]?.w;
+  const diff = last - first;
+
+  return `
+    <div class="statsRow" style="grid-template-columns:repeat(3,1fr)">
+      <div class="statCard"><div class="statLbl">Huidig</div><div class="statVal">${last} kg</div></div>
+      <div class="statCard"><div class="statLbl">Begin seizoen</div><div class="statVal">${first} kg</div></div>
+      <div class="statCard"><div class="statLbl">Evolutie</div><div class="statVal" style="color:${diff>0?'#E05252':diff<0?'#2EAA6A':'var(--txt)'}">${diff>0?'+':''}${diff.toFixed(1)} kg</div></div>
+    </div>
+    <div class="card">
+      <div class="cardTitle">Gewichtsverloop</div>
+      <!-- SVG grafiek -->
+      <div style="position:relative;height:160px;margin-bottom:8px;padding:20px 8px 24px 40px">
+        <svg width="100%" height="100%" viewBox="0 0 600 120" preserveAspectRatio="none" style="overflow:visible">
+          <!-- Grid lines -->
+          ${[0,25,50,75,100].map(pct=>`<line x1="0" y1="${pct*1.2}" x2="600" y2="${pct*1.2}" stroke="#DDE3EA" stroke-width="0.5"/>`).join('')}
+          <!-- Area fill -->
+          <defs><linearGradient id="wGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FA8D1" stop-opacity="0.3"/><stop offset="100%" stop-color="#4FA8D1" stop-opacity="0.05"/></linearGradient></defs>
+          <polyline points="${weights.map((w,i)=>{const x=weights.length===1?300:Math.round(i/(weights.length-1)*600);const y=Math.round(120-((w.w-minW)/range)*100);return`${x},${y}`;}).join(' ')}" fill="none" stroke="#4FA8D1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Dots -->
+          ${weights.map((w,i)=>{const x=weights.length===1?300:Math.round(i/(weights.length-1)*600);const y=Math.round(120-((w.w-minW)/range)*100);return`<circle cx="${x}" cy="${y}" r="4" fill="#4FA8D1" stroke="#fff" stroke-width="1.5"/><text x="${x}" y="${y-8}" text-anchor="middle" font-size="9" fill="#2B7FA8" font-weight="700">${w.w}</text>`;}).join('')}
+        </svg>
+        <!-- Y-axis labels -->
+        <div style="position:absolute;left:0;top:14px;font-size:9px;color:var(--t3);font-weight:600">${maxW}</div>
+        <div style="position:absolute;left:0;bottom:20px;font-size:9px;color:var(--t3);font-weight:600">${minW}</div>
+      </div>
+      <!-- X-axis dates -->
+      <div style="display:flex;justify-content:space-between;padding:0 40px 0 48px;margin-top:-10px">
+        ${weights.filter((_,i)=>i===0||i===weights.length-1||i===Math.floor(weights.length/2)).map(w=>`<span style="font-size:9px;color:var(--t3)">${w.d.split(' ').slice(0,2).join(' ')}</span>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="cardTitle">Alle metingen</div>
+      <table class="tbl">
+        <thead><tr><th>Datum</th><th>Gewicht</th><th>Wijziging</th></tr></thead>
+        <tbody>${weights.slice().reverse().map((w,ri)=>{
+          const prev = weights[weights.length-1-ri-1];
+          const delta = prev ? (w.w - prev.w).toFixed(1) : '—';
+          const dColor = delta!=='—'?parseFloat(delta)>0?'#E05252':parseFloat(delta)<0?'#2EAA6A':'var(--t3)':'var(--t3)';
+          return`<tr><td style="font-weight:500">${w.d}</td><td style="font-weight:700">${w.w} kg</td><td style="color:${dColor};font-weight:600">${delta!=='—'&&parseFloat(delta)>0?'+':''}${delta!=='—'?delta+' kg':'—'}</td></tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ── POP / PAP ────────────────────────────────────────────────
+function buildSpelerPop(p) {
+  const pops = [...(p.popHistory||[])].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  return `
+    ${pops.map((h,hi)=>`
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <span style="font-weight:700;font-size:15px">${h.date||''}</span>
+          <span class="bdg ${h.type==='POP'?'blue':h.type==='PAP'?'green':'gray'}">${h.type}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px">
+          ${h.goed?`<div style="background:#F0FDF4;border-radius:7px;padding:9px 12px;font-size:13px"><strong style="color:#065F46">✓ Wat ging goed:</strong> <span style="color:var(--t2)">${h.goed}</span></div>`:''}
+          ${h.werkpunten?`<div style="background:#EFF6FF;border-radius:7px;padding:9px 12px;font-size:13px"><strong style="color:#1D4ED8">🎯 Werkpunten:</strong> <span style="color:var(--t2)">${h.werkpunten}</span></div>`:''}
+          ${h.acties?`<div style="background:#FEF9C3;border-radius:7px;padding:9px 12px;font-size:13px"><strong style="color:#A16207">📋 Afspraken:</strong> <span style="color:var(--t2)">${h.acties}</span></div>`:''}
+        </div>
+
+        <!-- Clips sectie -->
+        <div style="border-top:1px solid var(--brd);padding-top:10px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🎬 Mijn clips (max 3)</div>
+          <div id="popClips_${h.id||hi}">${buildClipsSection(h.clips||[], 'pop', h.id||hi, p.id)}</div>
+          ${(h.clips||[]).length < 3 ? `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            <input id="popHudl_${h.id||hi}" placeholder="HUDL of video link..." style="flex:1;min-width:180px;padding:7px 10px;font-size:12px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);font-family:var(--f)">
+            <button class="btn btnP sm" onclick="addClipLink('pop','${h.id||hi}','${p.id}')">+ Link</button>
+            <label class="btn btnG sm" style="cursor:pointer">📁 Bestand<input type="file" accept="video/*" style="display:none" onchange="addClipFile('pop','${h.id||hi}','${p.id}',this)"></label>
+          </div>` : '<div style="font-size:11px;color:var(--t3)">Maximum van 3 clips bereikt.</div>'}
+        </div>
+
+        <!-- Speler reactie -->
+        <div style="border-top:1px solid var(--brd);padding-top:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">💬 Mijn reactie</div>
+          ${h.spelerReactie ? `<div style="background:#F0FDF4;border-radius:7px;padding:8px 12px;margin-bottom:6px;font-size:13px;color:#065F46">${h.spelerReactie}</div>` : ''}
+          <textarea id="popReactie_${h.id||hi}" rows="2" placeholder="Geef hier je reactie op dit gesprek..." style="width:100%;padding:8px 10px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:7px;background:var(--bg)">${h.spelerReactie||''}</textarea>
+          <button class="btn btnP sm" style="margin-top:5px" onclick="saveSpelerReactiePop('${p.id}',${hi})">Opslaan</button>
+        </div>
+      </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Nog geen POP/PAP gesprekken.</p></div>'}`;
+}
+
+// ── KPI'S PER WEDSTRIJD ──────────────────────────────────────
+function buildSpelerKpis(p) {
+  const matchKpis = [...(p.matchKpis||[])].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  
+  return `
+    <div class="statsRow">
+      <div class="statCard"><div class="statLbl">Gemiddeld</div><div class="statVal" style="font-size:18px">${KPIS[0]?.name}</div><div class="statSub">${matchKpis.length ? (matchKpis.reduce((s,m)=>s+(m.values?.[KPIS[0]?.id]||0),0)/matchKpis.length).toFixed(1) : '—'}${KPIS[0]?.unit==='pct'?'%':KPIS[0]?.unit==='km'?' km':''}</div></div>
+      <div class="statCard"><div class="statLbl">Wedstrijden</div><div class="statVal">${matchKpis.length}</div><div class="statSub">met KPI data</div></div>
+    </div>
+
+    ${matchKpis.length ? `
+    <div class="card" style="margin-bottom:14px">
+      <div class="cardTitle">KPI evolutie per wedstrijd</div>
+      <div style="overflow-x:auto">
+        <table class="tbl" style="min-width:500px">
+          <thead><tr><th>Datum</th><th>Tegenstander</th>${KPIS.map(k=>`<th style="text-align:right">${k.name}</th>`).join('')}</tr></thead>
+          <tbody>${matchKpis.map(m=>`<tr>
+            <td style="font-weight:500;white-space:nowrap">${m.date||'—'}</td>
+            <td style="color:var(--t2)">${m.opponent||'—'}</td>
+            ${KPIS.map(k=>`<td style="text-align:right;font-weight:600">${m.values?.[k.id]??'—'}${m.values?.[k.id]!==undefined?(k.unit==='pct'?'%':k.unit==='km'?' km':''):''}
+            </td>`).join('')}
+          </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>` : ''}
+
+    <!-- Coach kan hier per wedstrijd KPI's ingeven (enkel zichtbaar voor coach) -->
+    ${isCoach() ? `
+    <div class="card" style="border:2px dashed var(--blue)">
+      <div class="cardTitle" style="color:var(--blue)">⚽ KPI's per wedstrijd toevoegen (coach)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="ff"><label>Datum</label><input type="date" id="mkDate" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div class="ff"><label>Tegenstander</label><input id="mkOpponent" placeholder="bv. Sporting Hasselt"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:12px">
+        ${KPIS.map(k=>`<div class="ff" style="margin-bottom:0"><label style="font-size:11px">${k.name}</label><input type="number" id="mkv_${k.id}" placeholder="${k.default_val}" step="0.1" style="padding:7px 9px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);width:100%;font-family:var(--f)"></div>`).join('')}
+      </div>
+      <button class="btn btnP" onclick="saveMatchKpi('${p.id}')">KPI's opslaan</button>
+    </div>` : ''}
+    
+    <!-- Algemene KPI's (huidige seizoen gem.) -->
+    <div class="card">
+      <div class="cardTitle">📈 Seizoensgemiddelden</div>
+      ${KPIS.map(k=>{
+        const vals = matchKpis.map(m=>m.values?.[k.id]).filter(v=>v!==undefined&&v!==null);
+        const avg = vals.length ? (vals.reduce((s,v)=>s+v,0)/vals.length) : (p.kpis?.[k.id]??k.default_val);
+        return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:3px"><span>${k.name}</span><span style="font-weight:700">${typeof avg==='number'?avg.toFixed(1):avg}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</span></div><div class="kpiBar"><div class="kpiBarFill" style="width:${Math.min(100,k.unit==='km'?avg/12*100:avg)}%"></div></div></div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── CLIPS HELPERS ────────────────────────────────────────────
+function buildClipsSection(clips, type, itemId, playerId) {
+  if (!clips.length) return '<div style="font-size:11px;color:var(--t3);font-style:italic">Nog geen clips toegevoegd.</div>';
+  return clips.map((c,ci)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg);border-radius:6px;margin-bottom:4px">
+    <span style="font-size:13px">🎬</span>
+    <div style="flex:1;overflow:hidden">
+      ${c.url ? `<a href="${c.url}" target="_blank" style="font-size:12px;color:var(--blue);font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.url.length>50?c.url.slice(0,50)+'...':c.url}</a>` : `<span style="font-size:12px;font-weight:600;color:var(--t2)">${c.name||'Video bestand'}</span>`}
+    </div>
+    <button style="background:none;border:none;cursor:pointer;color:var(--red);font-size:14px" onclick="removeClip('${type}','${itemId}','${playerId}',${ci})">×</button>
+  </div>`).join('');
+}
+
+async function addClipLink(type, itemId, playerId) {
+  const inp = document.getElementById(`${type==='pop'?'pop':'hudl'}HudlInput_${itemId}`) || 
+              document.getElementById(`hudlInput_${itemId}`) ||
+              document.getElementById(`popHudl_${itemId}`);
+  const url = inp?.value?.trim();
+  if (!url) { notify('Vul een link in'); return; }
+  await saveClip(type, itemId, playerId, {url, name: url.includes('hudl')?'HUDL clip':'Video link'});
+  if (inp) inp.value = '';
+  notify('Clip toegevoegd');
+  refreshSpelerDashboard(playerId);
+}
+
+async function addClipFile(type, itemId, playerId, input) {
+  if (!input.files[0]) return;
+  const file = input.files[0];
+  // Store as base64 (max ~50MB practical limit)
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    await saveClip(type, itemId, playerId, {url: e.target.result, name: file.name, isFile: true});
+    notify('Clip geüpload');
+    refreshSpelerDashboard(playerId);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveClip(type, itemId, playerId, clip) {
+  const p = PLAYERS.find(x=>x.id==playerId);
+  if (!p) return;
+  if (type === 'werkpunt') {
+    const w = (p.werkpunten||[]).find(x=>x.id==itemId);
+    if (!w) return;
+    w.clips = [...(w.clips||[]), clip];
+    if ((w.clips||[]).length > 3) w.clips = w.clips.slice(-3);
+    await saveWp(w, playerId);
+  } else if (type === 'pop') {
+    const h = (p.popHistory||[]).find(x=>(x.id||'')==itemId) || p.popHistory[parseInt(itemId)];
+    if (!h) return;
+    h.clips = [...(h.clips||[]), clip];
+    if (h.clips.length > 3) h.clips = h.clips.slice(-3);
+    if (h.id) await sbUpdate('pop_history', h.id, {clips: h.clips});
+  }
+}
+
+async function removeClip(type, itemId, playerId, idx) {
+  const p = PLAYERS.find(x=>x.id==playerId);
+  if (!p) return;
+  if (type === 'werkpunt') {
+    const w = (p.werkpunten||[]).find(x=>x.id==itemId);
+    if (!w) return;
+    w.clips = (w.clips||[]).filter((_,i)=>i!==idx);
+    await saveWp(w, playerId);
+  } else if (type === 'pop') {
+    const h = (p.popHistory||[]).find(x=>(x.id||'')==itemId) || p.popHistory[parseInt(itemId)];
+    if (!h) return;
+    h.clips = (h.clips||[]).filter((_,i)=>i!==idx);
+    if (h.id) await sbUpdate('pop_history', h.id, {clips: h.clips});
+  }
+  notify('Verwijderd');
+  refreshSpelerDashboard(playerId);
+}
+
+async function saveSpelerFeedbackWp(playerId, wpId) {
+  const p = PLAYERS.find(x=>x.id==playerId);
+  const w = (p?.werkpunten||[]).find(x=>x.id==wpId);
+  if (!w) return;
+  w.spelerFeedback = document.getElementById('sfInput_'+wpId)?.value || '';
+  await saveWp(w, playerId);
+  notify('Feedback opgeslagen');
+  refreshSpelerDashboard(playerId);
+}
+
+async function saveSpelerReactiePop(playerId, hi) {
+  const p = PLAYERS.find(x=>x.id==playerId);
+  const h = p?.popHistory[hi];
+  if (!h) return;
+  h.spelerReactie = document.getElementById('popReactie_'+(h.id||hi))?.value || '';
+  if (h.id) await sbUpdate('pop_history', h.id, {spelerReactie: h.spelerReactie});
+  notify('Reactie opgeslagen');
+  refreshSpelerDashboard(playerId);
+}
+
+async function saveMatchKpi(playerId) {
+  const p = PLAYERS.find(x=>x.id==playerId);
+  if (!p) return;
+  const date = document.getElementById('mkDate')?.value || '';
+  const opponent = document.getElementById('mkOpponent')?.value || '';
+  const values = {};
+  KPIS.forEach(k=>{
+    const v = document.getElementById('mkv_'+k.id)?.value;
+    if (v !== undefined && v !== '') values[k.id] = parseFloat(v);
+  });
+  const entry = {id: Date.now(), date, opponent, values};
+  p.matchKpis = [...(p.matchKpis||[]), entry].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  // Save to players table
+  await sbUpdate('players', playerId, {match_kpis: p.matchKpis});
+  // Clear inputs
+  KPIS.forEach(k=>{ const el=document.getElementById('mkv_'+k.id); if(el) el.value=''; });
+  document.getElementById('mkOpponent').value = '';
+  notify('KPI\'s opgeslagen voor '+date);
+  refreshSpelerDashboard(playerId);
+}
+
+
 
 // ============================================================
 // KERN
@@ -940,7 +1331,24 @@ function renderSpelerDetail(p) {
         </div>
         <div class="card"><div class="cardTitle">KPI ${isCoach()?`<button class="btn btnG sm" style="margin-left:auto" onclick="openKpiEdit(${p.id})">✏</button>`:''}</div>
           ${KPIS.map(k=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:2px"><span>${k.name}</span><span style="font-weight:700">${p.kpis?.[k.id]||k.default_val}${k.unit==='pct'?'%':k.unit==='km'?' km':''}</span></div><div class="kpiBar"><div class="kpiBarFill" style="width:${Math.min(100,k.unit==='km'?(p.kpis?.[k.id]||k.default_val)/12*100:(p.kpis?.[k.id]||k.default_val))}%"></div></div></div>`).join('')}
+        
+        <!-- Per-wedstrijd KPIs -->
+        <div class="card" style="margin-top:12px">
+          <div class="cardTitle" style="display:flex;align-items:center">⚽ KPIs per wedstrijd ${isCoach()?`<button class="btn btnP sm" style="margin-left:auto" onclick="openMatchKpiForm(${p.id})">+ Wedstrijd</button>`:''}</div>
+          ${(p.matchKpis||[]).length?`<div style="overflow-x:auto"><table class="tbl" style="min-width:400px"><thead><tr><th>Datum</th><th>Tegenstander</th>${KPIS.map(k=>`<th style="text-align:right;font-size:10px">${k.name}</th>`).join('')}${isCoach()?'<th></th>':''}</tr></thead><tbody>${[...(p.matchKpis||[])].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map((m,mi)=>`<tr><td style="font-weight:500;white-space:nowrap">${m.date||'—'}</td><td style="color:var(--t2)">${m.opponent||'—'}</td>${KPIS.map(k=>`<td style="text-align:right;font-weight:600">${m.values?.[k.id]!==undefined?m.values[k.id]+(k.unit==='pct'?'%':k.unit==='km'?' km':''):'—'}</td>`).join('')}${isCoach()?`<td><button class="btn btnD sm" onclick="delMatchKpi(${p.id},${mi})">✕</button></td>`:''}</tr>`).join('')}</tbody></table></div>`:'<div style="font-size:12px;color:var(--t3)">Nog geen wedstrijd KPIs ingegeven.</div>'}
+          <div id="mkpiForm_${p.id}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--brd)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+              <div class="ff"><label>Datum</label><input type="date" id="mkDate_${p.id}" value="${new Date().toISOString().split('T')[0]}"></div>
+              <div class="ff"><label>Tegenstander</label><input id="mkOpp_${p.id}" placeholder="bv. Sporting Hasselt"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-bottom:10px">
+              ${KPIS.map(k=>`<div class="ff" style="margin-bottom:0"><label style="font-size:10px">${k.name}</label><input type="number" id="mkv2_${k.id}_${p.id}" step="0.1" style="padding:6px 8px;font-size:12px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);width:100%;font-family:var(--f)" placeholder="${k.default_val}"></div>`).join('')}
+            </div>
+            <button class="btn btnP sm" onclick="saveMatchKpiCoach(${p.id})">Opslaan</button>
+            <button class="btn btnG sm" onclick="document.getElementById('mkpiForm_${p.id}').style.display='none'">Annuleer</button>
+          </div>
         </div>
+</div>
       </div>
     </div>
     <div id="stabContent1" class="stabContent" style="display:none">
@@ -2132,6 +2540,39 @@ function notify(msg='✓ Opgeslagen') { const n=document.getElementById('notif')
 // ============================================================
 function renderAnalyse() {
   window.open('/analyse.html', '_blank');
+}
+
+
+function openMatchKpiForm(pid) {
+  const form = document.getElementById('mkpiForm_'+pid);
+  if (form) form.style.display = form.style.display==='none'?'block':'none';
+}
+
+async function saveMatchKpiCoach(pid) {
+  const p = PLAYERS.find(x=>x.id==pid);
+  if (!p) return;
+  const date = document.getElementById('mkDate_'+pid)?.value || '';
+  const opponent = document.getElementById('mkOpp_'+pid)?.value || '';
+  const values = {};
+  KPIS.forEach(k=>{
+    const v = document.getElementById('mkv2_'+k.id+'_'+pid)?.value;
+    if (v !== '' && v !== undefined) values[k.id] = parseFloat(v);
+  });
+  const entry = {id: Date.now(), date, opponent, values};
+  p.matchKpis = [...(p.matchKpis||[]), entry].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  await sbUpdate('players', pid, {match_kpis: p.matchKpis});
+  document.getElementById('mkpiForm_'+pid).style.display = 'none';
+  openSpeler(pid);
+  notify('KPI\'s opgeslagen');
+}
+
+async function delMatchKpi(pid, idx) {
+  const p = PLAYERS.find(x=>x.id==pid);
+  if (!p) return;
+  p.matchKpis.splice(idx, 1);
+  await sbUpdate('players', pid, {match_kpis: p.matchKpis});
+  openSpeler(pid);
+  notify('Verwijderd');
 }
 
 showSpinner(true);
