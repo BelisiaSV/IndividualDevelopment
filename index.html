@@ -1467,9 +1467,17 @@ function renderSpelerDetail(p) {
           <span class="bdg blue">${w.cat}</span>
           ${isCoach()?`<button class="btn btnD sm" onclick="delWerkpunt(${p.id},'${w.id}')">✕</button>`:''}
         </div>
-        <div class="dropzone" id="dz${w.id}" ondragover="event.preventDefault();this.classList.add('over')" ondrop="dropPrincipe(event,${p.id},'${w.id}')" ondragleave="this.classList.remove('over')">
-          ${(w.principes||[]).map(pr=>`<span class="${(PRINCIPES.find(x=>x.label===pr)||{color:'chip-blue'}).color} chip">${pr}${isCoach()?`<span onclick="removePrincipe(${p.id},'${w.id}','${pr}')" style="margin-left:3px;opacity:.4;cursor:pointer">×</span>`:''}</span>`).join('')}
-          ${!(w.principes||[]).length?`<span style="font-size:11px;color:var(--t3);font-style:italic">${isCoach()?'Sleep principes...':'Geen.'}</span>`:''}
+        <div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;min-height:28px;margin-bottom:4px">
+            ${(w.principes||[]).map(pr=>`<span class="${(PRINCIPES.find(x=>x.label===pr)||{color:'chip-blue'}).color} chip">${pr}${isCoach()?`<span onclick="removePrincipe(${p.id},'${w.id}','${pr}')" style="margin-left:3px;opacity:.4;cursor:pointer">×</span>`:''}</span>`).join('')}
+            ${!(w.principes||[]).length&&!isCoach()?'<span style="font-size:11px;color:var(--t3);font-style:italic">Geen.</span>':''}
+          </div>
+          ${isCoach()?`<details style="margin-top:2px">
+            <summary style="font-size:11px;color:var(--t3);cursor:pointer;user-select:none">+ Principe toevoegen</summary>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;padding:7px;background:var(--bg);border-radius:7px;margin-top:5px">
+              ${PRINCIPES.map(pr=>(w.principes||[]).includes(pr.label)?'':`<span class="${pr.color} chip" style="cursor:pointer;opacity:.7" onclick="addPrincipeToWp(${p.id},'${w.id}','${pr.label}')">${pr.label} +</span>`).join('')}
+            </div>
+          </details>`:''}
         </div>
         <div style="margin-top:8px">
           <div style="font-size:11px;font-weight:600;color:var(--t3);margin-bottom:5px;display:flex;justify-content:space-between">ACTIEPUNTEN ${isCoach()?`<button class="btn btnG sm" onclick="addActie(${p.id},'${w.id}')">+ Actie</button>`:''}</div>
@@ -1480,12 +1488,23 @@ function renderSpelerDetail(p) {
           </div>`).join('')}
         </div>
         ${isCoach()?`
-          <div style="margin-top:8px">
-            <textarea id="fb${w.id}" rows="2" style="width:100%;padding:7px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:7px;background:#fff" placeholder="Coach feedback...">${w.feedback||''}</textarea>
-            <button class="btn btnG sm" style="margin-top:4px" onclick="saveFeedback(${p.id},'${w.id}')">Opslaan</button>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--brd)">
+            <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:6px">Coach feedback</div>
+            <textarea id="fb${w.id}" rows="2" style="width:100%;padding:7px;font-size:13px;font-family:var(--f);border:1px solid var(--brd);border-radius:7px;background:#fff" placeholder="Geef feedback aan de speler...">${w.feedback||''}</textarea>
+            <button class="btn btnP sm" style="margin-top:5px" onclick="saveFeedback(${p.id},'${w.id}')">Opslaan</button>
           </div>
-          ${w.spelerFeedback?`<div style="margin-top:6px;background:#F0FDF4;border-radius:6px;padding:8px 10px;font-size:12px"><strong style="color:#065F46">💬 Speler:</strong> <span style="color:var(--t2)">${w.spelerFeedback}</span></div>`:''}
-          ${(w.clips||[]).length?`<div style="margin-top:6px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">🎬 Clips speler</div>${(w.clips||[]).map(c=>`<div style="font-size:12px;padding:3px 8px;background:var(--bg);border-radius:5px;margin-bottom:2px">${c.url&&!c.isFile?`<a href="${c.url}" target="_blank" style="color:var(--blue)">🎬 ${c.name||c.url.slice(0,40)}</a>`:`<span>🎬 ${c.name||'Video'}</span>`}</div>`).join('')}</div>`:''}
+          ${w.spelerFeedback?`
+          <div style="margin-top:8px;background:#F0FDF4;border-radius:7px;padding:9px 12px;font-size:13px">
+            <strong style="color:#065F46;font-size:11px;text-transform:uppercase;display:block;margin-bottom:3px">💬 Speler reactie</strong>
+            <span style="color:var(--t2)">${w.spelerFeedback}</span>
+          </div>`:''}
+          ${(w.clips||[]).length?`
+          <div style="margin-top:8px">
+            <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:5px">🎬 Clips van speler</div>
+            ${(w.clips||[]).map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg);border-radius:5px;margin-bottom:3px;font-size:12px">
+              ${c.url&&!c.isFile?`<a href="${c.url}" target="_blank" style="color:var(--blue)">🎬 ${c.name||c.url.slice(0,45)}</a>`:`<span>🎬 ${c.name||'Video bestand'}</span>`}
+            </div>`).join('')}
+          </div>`:''}
         `:`${w.feedback?`<div style="margin-top:8px;background:#E6F4FB;border-radius:6px;padding:8px;font-size:12px;color:#2B7FA8"><strong>Coach:</strong> ${w.feedback}</div>`:''}` }
       </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Geen werkpunten.</p></div>'}
     </div>
@@ -2094,7 +2113,14 @@ async function addActie(pid, wpId) {
 async function saveFeedback(pid, wpId) {
   const p = PLAYERS.find(x=>x.id==pid);
   const w = (p?.werkpunten||[]).find(x=>x.id==wpId);
-  if (w) { w.feedback=document.getElementById('fb'+wpId)?.value; await saveWp(w,pid); notify(); }
+  if (w) {
+    w.feedback = document.getElementById('fb'+wpId)?.value || '';
+    await saveWp(w, pid);
+    notify('Feedback opgeslagen');
+    // Re-render so coach sees confirmed state
+    renderSpelerDetail(p);
+    showSpelerTab(1);
+  }
 }
 
 async function delWerkpunt(pid, wpId) {
@@ -2734,6 +2760,17 @@ async function delMatchKpi(pid, idx) {
   notify('Verwijderd');
 }
 
+
+async function addPrincipeToWp(pid, wpId, label) {
+  const p = PLAYERS.find(x=>x.id==pid);
+  const w = (p?.werkpunten||[]).find(x=>x.id==wpId);
+  if (w && !(w.principes||[]).includes(label)) {
+    w.principes = [...(w.principes||[]), label];
+    await saveWp(w, pid);
+    renderSpelerDetail(p);
+    showSpelerTab(1);
+  }
+}
 showSpinner(true);
 init();
 </script>
