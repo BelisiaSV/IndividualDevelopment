@@ -45,7 +45,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
 #menuToggle{background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:6px 8px;flex-shrink:0;border-radius:6px;line-height:1;}
 #menuToggle:hover{background:var(--bg);}
 #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;}
+.hide-mobile{display:block;}
+.show-mobile{display:none;}
 @media(max-width:700px){
+  .hide-mobile{display:none!important;}
+  .show-mobile{display:block!important;}
   #sidebar{transform:translateX(-100%);width:240px;}
   #sidebar.open{transform:translateX(0);}
   #sidebar.collapsed{width:240px;}
@@ -3023,8 +3027,8 @@ function showDayDetail(weekIdx, dayIdx) {
           <div style="background:#E6F4FB;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:11px;color:var(--t3)">Totale afstand</div><div style="font-size:20px;font-weight:700;color:#2B7FA8">${(totAfstand/1000).toFixed(2)} km</div></div>
           <div style="background:#E6F4FB;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:11px;color:var(--t3)">Totale tijd</div><div style="font-size:20px;font-weight:700;color:#2B7FA8">${totTijd} min</div></div>
         </div>
-        <div style="overflow-x:auto">
-          <table class="tbl">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table class="tbl" style="min-width:500px">
             <thead><tr style="background:#1E3A5F;color:#fff">
               <th style="color:#fff">Blok</th><th style="color:#fff">Duur (min)</th><th style="color:#fff">Snelheid (km/h)</th>
               <th style="color:#fff">Afstand (m)</th><th style="color:#fff">Tijdslabel</th>
@@ -3058,13 +3062,13 @@ function showDayDetail(weekIdx, dayIdx) {
     content = `
       <div class="card" style="margin-bottom:12px">
         <div class="cardTitle">💪 ${day.name} – ${day.label}</div>
-        <div style="overflow-x:auto">
-          <table class="tbl">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table class="tbl" style="min-width:600px">
             <thead><tr style="background:#6D28D9;color:#fff">
               <th style="color:#fff">#</th><th style="color:#fff">Oefening</th>
               <th style="color:#fff">Sets</th><th style="color:#fff">Rust (sec)</th>
               <th style="color:#fff">Reps</th><th style="color:#fff">Gewicht</th>
-              <th style="color:#fff">Video</th>
+              <th style="color:#fff">Video</th><th style="color:#fff">QR</th>
             </tr></thead>
             <tbody>
               ${day.oefeningen.map(o=>`<tr>
@@ -3074,11 +3078,12 @@ function showDayDetail(weekIdx, dayIdx) {
                 <td>${o.rust_sets||''}</td>
                 <td style="font-weight:600">${o.reps||''}</td>
                 <td>${o.gewicht||'nvt'}</td>
-                <td style="white-space:nowrap">
-                ${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px;font-weight:600">▶ Video</a> `:''}
-                ${o.qr_img?`<span style="cursor:pointer;font-size:12px" onclick="showQrModal('${o.qr_img}')">📷 QR</span> `:''}
-                ${isCoach()?`<button class="btn btnG sm" style="font-size:10px" onclick="editOefMedia(${weekIdx},${dayIdx},${o.nr-1})">✏</button>`:''}
-                ${!o.qr_url&&!o.qr_img&&!isCoach()?'<span style="color:var(--t3);font-size:11px">—</span>':''}
+                <td style="text-align:center">
+                ${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px;font-weight:600">▶ Video</a>`:'<span style="color:var(--t3)">—</span>'}
+                ${isCoach()?`<button class="btn btnG sm" style="font-size:10px;margin-left:4px" onclick="editOefMedia(${weekIdx},${dayIdx},${o.nr-1})">✏</button>`:''}
+              </td>
+              <td style="text-align:center">
+                ${o.qr_img?`<img src="${o.qr_img}" style="width:48px;height:48px;object-fit:contain;border-radius:4px;border:1px solid var(--brd);cursor:pointer" onclick="showQrModal('${o.qr_img}')" title="Klik om te vergroten">`:'<span style="color:var(--t3)">—</span>'}
               </td>
               </tr>`).join('')}
             </tbody>
@@ -3248,12 +3253,14 @@ function spelerShowDay(weekIdx, dayIdx) {
   } else if (day.type === 'exercise') {
     content = `<div class="card" style="border-left:3px solid #8B5CF6">
       <div class="cardTitle">💪 ${day.name} – ${day.label}</div>
-      <div style="overflow-x:auto">
+      <!-- Desktop tabel -->
+      <div class="hide-mobile" style="overflow-x:auto">
         <table class="tbl">
           <thead><tr style="background:#6D28D9;color:#fff">
             <th style="color:#fff">#</th><th style="color:#fff">Oefening</th>
             <th style="color:#fff">Sets</th><th style="color:#fff">Rust</th>
-            <th style="color:#fff">Reps</th><th style="color:#fff">Gewicht</th><th style="color:#fff">Video</th>
+            <th style="color:#fff">Reps</th><th style="color:#fff">Gewicht</th>
+            <th style="color:#fff">Video</th><th style="color:#fff">QR</th>
           </tr></thead>
           <tbody>
             ${day.oefeningen.map(o=>`<tr>
@@ -3262,14 +3269,30 @@ function spelerShowDay(weekIdx, dayIdx) {
               <td>${o.sets||''}</td><td>${o.rust_sets?o.rust_sets+'s':''}</td>
               <td style="font-weight:600">${o.reps||''}</td>
               <td>${o.gewicht||'nvt'}</td>
-              <td style="white-space:nowrap">
-              ${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-weight:600">▶ Video</a>`:''}
-              ${o.qr_img?` <span style="cursor:pointer" onclick="showQrModal('${o.qr_img}')">📷</span>`:''}
-              ${!o.qr_url&&!o.qr_img?'<span style="color:var(--t3)">—</span>':''}
-            </td>
+              <td style="text-align:center">${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-weight:600">▶ Video</a>`:'—'}</td>
+              <td style="text-align:center">${o.qr_img?`<img src="${o.qr_img}" style="width:48px;height:48px;object-fit:contain;border-radius:4px;border:1px solid var(--brd);cursor:pointer" onclick="showQrModal('${o.qr_img}')">`:'—'}</td>
             </tr>`).join('')}
           </tbody>
         </table>
+      </div>
+      <!-- Mobiele kaarten -->
+      <div class="show-mobile">
+        ${day.oefeningen.map(o=>`<div style="border:1px solid var(--brd);border-radius:8px;padding:12px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="width:26px;height:26px;border-radius:50%;background:#6D28D9;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${o.nr}</div>
+            <div style="font-weight:600;font-size:14px">${o.naam}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+            <div style="background:var(--bg);border-radius:6px;padding:6px 8px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase">Sets</div><div style="font-weight:700">${o.sets||'—'}</div></div>
+            <div style="background:var(--bg);border-radius:6px;padding:6px 8px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase">Reps</div><div style="font-weight:700">${o.reps||'—'}</div></div>
+            <div style="background:var(--bg);border-radius:6px;padding:6px 8px"><div style="font-size:9px;color:var(--t3);text-transform:uppercase">Rust</div><div style="font-weight:700">${o.rust_sets?o.rust_sets+'s':'—'}</div></div>
+          </div>
+          ${o.gewicht&&o.gewicht!=='nvt'?`<div style="font-size:12px;color:var(--t2);margin-bottom:6px">⚖ Gewicht: <strong>${o.gewicht}</strong></div>`:''}
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:#E6F4FB;border-radius:6px;color:var(--blue);font-size:12px;font-weight:700;text-decoration:none">▶ Video bekijken</a>`:''}
+            ${o.qr_img?`<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><img src="${o.qr_img}" style="width:70px;height:70px;object-fit:contain;border-radius:6px;border:1px solid var(--brd);cursor:pointer" onclick="showQrModal('${o.qr_img}')"><div style="font-size:10px;color:var(--t3)">QR scannen</div></div>`:''}
+          </div>
+        </div>`).join('')}
       </div>
     </div>`;
   }
