@@ -242,6 +242,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
         <div class="page" id="pgWerkpunten"></div>
         <div class="page" id="pgPop"></div>
         <div class="page" id="pgAnalyse"></div>
+        <div class="page" id="pgVoorbereiding"></div>
         <div class="page" id="pgFysiek"></div>
         <div class="page" id="pgTraining"></div>
         <div class="page" id="pgOefenvormen"></div>
@@ -499,6 +500,15 @@ function loadKPIS() {
 }
 let KPIS = loadKPIS();
 function saveKPIS() { localStorage.setItem('custom_kpis', JSON.stringify(KPIS)); }
+
+// ============================================================
+// VOORBEREIDINGSSCHEMA
+// ============================================================
+const VOORBEREIDINGSSCHEMA = [{"week":1,"start_date":"2025-05-25","days":[{"name":"Maandag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":20,"snelheid":12,"afstand":4000,"start":10,"eind":30,"tijdslabel":"10-30 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":30,"eind":40,"tijdslabel":"30-40 min"}],"oefeningen":[],"totaal_min":40},{"name":"Dinsdag","label":"Mob & Flex","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Woensdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":5,"snelheid":10,"afstand":833,"start":0,"eind":5,"tijdslabel":"0-5 min"},{"blok":2,"duur":6,"snelheid":13,"afstand":1300,"start":5,"eind":11,"tijdslabel":"5-11 min"},{"blok":3,"duur":2,"snelheid":10,"afstand":333,"start":11,"eind":13,"tijdslabel":"11-13 min"},{"blok":4,"duur":6,"snelheid":13,"afstand":1300,"start":13,"eind":19,"tijdslabel":"13-19 min"},{"blok":5,"duur":2,"snelheid":10,"afstand":333,"start":19,"eind":21,"tijdslabel":"19-21 min"},{"blok":6,"duur":6,"snelheid":13,"afstand":1300,"start":21,"eind":27,"tijdslabel":"21-27 min"},{"blok":7,"duur":2,"snelheid":10,"afstand":333,"start":27,"eind":29,"tijdslabel":"27-29 min"},{"blok":8,"duur":5,"snelheid":10,"afstand":833,"start":29,"eind":34,"tijdslabel":"29-34 min"}],"oefeningen":[],"totaal_min":34},{"name":"Donderdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"goblet squat","sets":3,"rust_sets":120,"reps":"25","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"hamstring bridge 90° ","sets":3,"rust_sets":120,"reps":"14","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"lunge romp rotatie L/R","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":4,"naam":"zijwaarste sprongen L/R","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"","gewicht":"4-8 kg","qr_url":""},{"nr":5,"naam":"voorwaarste plank ","sets":3,"rust_sets":120,"reps":"15 L/R","rust_reps":"","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Vrijdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":20,"snelheid":12,"afstand":4000,"start":10,"eind":30,"tijdslabel":"10-30 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":30,"eind":40,"tijdslabel":"30-40 min"}],"oefeningen":[],"totaal_min":40},{"name":"Zaterdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"goblet squat","sets":3,"rust_sets":120,"reps":"25","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"hamstring bridge 90° ","sets":3,"rust_sets":120,"reps":"14","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"lunge romp rotatie L/R","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":4,"naam":"zijwaarste sprongen L/R","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"","gewicht":"4-8 kg","qr_url":""},{"nr":5,"naam":"voorwaarste plank ","sets":3,"rust_sets":120,"reps":"15 L/R","rust_reps":"","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Zondag","label":"Vrije dag","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0}]},{"week":2,"start_date":"2025-06-01","days":[{"name":"Maandag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":20,"snelheid":13,"afstand":4333,"start":10,"eind":30,"tijdslabel":"10-30 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":30,"eind":40,"tijdslabel":"30-40 min"}],"oefeningen":[],"totaal_min":40},{"name":"Dinsdag","label":"Mob & Flex","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Woensdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":5,"snelheid":10,"afstand":833,"start":0,"eind":5,"tijdslabel":"0-5 min"},{"blok":2,"duur":6,"snelheid":14,"afstand":1400,"start":5,"eind":11,"tijdslabel":"5-11 min"},{"blok":3,"duur":2,"snelheid":10,"afstand":333,"start":11,"eind":13,"tijdslabel":"11-13 min"},{"blok":4,"duur":6,"snelheid":14,"afstand":1400,"start":13,"eind":19,"tijdslabel":"13-19 min"},{"blok":5,"duur":2,"snelheid":10,"afstand":333,"start":19,"eind":21,"tijdslabel":"19-21 min"},{"blok":6,"duur":6,"snelheid":14,"afstand":1400,"start":21,"eind":27,"tijdslabel":"21-27 min"},{"blok":7,"duur":2,"snelheid":10,"afstand":333,"start":27,"eind":29,"tijdslabel":"27-29 min"},{"blok":8,"duur":5,"snelheid":10,"afstand":833,"start":29,"eind":34,"tijdslabel":"29-34 min"}],"oefeningen":[],"totaal_min":34},{"name":"Donderdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"bulgarian splitsquat","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"steun 1 been- diver met gewicht","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":3,"naam":"kopenhagen adductor hold","sets":3,"rust_sets":120,"reps":"4x 15 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"box jump","sets":3,"rust_sets":120,"reps":"12","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"zijwaartse plank knie in/uit","sets":3,"rust_sets":120,"reps":"2x10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Vrijdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":20,"snelheid":14,"afstand":4667,"start":10,"eind":30,"tijdslabel":"10-30 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":30,"eind":40,"tijdslabel":"30-40 min"}],"oefeningen":[],"totaal_min":40},{"name":"Zaterdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"bulgarian splitsquat","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"steun 1 been- diver met gewicht","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":3,"naam":"kopenhagen adductor hold","sets":3,"rust_sets":120,"reps":"4x 15 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"box jump","sets":3,"rust_sets":120,"reps":"12","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"zijwaartse plank knie in/uit","sets":3,"rust_sets":120,"reps":"2x10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Zondag","label":"Vrije dag","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0}]},{"week":3,"start_date":"2025-06-08","days":[{"name":"Maandag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":30,"snelheid":12,"afstand":6000,"start":10,"eind":40,"tijdslabel":"10-40 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":40,"eind":50,"tijdslabel":"40-50 min"}],"oefeningen":[],"totaal_min":50},{"name":"Dinsdag","label":"Mob & Flex","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Woensdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":5,"snelheid":10,"afstand":833,"start":0,"eind":5,"tijdslabel":"0-5 min"},{"blok":2,"duur":6,"snelheid":13,"afstand":1300,"start":5,"eind":11,"tijdslabel":"5-11 min"},{"blok":3,"duur":2,"snelheid":10,"afstand":333,"start":11,"eind":13,"tijdslabel":"11-13 min"},{"blok":4,"duur":6,"snelheid":13,"afstand":1300,"start":13,"eind":19,"tijdslabel":"13-19 min"},{"blok":5,"duur":2,"snelheid":10,"afstand":333,"start":19,"eind":21,"tijdslabel":"19-21 min"},{"blok":6,"duur":6,"snelheid":13,"afstand":1300,"start":21,"eind":27,"tijdslabel":"21-27 min"},{"blok":7,"duur":2,"snelheid":10,"afstand":333,"start":27,"eind":29,"tijdslabel":"27-29 min"},{"blok":7,"duur":6,"snelheid":13,"afstand":1300,"start":29,"eind":35,"tijdslabel":"29-35 min"},{"blok":8,"duur":7,"snelheid":10,"afstand":1167,"start":35,"eind":42,"tijdslabel":"35-42 min"}],"oefeningen":[],"totaal_min":42},{"name":"Donderdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"step up/down van stoel met gewicht","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"hip thrust 1 been","sets":3,"rust_sets":120,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"dumbbel overhead back slide","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt ","gewicht":"4-8 kg","qr_url":""},{"nr":4,"naam":"tripple hop jump","sets":3,"rust_sets":120,"reps":"10","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"mountain climber","sets":3,"rust_sets":120,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Vrijdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":20,"snelheid":12,"afstand":4000,"start":10,"eind":30,"tijdslabel":"10-30 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":30,"eind":40,"tijdslabel":"30-40 min"}],"oefeningen":[],"totaal_min":40},{"name":"Zaterdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"step up/down van stoel met gewicht","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"hip thrust 1 been","sets":3,"rust_sets":120,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"dumbbel overhead back slide","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt ","gewicht":"4-8 kg","qr_url":""},{"nr":4,"naam":"tripple hop jump","sets":3,"rust_sets":120,"reps":"10","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"mountain climber","sets":3,"rust_sets":120,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Zondag","label":"Vrije dag","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0}]},{"week":4,"start_date":"2025-06-15","days":[{"name":"Maandag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":30,"snelheid":13,"afstand":6500,"start":10,"eind":40,"tijdslabel":"10-40 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":40,"eind":50,"tijdslabel":"40-50 min"}],"oefeningen":[],"totaal_min":50},{"name":"Dinsdag","label":"Mob & Flex","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Woensdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":5,"snelheid":10,"afstand":833,"start":0,"eind":5,"tijdslabel":"0-5 min"},{"blok":2,"duur":6,"snelheid":14,"afstand":1400,"start":5,"eind":11,"tijdslabel":"5-11 min"},{"blok":3,"duur":2,"snelheid":10,"afstand":333,"start":11,"eind":13,"tijdslabel":"11-13 min"},{"blok":4,"duur":6,"snelheid":14,"afstand":1400,"start":13,"eind":19,"tijdslabel":"13-19 min"},{"blok":5,"duur":2,"snelheid":10,"afstand":333,"start":19,"eind":21,"tijdslabel":"19-21 min"},{"blok":6,"duur":6,"snelheid":14,"afstand":1400,"start":21,"eind":27,"tijdslabel":"21-27 min"},{"blok":7,"duur":2,"snelheid":10,"afstand":333,"start":27,"eind":29,"tijdslabel":"27-29 min"},{"blok":7,"duur":6,"snelheid":14,"afstand":1400,"start":29,"eind":35,"tijdslabel":"29-35 min"},{"blok":8,"duur":7,"snelheid":10,"afstand":1167,"start":35,"eind":42,"tijdslabel":"35-42 min"}],"oefeningen":[],"totaal_min":42},{"name":"Donderdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"thruster + heel raise","sets":3,"rust_sets":120,"reps":"20","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"hamstring bridge gestrekte knieen hielen verhoogd L/R uitstrekken","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"single leg squat multiple direction met gewicht","sets":3,"rust_sets":120,"reps":"3L/R + V/A","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":4,"naam":"splitsquat jump","sets":3,"rust_sets":120,"reps":"16x","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"sit ups","sets":3,"rust_sets":120,"reps":"15","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Vrijdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":20,"snelheid":13,"afstand":4333,"start":10,"eind":30,"tijdslabel":"10-30 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":30,"eind":40,"tijdslabel":"30-40 min"}],"oefeningen":[],"totaal_min":40},{"name":"Zaterdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"thruster + heel raise","sets":3,"rust_sets":120,"reps":"20","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"hamstring bridge gestrekte knieen hielen verhoogd L/R uitstrekken","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"single leg squat multiple direction met gewicht","sets":3,"rust_sets":120,"reps":"3L/R + V/A","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":4,"naam":"splitsquat jump","sets":3,"rust_sets":120,"reps":"16x","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"sit ups","sets":3,"rust_sets":120,"reps":"15","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Zondag","label":"Vrije dag","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0}]},{"week":5,"start_date":"2025-06-22","days":[{"name":"Maandag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":30,"snelheid":14,"afstand":7000,"start":10,"eind":40,"tijdslabel":"10-40 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":40,"eind":50,"tijdslabel":"40-50 min"}],"oefeningen":[],"totaal_min":50},{"name":"Dinsdag","label":"Mob & Flex","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Woensdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":5,"snelheid":10,"afstand":833,"start":0,"eind":5,"tijdslabel":"0-5 min"},{"blok":2,"duur":6,"snelheid":15,"afstand":1500,"start":5,"eind":11,"tijdslabel":"5-11 min"},{"blok":3,"duur":2,"snelheid":10,"afstand":333,"start":11,"eind":13,"tijdslabel":"11-13 min"},{"blok":4,"duur":6,"snelheid":15,"afstand":1500,"start":13,"eind":19,"tijdslabel":"13-19 min"},{"blok":5,"duur":2,"snelheid":10,"afstand":333,"start":19,"eind":21,"tijdslabel":"19-21 min"},{"blok":6,"duur":6,"snelheid":15,"afstand":1500,"start":21,"eind":27,"tijdslabel":"21-27 min"},{"blok":7,"duur":2,"snelheid":10,"afstand":333,"start":27,"eind":29,"tijdslabel":"27-29 min"},{"blok":8,"duur":6,"snelheid":15,"afstand":1500,"start":29,"eind":35,"tijdslabel":"29-35 min"},{"blok":9,"duur":7,"snelheid":10,"afstand":1167,"start":35,"eind":42,"tijdslabel":"35-42 min"}],"oefeningen":[],"totaal_min":42},{"name":"Donderdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"goblet side lunge","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"hamstring bridge + ball squeeze","sets":3,"rust_sets":120,"reps":"10x3' squeeze","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"1 been staan: bal achter standbeen + heel raise","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"squat jump met gewicht","sets":3,"rust_sets":120,"reps":"20","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":5,"naam":"w press + benen open/toe","sets":3,"rust_sets":120,"reps":"20","rust_reps":"nvt","gewicht":"1-2 kg","qr_url":""}],"totaal_min":0},{"name":"Vrijdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":10,"snelheid":10,"afstand":1667,"start":0,"eind":10,"tijdslabel":"0-10 min"},{"blok":2,"duur":20,"snelheid":14,"afstand":4667,"start":10,"eind":30,"tijdslabel":"10-30 min"},{"blok":3,"duur":10,"snelheid":10,"afstand":1667,"start":30,"eind":40,"tijdslabel":"30-40 min"}],"oefeningen":[],"totaal_min":40},{"name":"Zaterdag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"goblet side lunge","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"hamstring bridge + ball squeeze","sets":3,"rust_sets":120,"reps":"10x3' squeeze","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"1 been staan: bal achter standbeen + heel raise","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"squat jump met gewicht","sets":3,"rust_sets":120,"reps":"20","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":5,"naam":"w press + benen open/toe","sets":3,"rust_sets":120,"reps":"20","rust_reps":"nvt","gewicht":"1-2 kg","qr_url":""}],"totaal_min":0},{"name":"Zondag","label":"Vrije dag","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0}]},{"week":6,"start_date":"2025-06-29","days":[{"name":"Maandag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"back step / front step met rotatie romp ","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"heel slides / 1 been","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"kopenhagen adductor","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"kaatssprongen","sets":3,"rust_sets":120,"reps":"60","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"plank handensteun - commando + opendraaien ","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Dinsdag","label":"Veldtraining op de club","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0},{"name":"Woensdag","label":"Mobiliteit & Flexibiliteit","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Donderdag","label":"Veldtraining op de club","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0},{"name":"Vrijdag","label":"Mobiliteit & Flexibiliteit","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Zaterdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":5,"snelheid":10,"afstand":833,"start":0,"eind":5,"tijdslabel":"0-5 min"},{"blok":2,"duur":40,"snelheid":12,"afstand":8000,"start":5,"eind":45,"tijdslabel":"5-45 min"},{"blok":3,"duur":5,"snelheid":10,"afstand":833,"start":45,"eind":50,"tijdslabel":"45-50 min"}],"oefeningen":[],"totaal_min":50},{"name":"Zondag","label":"Vrije dag","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0}]},{"week":7,"start_date":"2025-07-06","days":[{"name":"Maandag","label":"Basis kracht","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"1 been box squat met gewicht","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":2,"naam":"zijwaartse plank leg raise","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"sumo squat met gewicht","sets":3,"rust_sets":120,"reps":"25","rust_reps":"nvt","gewicht":"4-8 kg","qr_url":""},{"nr":4,"naam":"lunge jump","sets":3,"rust_sets":120,"reps":"10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"push up","sets":3,"rust_sets":120,"reps":"25","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Dinsdag","label":"Veldtraining op de club","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0},{"name":"Woensdag","label":"Mobiliteit & Flexibiliteit","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Donderdag","label":"Veldtraining op de club","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0},{"name":"Vrijdag","label":"Mobiliteit & Flexibiliteit","type":"exercise","blokken":[],"oefeningen":[{"nr":1,"naam":"hamstrings dynamische stretch","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":2,"naam":"achterste keten statische stretch","sets":2,"rust_sets":90,"reps":"3x20 sec","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":3,"naam":"adductoren dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":4,"naam":"bilspieren statische stretch","sets":2,"rust_sets":90,"reps":"2x20 sec L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":5,"naam":"quadriceps dynamische stretch","sets":2,"rust_sets":90,"reps":"1x15","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":6,"naam":"heup extensie mobilliteit","sets":2,"rust_sets":90,"reps":"2x 10 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":7,"naam":"heup endo rotatie mobilliteit","sets":2,"rust_sets":90,"reps":"15 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":8,"naam":"heup en bovenrug mobilliteit","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":9,"naam":"rug flexie/extensie mobilliteit","sets":2,"rust_sets":90,"reps":"8","rust_reps":"nvt","gewicht":"","qr_url":""},{"nr":10,"naam":"rug rotatie","sets":2,"rust_sets":90,"reps":"8 L/R","rust_reps":"nvt","gewicht":"","qr_url":""}],"totaal_min":0},{"name":"Zaterdag","label":"Loopprogramma","type":"run","blokken":[{"blok":1,"duur":5,"snelheid":10,"afstand":833,"start":0,"eind":5,"tijdslabel":"0-5 min"},{"blok":2,"duur":40,"snelheid":12,"afstand":8000,"start":5,"eind":45,"tijdslabel":"5-45 min"},{"blok":3,"duur":5,"snelheid":10,"afstand":833,"start":45,"eind":50,"tijdslabel":"45-50 min"}],"oefeningen":[],"totaal_min":50},{"name":"Zondag","label":"Vrije dag","type":"rest","blokken":[],"oefeningen":[],"totaal_min":0}]}];
+
+const STRAVA_URL = 'https://www.strava.com/clubs/belisia';
+let SCHEMA_WEEK_VIEW = null; // null = auto (current week)
+
 function loadPRINCIPES() {
   try {
     const s = localStorage.getItem('custom_principes');
@@ -769,6 +779,7 @@ function buildSidebar() {
         <div class="sbItem" onclick="goPage('Oefenvormen','pgOefenvormen',renderOefenvormen)">🎬 Oefenvormen</div>
         <div class="sbLabel">Meer</div>
         <div class="sbItem" onclick="goPage('Export','pgExport',renderExport)">📥 Export</div>
+        <div class="sbItem" onclick="goPage('Voorbereiding','pgVoorbereiding',renderVoorbereiding)">🏃 Voorbereiding</div>
         <div class="sbItem" onclick="goPage('Portfolio','pgPortfolio',renderPortfolio)">🏅 Portfolio</div>
         <div class="sbItem" onclick="goPage('Pro License','pgLicentie',renderLicentie)">🎓 Pro License</div>
       </div>
@@ -789,6 +800,7 @@ function buildSidebar() {
       {icon:'⚖', label:'Gewicht', view:'gewicht'},
       {icon:'💬', label:'POP / PAP', view:'pop'},
       {icon:"📊", label:"KPI's", view:"kpis"},
+      {icon:"🏃", label:"Voorbereiding", view:"voorbereiding"},
     ];
     document.getElementById('sidebar').innerHTML = `
       <div class="sbHead">${logo}<div><div class="sbTitle">${CLUB_NAME}</div><div class="sbSub">Performance Platform</div></div></div>
@@ -899,6 +911,7 @@ function buildSpelerDashboard(p) {
     gewicht: buildSpelerGewicht(p),
     pop: buildSpelerPop(p),
     kpis: buildSpelerKpis(p),
+    voorbereiding: buildSpelerVoorbereiding(),
   };
 
   const tabStyle = (id) => SPELER_VIEW === id
@@ -2771,6 +2784,345 @@ async function addPrincipeToWp(pid, wpId, label) {
     showSpelerTab(1);
   }
 }
+
+// ============================================================
+// VOORBEREIDING MODULE
+// ============================================================
+
+function getCurrentSchemaWeek() {
+  const today = new Date();
+  for (let i = VOORBEREIDINGSSCHEMA.length - 1; i >= 0; i--) {
+    if (today >= new Date(VOORBEREIDINGSSCHEMA[i].start_date)) return i;
+  }
+  return 0;
+}
+
+function renderVoorbereiding() {
+  const weekIdx = SCHEMA_WEEK_VIEW !== null ? SCHEMA_WEEK_VIEW : getCurrentSchemaWeek();
+  const week = VOORBEREIDINGSSCHEMA[weekIdx];
+  document.getElementById('topActions').innerHTML = isCoach()
+    ? `<button class="btn btnP sm" onclick="openSchemaEditor(${weekIdx})">✏ Schema bewerken</button>`
+    : '';
+  document.getElementById('pgVoorbereiding').innerHTML = buildVoorbereidingView(week, weekIdx);
+}
+
+function buildVoorbereidingView(week, weekIdx) {
+  const weekStart = new Date(week.start_date);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+  const fmt = d => d.toLocaleDateString('nl-BE',{day:'numeric',month:'short'});
+
+  // Week navigator
+  const nav = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn btnG sm" onclick="SCHEMA_WEEK_VIEW=Math.max(0,${weekIdx}-1);renderVoorbereiding()" ${weekIdx===0?'disabled':''}>◀</button>
+        <div>
+          <div style="font-size:16px;font-weight:700">Week ${week.week}</div>
+          <div style="font-size:12px;color:var(--t3)">${fmt(weekStart)} – ${fmt(weekEnd)}</div>
+        </div>
+        <button class="btn btnG sm" onclick="SCHEMA_WEEK_VIEW=Math.min(${VOORBEREIDINGSSCHEMA.length-1},${weekIdx}+1);renderVoorbereiding()" ${weekIdx===VOORBEREIDINGSSCHEMA.length-1?'disabled':''}>▶</button>
+        <button class="btn btnG sm" onclick="SCHEMA_WEEK_VIEW=null;renderVoorbereiding()">Vandaag</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="${STRAVA_URL}" target="_blank" class="btn btnP sm" style="text-decoration:none">🏃 Strava Club</a>
+        ${VOORBEREIDINGSSCHEMA.map((_,i)=>`<button class="btn ${i===weekIdx?'btnP':'btnG'} sm" onclick="SCHEMA_WEEK_VIEW=${i};renderVoorbereiding()">W${i+1}</button>`).join('')}
+      </div>
+    </div>`;
+
+  // Week overview cards
+  const typeColors = {run:'#E6F4FB',exercise:'#F3E8FF',rest:'var(--bg)'};
+  const typeIcons = {run:'🏃',exercise:'💪',rest:'😴'};
+  const typeBorderColors = {run:'#4FA8D1',exercise:'#8B5CF6',rest:'var(--brd)'};
+
+  const dayCards = week.days.map((day,di) => {
+    const hasContent = day.blokken.length > 0 || day.oefeningen.length > 0;
+    const totAfstand = day.blokken.reduce((s,b)=>s+(b.afstand||0),0);
+    return `<div style="background:${typeColors[day.type]||'var(--bg)'};border:1.5px solid ${typeBorderColors[day.type]||'var(--brd)'};border-radius:8px;padding:10px;cursor:${hasContent?'pointer':'default'}"
+      onclick="${hasContent?`showDayDetail(${weekIdx},${di})`:''}">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">${typeIcons[day.type]||''} ${day.name}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--txt);margin-bottom:4px">${day.label}</div>
+      ${day.type==='run'&&totAfstand?`<div style="font-size:11px;color:#2B7FA8">📏 ${(totAfstand/1000).toFixed(2)} km · ⏱ ${day.totaal_min} min</div>`:''}
+      ${day.type==='exercise'&&day.oefeningen.length?`<div style="font-size:11px;color:#6D28D9">${day.oefeningen.length} oefeningen</div>`:''}
+      ${day.type==='rest'?`<div style="font-size:11px;color:var(--t3)">Rust & herstel</div>`:''}
+    </div>`;
+  }).join('');
+
+  // Completion tracking (coach only)
+  const completionKey = 'schema_done_w' + weekIdx;
+  const doneData = JSON.parse(localStorage.getItem(completionKey)||'{}');
+  const playerChecks = isCoach() ? `
+    <div class="card" style="margin-top:16px">
+      <div class="cardTitle">✅ Voltooiing – Week ${week.week}</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:10px">Afvinken als je op Strava hebt gecontroleerd wie gepost heeft.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
+        ${PLAYERS.map(p=>{
+          const done = doneData[p.id];
+          return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${done?'#F0FDF4':'var(--bg)'};border:1px solid ${done?'#2EAA6A':'var(--brd)'};border-radius:7px;cursor:pointer"
+            onclick="toggleSchemaDone(${weekIdx},'${p.id}')">
+            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${done?'#2EAA6A':'var(--brd)'};background:${done?'#2EAA6A':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              ${done?'<span style="color:#fff;font-size:10px">✓</span>':''}
+            </div>
+            <div style="width:24px;height:24px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0">${ini(p.name)}</div>
+            <div style="font-size:12px;font-weight:500;flex:1">${p.name}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : '';
+
+  return `
+    <div style="background:var(--txt);border-radius:10px;padding:16px 20px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:var(--fc);font-size:18px;font-weight:700;color:#fff">🏋️ Voorbereidingsschema</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.5)">SV Belisia · ${VOORBEREIDINGSSCHEMA.length} weken · Start 25/5</div>
+        </div>
+        <a href="${STRAVA_URL}" target="_blank" style="background:#FC4C02;color:#fff;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none">🏃 Strava</a>
+      </div>
+    </div>
+    ${nav}
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px">${dayCards}</div>
+    <div id="dayDetailContainer"></div>
+    ${playerChecks}`;
+}
+
+function showDayDetail(weekIdx, dayIdx) {
+  const day = VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx];
+  const container = document.getElementById('dayDetailContainer');
+  if (!container) return;
+
+  let content = '';
+  if (day.type === 'run') {
+    const totAfstand = day.blokken.reduce((s,b)=>s+(b.afstand||0),0);
+    const totTijd = day.totaal_min;
+    content = `
+      <div class="card" style="margin-bottom:12px">
+        <div class="cardTitle">🏃 ${day.name} – ${day.label}</div>
+        <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+          <div style="background:#E6F4FB;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:11px;color:var(--t3)">Totale afstand</div><div style="font-size:20px;font-weight:700;color:#2B7FA8">${(totAfstand/1000).toFixed(2)} km</div></div>
+          <div style="background:#E6F4FB;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:11px;color:var(--t3)">Totale tijd</div><div style="font-size:20px;font-weight:700;color:#2B7FA8">${totTijd} min</div></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr style="background:#1E3A5F;color:#fff">
+              <th style="color:#fff">Blok</th><th style="color:#fff">Duur (min)</th><th style="color:#fff">Snelheid (km/h)</th>
+              <th style="color:#fff">Afstand (m)</th><th style="color:#fff">Tijdslabel</th>
+            </tr></thead>
+            <tbody>
+              ${day.blokken.map(b=>`<tr>
+                <td style="font-weight:700">${b.blok}</td>
+                <td>${b.duur}</td>
+                <td>${b.snelheid}</td>
+                <td style="color:#2EAA6A;font-weight:600">${b.afstand||''}</td>
+                <td style="color:var(--t3)">${b.tijdslabel}</td>
+              </tr>`).join('')}
+              <tr style="background:#FEF3C7;font-weight:700">
+                <td>Totaal</td><td>${totTijd}</td><td></td>
+                <td style="color:#2EAA6A">${totAfstand}</td><td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:#E6F4FB;border-radius:8px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">📱</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#2B7FA8">Vergeet niet te posten op Strava!</div>
+            <a href="${STRAVA_URL}" target="_blank" style="font-size:11px;color:#FC4C02">→ ${STRAVA_URL}</a>
+          </div>
+        </div>
+      </div>`;
+
+  } else if (day.type === 'exercise') {
+    content = `
+      <div class="card" style="margin-bottom:12px">
+        <div class="cardTitle">💪 ${day.name} – ${day.label}</div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr style="background:#6D28D9;color:#fff">
+              <th style="color:#fff">#</th><th style="color:#fff">Oefening</th>
+              <th style="color:#fff">Sets</th><th style="color:#fff">Rust (sec)</th>
+              <th style="color:#fff">Reps</th><th style="color:#fff">Gewicht</th>
+              <th style="color:#fff">Video</th>
+            </tr></thead>
+            <tbody>
+              ${day.oefeningen.map(o=>`<tr>
+                <td style="color:var(--t3)">${o.nr}</td>
+                <td style="font-weight:500">${o.naam}</td>
+                <td>${o.sets||''}</td>
+                <td>${o.rust_sets||''}</td>
+                <td style="font-weight:600">${o.reps||''}</td>
+                <td>${o.gewicht||'nvt'}</td>
+                <td>${o.qr_url?`<a href="${o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px">▶ Bekijk</a>`:(isCoach()?`<button class="btn btnG sm" style="font-size:10px" onclick="editOefUrl(${weekIdx},${dayIdx},${o.nr-1})">+ Link</button>`:'<span style="color:var(--t3);font-size:11px">—</span>')}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  container.innerHTML = content;
+  container.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function toggleSchemaDone(weekIdx, playerId) {
+  const key = 'schema_done_w' + weekIdx;
+  const data = JSON.parse(localStorage.getItem(key)||'{}');
+  data[playerId] = !data[playerId];
+  localStorage.setItem(key, JSON.stringify(data));
+  renderVoorbereiding();
+}
+
+function editOefUrl(weekIdx, dayIdx, oefIdx) {
+  const url = prompt('Video link voor deze oefening (YouTube, HUDL, etc.):',
+    VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx].oefeningen[oefIdx].qr_url||'');
+  if (url === null) return;
+  VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx].oefeningen[oefIdx].qr_url = url;
+  // Save to localStorage
+  localStorage.setItem('schema_urls', JSON.stringify(
+    VOORBEREIDINGSSCHEMA.map(w=>w.days.map(d=>d.oefeningen.map(o=>o.qr_url||'')))
+  ));
+  renderVoorbereiding();
+  showDayDetail(weekIdx, dayIdx);
+  notify('Link opgeslagen');
+}
+
+function openSchemaEditor(weekIdx) {
+  // Load saved URLs from localStorage
+  try {
+    const saved = JSON.parse(localStorage.getItem('schema_urls')||'null');
+    if (saved) {
+      saved.forEach((wDays,wi) => wDays.forEach((dOef,di) => dOef.forEach((url,oi) => {
+        if (VOORBEREIDINGSSCHEMA[wi]?.days[di]?.oefeningen[oi])
+          VOORBEREIDINGSSCHEMA[wi].days[di].oefeningen[oi].qr_url = url;
+      })));
+    }
+  } catch(e) {}
+  notify('Klik op "▶ Bekijk" of "+ Link" per oefening om links toe te voegen');
+}
+
+// Restore saved URLs on init
+function restoreSchemaUrls() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('schema_urls')||'null');
+    if (saved) {
+      saved.forEach((wDays,wi) => wDays.forEach((dOef,di) => dOef.forEach((url,oi) => {
+        if (VOORBEREIDINGSSCHEMA[wi]?.days[di]?.oefeningen[oi])
+          VOORBEREIDINGSSCHEMA[wi].days[di].oefeningen[oi].qr_url = url;
+      })));
+    }
+  } catch(e) {}
+}
+
+// Player view of voorbereiding
+function buildSpelerVoorbereiding() {
+  const weekIdx = SCHEMA_WEEK_VIEW !== null ? SCHEMA_WEEK_VIEW : getCurrentSchemaWeek();
+  const week = VOORBEREIDINGSSCHEMA[weekIdx];
+  const weekStart = new Date(week.start_date);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+  const fmt = d => d.toLocaleDateString('nl-BE',{day:'numeric',month:'short'});
+
+  const typeColors = {run:'#E6F4FB',exercise:'#F3E8FF',rest:'var(--bg)'};
+  const typeIcons = {run:'🏃',exercise:'💪',rest:'😴'};
+  const typeBorderColors = {run:'#4FA8D1',exercise:'#8B5CF6',rest:'var(--brd)'};
+
+  // Find today's day
+  const today = new Date();
+  const dayOfWeek = (today.getDay()+6)%7; // Mon=0
+  const dayNames = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
+
+  const dayCards = week.days.map((day,di) => {
+    const hasContent = day.blokken.length > 0 || day.oefeningen.length > 0;
+    const totAfstand = day.blokken.reduce((s,b)=>s+(b.afstand||0),0);
+    const isToday = di === dayOfWeek && weekIdx === getCurrentSchemaWeek();
+    return `<div style="background:${isToday?'#EDF6FB':typeColors[day.type]||'var(--bg)'};border:${isToday?'2px solid var(--blue)':'1.5px solid '+typeBorderColors[day.type]};border-radius:8px;padding:10px;cursor:${hasContent?'pointer':'default'}"
+      onclick="${hasContent?`spelerShowDay(${weekIdx},${di})`:''}">
+      ${isToday?`<div style="font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:2px">VANDAAG</div>`:''}
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:3px">${typeIcons[day.type]} ${day.name.slice(0,2)}</div>
+      <div style="font-size:11px;font-weight:600;color:var(--txt);line-height:1.3">${day.label}</div>
+      ${day.type==='run'&&totAfstand?`<div style="font-size:10px;color:#2B7FA8;margin-top:3px">${(totAfstand/1000).toFixed(1)}km</div>`:''}
+      ${day.type==='exercise'&&day.oefeningen.length?`<div style="font-size:10px;color:#6D28D9;margin-top:3px">${day.oefeningen.length} oef.</div>`:''}
+    </div>`;
+  }).join('');
+
+  return `
+    <div style="background:var(--txt);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-family:var(--fc);font-size:18px;font-weight:700;color:#fff">🏋️ Voorbereidingsschema</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5)">Week ${week.week} · ${fmt(weekStart)} – ${fmt(weekEnd)}</div>
+      </div>
+      <a href="${STRAVA_URL}" target="_blank" style="background:#FC4C02;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">🏃 Post op Strava</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <button class="btn btnG sm" onclick="SCHEMA_WEEK_VIEW=Math.max(0,${weekIdx}-1);refreshSpelerDashboard('${PLAYERS.find(p=>p.profile_id===USER_ID)?.id}')" ${weekIdx===0?'disabled':''}>◀</button>
+      ${VOORBEREIDINGSSCHEMA.map((_,i)=>`<button class="btn ${i===weekIdx?'btnP':'btnG'} sm" onclick="SCHEMA_WEEK_VIEW=${i};refreshSpelerDashboard('${PLAYERS.find(p=>p.profile_id===USER_ID)?.id}')">W${i+1}</button>`).join('')}
+      <button class="btn btnG sm" onclick="SCHEMA_WEEK_VIEW=Math.min(${VOORBEREIDINGSSCHEMA.length-1},${weekIdx}+1);refreshSpelerDashboard('${PLAYERS.find(p=>p.profile_id===USER_ID)?.id}')" ${weekIdx===VOORBEREIDINGSSCHEMA.length-1?'disabled':''}>▶</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px">${dayCards}</div>
+    <div id="spelerDayDetail"></div>`;
+}
+
+function spelerShowDay(weekIdx, dayIdx) {
+  const day = VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx];
+  const container = document.getElementById('spelerDayDetail');
+  if (!container) return;
+
+  // Reuse showDayDetail logic but for speler container
+  const typeColors = {run:'#E6F4FB',exercise:'#F3E8FF'};
+
+  let content = '';
+  if (day.type === 'run') {
+    const totAfstand = day.blokken.reduce((s,b)=>s+(b.afstand||0),0);
+    content = `<div class="card" style="border-left:3px solid #4FA8D1">
+      <div class="cardTitle">🏃 ${day.name} – ${day.label}</div>
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <div style="background:#E6F4FB;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:11px;color:var(--t3)">Totale afstand</div><div style="font-size:22px;font-weight:700;color:#2B7FA8">${(totAfstand/1000).toFixed(2)} km</div></div>
+        <div style="background:#E6F4FB;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:11px;color:var(--t3)">Totale tijd</div><div style="font-size:22px;font-weight:700;color:#2B7FA8">${day.totaal_min} min</div></div>
+      </div>
+      <table class="tbl">
+        <thead><tr style="background:#2B7FA8;color:#fff"><th style="color:#fff">Blok</th><th style="color:#fff">Duur</th><th style="color:#fff">Snelheid</th><th style="color:#fff">Afstand</th><th style="color:#fff">Wanneer</th></tr></thead>
+        <tbody>
+          ${day.blokken.map(b=>`<tr>
+            <td style="font-weight:700">${b.blok}</td><td>${b.duur} min</td><td>${b.snelheid} km/h</td>
+            <td style="color:#2EAA6A;font-weight:600">${b.afstand} m</td><td style="color:var(--t3)">${b.tijdslabel}</td>
+          </tr>`).join('')}
+          <tr style="background:#FEF3C7;font-weight:700"><td>Totaal</td><td>${day.totaal_min} min</td><td></td><td style="color:#2EAA6A">${totAfstand} m</td><td></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;padding:12px;background:#FFF7ED;border-radius:8px;border:1px solid #FC4C02">
+        <div style="font-size:13px;font-weight:700;color:#FC4C02;margin-bottom:4px">📱 Vergeet niet te posten op Strava!</div>
+        <a href="${STRAVA_URL}" target="_blank" style="font-size:12px;color:#FC4C02;font-weight:600">${STRAVA_URL}</a>
+      </div>
+    </div>`;
+
+  } else if (day.type === 'exercise') {
+    content = `<div class="card" style="border-left:3px solid #8B5CF6">
+      <div class="cardTitle">💪 ${day.name} – ${day.label}</div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr style="background:#6D28D9;color:#fff">
+            <th style="color:#fff">#</th><th style="color:#fff">Oefening</th>
+            <th style="color:#fff">Sets</th><th style="color:#fff">Rust</th>
+            <th style="color:#fff">Reps</th><th style="color:#fff">Gewicht</th><th style="color:#fff">Video</th>
+          </tr></thead>
+          <tbody>
+            ${day.oefeningen.map(o=>`<tr>
+              <td style="color:var(--t3)">${o.nr}</td>
+              <td style="font-weight:500">${o.naam}</td>
+              <td>${o.sets||''}</td><td>${o.rust_sets?o.rust_sets+'s':''}</td>
+              <td style="font-weight:600">${o.reps||''}</td>
+              <td>${o.gewicht||'nvt'}</td>
+              <td>${o.qr_url?`<a href="${o.qr_url}" target="_blank" style="color:var(--blue);font-weight:600">▶ Video</a>`:'—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  container.innerHTML = content;
+  container.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+restoreSchemaUrls();
 showSpinner(true);
 init();
 </script>
