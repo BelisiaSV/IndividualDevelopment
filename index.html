@@ -758,6 +758,8 @@ async function startApp() {
     }
     // Load players
     await loadPlayers();
+    // Load schema media from Supabase so all devices (player phones) see coach's videos/QR
+    restoreSchemaUrlsFromServer().catch(()=>{});
     // Show app
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('app').style.display='block';
@@ -3134,39 +3136,63 @@ function openSchemaEditor(weekIdx) {
 }
 
 // Restore saved URLs on init
-function saveSchemaUrls() {
+async function saveSchemaUrls() {
+  const data = VOORBEREIDINGSSCHEMA.map(w => w.days.map(d => d.oefeningen.map(o => ({
+    url: o.qr_url || '',
+    qr: o.qr_img || ''
+  }))));
+  // Save locally
+  try { localStorage.setItem('schema_urls_v2', JSON.stringify(data)); } catch(e) {}
+  // Save to Supabase so ALL devices (including player phones) get it
   try {
-    const data = VOORBEREIDINGSSCHEMA.map(w => w.days.map(d => d.oefeningen.map(o => ({
-      url: o.qr_url || '',
-      qr: o.qr_img || ''
-    }))));
-    localStorage.setItem('schema_urls_v2', JSON.stringify(data));
+    await sbFetch(SB_URL + '/rest/v1/profiles?id=eq.' + USER_ID, {
+      method: 'PATCH',
+      headers: {...SB_HEADERS, 'Prefer': 'return=minimal'},
+      body: JSON.stringify({schema_media: data})
+    });
+  } catch(e) { console.warn('Schema media save to Supabase failed:', e); }
+}
+
+function applySchemaMedia(saved) {
+  if (!saved) return;
+  try {
+    saved.forEach((wDays, wi) => {
+      if (!wDays) return;
+      wDays.forEach((dOef, di) => {
+        if (!dOef) return;
+        dOef.forEach((item, oi) => {
+          const oef = VOORBEREIDINGSSCHEMA[wi]?.days[di]?.oefeningen[oi];
+          if (!oef) return;
+          if (typeof item === 'string') {
+            oef.qr_url = item;
+          } else if (item && typeof item === 'object') {
+            oef.qr_url = item.url || '';
+            oef.qr_img = item.qr || '';
+          }
+        });
+      });
+    });
   } catch(e) {}
 }
 
 function restoreSchemaUrls() {
+  // First try localStorage (fast, works offline)
   try {
-    // Try v2 format first (url + qr_img), fall back to v1 (url only)
-    const saved = JSON.parse(localStorage.getItem('schema_urls_v2') || localStorage.getItem('schema_urls') || 'null');
-    if (saved) {
-      saved.forEach((wDays, wi) => {
-        if (!wDays) return;
-        wDays.forEach((dOef, di) => {
-          if (!dOef) return;
-          dOef.forEach((item, oi) => {
-            const oef = VOORBEREIDINGSSCHEMA[wi]?.days[di]?.oefeningen[oi];
-            if (!oef) return;
-            if (typeof item === 'string') {
-              oef.qr_url = item;
-            } else if (item && typeof item === 'object') {
-              oef.qr_url = item.url || '';
-              oef.qr_img = item.qr || '';
-            }
-          });
-        });
-      });
-    }
+    const local = JSON.parse(localStorage.getItem('schema_urls_v2') || localStorage.getItem('schema_urls') || 'null');
+    if (local) applySchemaMedia(local);
   } catch(e) {}
+}
+
+async function restoreSchemaUrlsFromServer() {
+  // Load from Supabase (works across devices, coach phone -> player phone)
+  try {
+    const coaches = await sbGet('profiles', '&role=eq.coach&limit=1');
+    if (coaches && coaches[0]?.schema_media) {
+      applySchemaMedia(coaches[0].schema_media);
+      // Cache locally
+      try { localStorage.setItem('schema_urls_v2', JSON.stringify(coaches[0].schema_media)); } catch(e) {}
+    }
+  } catch(e) { console.warn('Schema media load failed:', e); }
 }
 
 // Player view of voorbereiding
