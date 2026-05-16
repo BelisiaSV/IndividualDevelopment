@@ -714,12 +714,28 @@ async function loadPlayers() {
       sbGet('pop_history', `&player_id=eq.${p.id}&order=created_at.desc`),
       sbGet('weight_history', `&player_id=eq.${p.id}&order=measured_at.asc`)
     ]);
-    p.werkpunten = (wps||[]).map(w=>({...w, principes:w.principes||[], acties:w.acties||[]}));
-    p.popHistory = pops||[];
+    p.werkpunten = (wps||[]).map(w=>({
+      ...w,
+      principes: w.principes||[],
+      acties: w.acties||[],
+      clips: typeof w.clips==='string' ? JSON.parse(w.clips||'[]') : (w.clips||[]),
+      spelerFeedback: w.speler_feedback||w.spelerFeedback||''
+    }));
+    p.popHistory = (pops||[]).map(h=>({
+      ...h,
+      spelerReactie: h.speler_reactie||h.spelerReactie||'',
+      clips: typeof h.clips==='string' ? JSON.parse(h.clips||'[]') : (h.clips||[])
+    }));
     p.weight = (wh||[]).map(w=>({d:new Date(w.measured_at).toLocaleDateString('nl-BE',{day:'numeric',month:'short'}), w:w.weight_kg}));
     if (!p.weight.length) p.weight = [{d:'Start', w:p.weight_kg||75}];
     p.kpis = p.kpis||{};
     p.presenceLog = p.presence_log||[];
+    // Parse match_kpis: stored as jsonb array or JSON string
+    try {
+      const raw = p.match_kpis;
+      p.matchKpis = Array.isArray(raw) ? raw :
+                    (typeof raw === 'string' && raw ? JSON.parse(raw) : []);
+    } catch(e) { p.matchKpis = []; }
   }
   PLAYERS = players;
 }
@@ -986,56 +1002,81 @@ function buildSpelerWerkpunten(p) {
 function buildSpelerGewicht(p) {
   const weights = [...(p.weight||[])].sort((a,b)=>(a.date_iso||a.d||'').localeCompare(b.date_iso||b.d||''));
   if (!weights.length) return '<div class="card"><p style="color:var(--t3)">Nog geen gewichtsmetingen.</p></div>';
-  
+
   const maxW = Math.max(...weights.map(x=>x.w));
   const minW = Math.min(...weights.map(x=>x.w));
   const range = maxW - minW || 1;
   const first = weights[0]?.w;
   const last = weights[weights.length-1]?.w;
-  const diff = last - first;
+  const diff = +(last - first).toFixed(1);
+
+  // Build SVG points — use 500x200 viewbox with padding
+  const PAD_L = 40, PAD_R = 20, PAD_T = 20, PAD_B = 40;
+  const W = 500, H = 200;
+  const chartW = W - PAD_L - PAD_R;
+  const chartH = H - PAD_T - PAD_B;
+
+  const pts = weights.map((w,i) => {
+    const x = PAD_L + (weights.length===1 ? chartW/2 : Math.round(i/(weights.length-1)*chartW));
+    const y = PAD_T + Math.round(((maxW-w.w)/range)*chartH);
+    return {x, y, w};
+  });
+
+  const polyline = pts.map(p=>`${p.x},${p.y}`).join(' ');
+
+  const gridLines = [0,25,50,75,100].map(pct => {
+    const val = (maxW - (pct/100)*range).toFixed(1);
+    const y = PAD_T + Math.round(pct/100*chartH);
+    return `<line x1="${PAD_L}" y1="${y}" x2="${W-PAD_R}" y2="${y}" stroke="#DDE3EA" stroke-width="1"/>
+    <text x="${PAD_L-5}" y="${y}" text-anchor="end" dominant-baseline="middle" font-size="9" fill="#94A3B8">${val}</text>`;
+  }).join('');
+
+  const dots = pts.map((p,i) =>
+    `<circle cx="${p.x}" cy="${p.y}" r="5" fill="#4FA8D1" stroke="#fff" stroke-width="2"/>
+    <text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="9" fill="#2B7FA8" font-weight="700">${p.w}kg</text>`
+  ).join('');
+
+  // X-axis date labels — show max 6, evenly spread
+  const step = weights.length <= 6 ? 1 : Math.ceil(weights.length/6);
+  const xLabels = pts.filter((_,i) => i===0 || i===pts.length-1 || i%step===0)
+    .map(p => `<text x="${p.x}" y="${H-PAD_B+14}" text-anchor="middle" font-size="9" fill="#94A3B8" transform="rotate(-20,${p.x},${H-PAD_B+14})">${p.w.d||''}</text>`).join('');
 
   return `
     <div class="statsRow" style="grid-template-columns:repeat(3,1fr)">
-      <div class="statCard"><div class="statLbl">Huidig</div><div class="statVal">${last} kg</div></div>
+      <div class="statCard"><div class="statLbl">Huidig gewicht</div><div class="statVal">${last} kg</div></div>
       <div class="statCard"><div class="statLbl">Begin seizoen</div><div class="statVal">${first} kg</div></div>
-      <div class="statCard"><div class="statLbl">Evolutie</div><div class="statVal" style="color:${diff>0?'#E05252':diff<0?'#2EAA6A':'var(--txt)'}">${diff>0?'+':''}${diff.toFixed(1)} kg</div></div>
+      <div class="statCard"><div class="statLbl">Evolutie</div><div class="statVal" style="color:${diff>0?'#E05252':diff<0?'#2EAA6A':'var(--txt)'}">${diff>0?'+':''}${diff} kg</div></div>
     </div>
     <div class="card">
       <div class="cardTitle">Gewichtsverloop</div>
-      <!-- SVG grafiek -->
-      <div style="position:relative;height:160px;margin-bottom:8px;padding:20px 8px 24px 40px">
-        <svg width="100%" height="100%" viewBox="0 0 600 120" preserveAspectRatio="none" style="overflow:visible">
-          <!-- Grid lines -->
-          ${[0,25,50,75,100].map(pct=>`<line x1="0" y1="${pct*1.2}" x2="600" y2="${pct*1.2}" stroke="#DDE3EA" stroke-width="0.5"/>`).join('')}
-          <!-- Area fill -->
-          <defs><linearGradient id="wGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FA8D1" stop-opacity="0.3"/><stop offset="100%" stop-color="#4FA8D1" stop-opacity="0.05"/></linearGradient></defs>
-          <polyline points="${weights.map((w,i)=>{const x=weights.length===1?300:Math.round(i/(weights.length-1)*600);const y=Math.round(120-((w.w-minW)/range)*100);return`${x},${y}`;}).join(' ')}" fill="none" stroke="#4FA8D1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- Dots -->
-          ${weights.map((w,i)=>{const x=weights.length===1?300:Math.round(i/(weights.length-1)*600);const y=Math.round(120-((w.w-minW)/range)*100);return`<circle cx="${x}" cy="${y}" r="4" fill="#4FA8D1" stroke="#fff" stroke-width="1.5"/><text x="${x}" y="${y-8}" text-anchor="middle" font-size="9" fill="#2B7FA8" font-weight="700">${w.w}</text>`;}).join('')}
+      <div style="overflow-x:auto">
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:${Math.max(300,weights.length*55)}px;height:${H}px;display:block">
+          ${gridLines}
+          ${weights.length>1?`<polyline points="${polyline}" fill="none" stroke="#4FA8D1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`:''}
+          ${dots}
+          ${xLabels}
         </svg>
-        <!-- Y-axis labels -->
-        <div style="position:absolute;left:0;top:14px;font-size:9px;color:var(--t3);font-weight:600">${maxW}</div>
-        <div style="position:absolute;left:0;bottom:20px;font-size:9px;color:var(--t3);font-weight:600">${minW}</div>
-      </div>
-      <!-- X-axis dates -->
-      <div style="display:flex;justify-content:space-between;padding:0 40px 0 48px;margin-top:-10px">
-        ${weights.filter((_,i)=>i===0||i===weights.length-1||i===Math.floor(weights.length/2)).map(w=>`<span style="font-size:9px;color:var(--t3)">${w.d.split(' ').slice(0,2).join(' ')}</span>`).join('')}
       </div>
     </div>
     <div class="card">
       <div class="cardTitle">Alle metingen</div>
       <table class="tbl">
-        <thead><tr><th>Datum</th><th>Gewicht</th><th>Wijziging</th></tr></thead>
-        <tbody>${weights.slice().reverse().map((w,ri)=>{
+        <thead><tr><th>Datum</th><th style="text-align:right">Gewicht</th><th style="text-align:right">Wijziging</th></tr></thead>
+        <tbody>${weights.slice().reverse().map((w,ri) => {
           const prev = weights[weights.length-1-ri-1];
-          const delta = prev ? (w.w - prev.w).toFixed(1) : '—';
-          const dColor = delta!=='—'?parseFloat(delta)>0?'#E05252':parseFloat(delta)<0?'#2EAA6A':'var(--t3)':'var(--t3)';
-          return`<tr><td style="font-weight:500">${w.d}</td><td style="font-weight:700">${w.w} kg</td><td style="color:${dColor};font-weight:600">${delta!=='—'&&parseFloat(delta)>0?'+':''}${delta!=='—'?delta+' kg':'—'}</td></tr>`;
+          const delta = prev ? +(w.w - prev.w).toFixed(1) : null;
+          const dColor = delta===null?'var(--t3)':delta>0?'#E05252':delta<0?'#2EAA6A':'var(--t3)';
+          return `<tr>
+            <td style="font-weight:500">${w.d}</td>
+            <td style="text-align:right;font-weight:700">${w.w} kg</td>
+            <td style="text-align:right;color:${dColor};font-weight:600">${delta===null?'—':delta>0?'+'+delta+' kg':delta+' kg'}</td>
+          </tr>`;
         }).join('')}
         </tbody>
       </table>
     </div>`;
 }
+
 
 // ── POP / PAP ────────────────────────────────────────────────
 function buildSpelerPop(p) {
@@ -1214,7 +1255,7 @@ async function saveSpelerReactiePop(playerId, hi) {
   const h = p?.popHistory[hi];
   if (!h) return;
   h.spelerReactie = document.getElementById('popReactie_'+(h.id||hi))?.value || '';
-  if (h.id) await sbUpdate('pop_history', h.id, {spelerReactie: h.spelerReactie});
+  if (h.id) await sbUpdate('pop_history', h.id, {speler_reactie: h.spelerReactie});
   notify('Reactie opgeslagen');
   refreshSpelerDashboard(playerId);
 }
@@ -1995,7 +2036,12 @@ async function delWerkpunt(pid, wpId) {
 }
 
 async function saveWp(w, pid) {
-  const data = {player_id:pid, text:w.text, cat:w.cat, principes:w.principes, acties:w.acties, feedback:w.feedback};
+  const data = {
+    player_id: pid, text: w.text, cat: w.cat,
+    principes: w.principes, acties: w.acties, feedback: w.feedback,
+    speler_feedback: w.spelerFeedback||'',
+    clips: w.clips||[]
+  };
   if (w.id && !String(w.id).startsWith('local_')) await sbUpdate('werkpunten', w.id, data);
   else { const d=await sbInsert('werkpunten', data); if(d?.id) w.id=d.id; }
 }
@@ -2563,7 +2609,7 @@ async function saveMatchKpiCoach(pid) {
   await sbUpdate('players', pid, {match_kpis: p.matchKpis});
   document.getElementById('mkpiForm_'+pid).style.display = 'none';
   openSpeler(pid);
-  notify('KPI\'s opgeslagen');
+  notify('KPI\'s opgeslagen voor '+date);
 }
 
 async function delMatchKpi(pid, idx) {
