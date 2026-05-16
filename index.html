@@ -3145,16 +3145,21 @@ async function saveSchemaUrls() {
   try { localStorage.setItem('schema_urls_v2', JSON.stringify(data)); } catch(e) {}
   // Save to Supabase (cross-device sync)
   try {
-    const resp = await sbFetch(SB_URL + '/rest/v1/profiles?id=eq.' + USER_ID, {
+    const resp = await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + USER_ID, {
       method: 'PATCH',
-      headers: {...SB_HEADERS, 'Prefer': 'return=minimal', 'Content-Type': 'application/json'},
+      headers: hdrs({'Prefer': 'return=minimal'}),
       body: JSON.stringify({schema_media: data})
     });
-    if (resp && resp.error) {
-      console.warn('Schema media Supabase error:', resp.error);
-      notify('Video/QR lokaal opgeslagen. Voer eerst de SQL migratie uit voor sync naar andere apparaten.', '#D4860A');
-    } else {
+    if (resp.ok) {
       console.log('Schema media synced to Supabase OK');
+      notify('Video/QR opgeslagen en gesynchroniseerd');
+    } else {
+      const err = await resp.text();
+      console.warn('Schema media Supabase error:', err);
+      // Column may not exist yet
+      if (err.includes('schema_media')) {
+        notify('Voer eerst de SQL migratie uit in Supabase!', '#E05252');
+      }
     }
   } catch(e) {
     console.warn('Schema media save failed:', e);
@@ -3194,21 +3199,21 @@ function restoreSchemaUrls() {
 async function restoreSchemaUrlsFromServer() {
   // Load from Supabase (works across devices, coach phone -> player phone)
   try {
-    const coaches = await sbGet('profiles', '&role=eq.coach&limit=1&select=id,schema_media');
-    if (coaches && coaches.length > 0 && coaches[0].schema_media) {
+    // Fetch directly so we can see the raw response for debugging
+    const r = await fetch(SB_URL + '/rest/v1/profiles?role=eq.coach&limit=1&select=id,schema_media', {
+      headers: hdrs({'Accept': 'application/json'})
+    });
+    const coaches = await r.json();
+    console.log('Schema media fetch result:', JSON.stringify(coaches).slice(0, 200));
+    if (Array.isArray(coaches) && coaches.length > 0 && coaches[0].schema_media) {
       applySchemaMedia(coaches[0].schema_media);
-      // Cache locally for next load
       try { localStorage.setItem('schema_urls_v2', JSON.stringify(coaches[0].schema_media)); } catch(e) {}
-      console.log('Schema media loaded from server: OK');
-      // Re-render if user is currently on voorbereiding page
-      if (document.getElementById('pgVoorbereiding')?.style.display !== 'none') {
-        renderVoorbereiding && renderVoorbereiding();
-      }
+      console.log('Schema media applied from server OK');
     } else {
-      console.log('No schema_media on server yet (run SQL migration or no data saved yet)');
+      console.log('No schema_media found on server. coaches=', coaches);
     }
   } catch(e) {
-    console.warn('Schema media server load failed (column may not exist yet):', e);
+    console.warn('Schema media server load failed:', e);
   }
 }
 
