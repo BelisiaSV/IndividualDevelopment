@@ -3386,26 +3386,51 @@ function toggleAllSchemaDone(weekIdx, dayIdx, setDone) {
 }
 
 function editOefMedia(weekIdx, dayIdx, oefIdx) {
+  // Close any existing open modal first
+  document.querySelector('.modal.open')?.remove();
   const oef = VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx].oefeningen[oefIdx];
   const modal = document.createElement('div');
   modal.className = 'modal open';
   modal.innerHTML =
-    '<div class="modalBox" style="width:460px;max-width:97vw">' +
+    '<div class="modalBox" style="width:480px;max-width:97vw">' +
       '<div class="modalTitle">✏ Media — ' + oef.naam + '</div>' +
       '<div class="ff"><label>Video link (YouTube, HUDL, ...)</label>' +
-        '<input id="mediaUrl_' + oefIdx + '" value="' + (oef.qr_url || '') + '" placeholder="https://youtube.com/..." style="font-family:var(--f)"></div>' +
-      '<div class="ff"><label>QR code afbeelding uploaden</label>' +
-        (oef.qr_img ? '<div style="margin-bottom:8px"><img src="' + oef.qr_img + '" style="width:90px;height:90px;border-radius:6px;border:1px solid var(--brd);object-fit:contain"></div>' : '') +
-        '<label class="btn btnG sm" style="cursor:pointer;display:inline-block">📷 QR uploaden' +
+        '<div style="display:flex;gap:6px;align-items:center">' +
+          '<input id="mediaUrl_' + oefIdx + '" value="' + (oef.qr_url || '') + '" placeholder="https://youtube.com/..." style="flex:1;font-family:var(--f)">' +
+          (oef.qr_url ? '<button class="btn btnD sm" onclick="clearOefUrl(' + weekIdx + ',' + dayIdx + ',' + oefIdx + ')" title="Link verwijderen">✕</button>' : '') +
+        '</div>' +
+        (oef.qr_url ? '<div style="margin-top:5px;font-size:11px;color:var(--t3)">Huidige link: ' + oef.qr_url.slice(0,50) + (oef.qr_url.length>50?'...':'') + '</div>' : '') +
+      '</div>' +
+      '<div class="ff"><label>QR code afbeelding</label>' +
+        (oef.qr_img ?
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:8px;background:var(--bg);border-radius:7px">' +
+            '<img src="' + oef.qr_img + '" style="width:72px;height:72px;border-radius:5px;border:1px solid var(--brd);object-fit:contain;cursor:pointer" onclick="showQrModal(this.src)">' +
+            '<div>' +
+              '<div style="font-size:12px;color:var(--t2);margin-bottom:6px">QR afbeelding aanwezig</div>' +
+              '<button class="btn btnD sm" onclick="clearOefQr(' + weekIdx + ',' + dayIdx + ',' + oefIdx + ')">✕ QR verwijderen</button>' +
+            '</div>' +
+          '</div>' : '<div style="font-size:12px;color:var(--t3);margin-bottom:6px">Nog geen QR afbeelding</div>') +
+        '<label class="btn btnG sm" style="cursor:pointer;display:inline-block">' +
+          (oef.qr_img ? '📷 Vervang QR' : '📷 QR uploaden') +
           '<input type="file" accept="image/*" style="display:none" onchange="handleQrUpload(' + weekIdx + ',' + dayIdx + ',' + oefIdx + ',this)"></label>' +
       '</div>' +
       '<div class="modalFoot">' +
         '<button class="btn btnG" onclick="this.closest(\'.modal\').remove()">Annuleer</button>' +
-        '<button class="btn btnP" onclick="saveOefMedia(' + weekIdx + ',' + dayIdx + ',' + oefIdx + ')">Opslaan</button>' +
+        '<button class="btn btnP" onclick="saveOefMedia(' + weekIdx + ',' + dayIdx + ',' + oefIdx + ')">Opslaan & synchroniseren</button>' +
       '</div>' +
     '</div>';
   modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
+}
+
+function clearOefUrl(weekIdx, dayIdx, oefIdx) {
+  VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx].oefeningen[oefIdx].qr_url = '';
+  editOefMedia(weekIdx, dayIdx, oefIdx); // re-open modal refreshed
+}
+
+function clearOefQr(weekIdx, dayIdx, oefIdx) {
+  VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx].oefeningen[oefIdx].qr_img = '';
+  editOefMedia(weekIdx, dayIdx, oefIdx); // re-open modal refreshed
 }
 
 function handleQrUpload(weekIdx, dayIdx, oefIdx, input) {
