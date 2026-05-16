@@ -2994,7 +2994,12 @@ function showDayDetail(weekIdx, dayIdx) {
                 <td>${o.rust_sets||''}</td>
                 <td style="font-weight:600">${o.reps||''}</td>
                 <td>${o.gewicht||'nvt'}</td>
-                <td>${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px">▶ Bekijk</a>`:(isCoach()?`<button class="btn btnG sm" style="font-size:10px" onclick="editOefMedia(${weekIdx},${dayIdx},${o.nr-1})">+ Link</button>`:'<span style="color:var(--t3);font-size:11px">—</span>')}</td>
+                <td style="white-space:nowrap">
+                ${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px;font-weight:600">▶ Video</a> `:''}
+                ${o.qr_img?`<span style="cursor:pointer;font-size:12px" onclick="showQrModal('${o.qr_img}')">📷 QR</span> `:''}
+                ${isCoach()?`<button class="btn btnG sm" style="font-size:10px" onclick="editOefMedia(${weekIdx},${dayIdx},${o.nr-1})">✏</button>`:''}
+                ${!o.qr_url&&!o.qr_img&&!isCoach()?'<span style="color:var(--t3);font-size:11px">—</span>':''}
+              </td>
               </tr>`).join('')}
             </tbody>
           </table>
@@ -3154,7 +3159,11 @@ function spelerShowDay(weekIdx, dayIdx) {
               <td>${o.sets||''}</td><td>${o.rust_sets?o.rust_sets+'s':''}</td>
               <td style="font-weight:600">${o.reps||''}</td>
               <td>${o.gewicht||'nvt'}</td>
-              <td>${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-weight:600">▶ Video</a>`:'—'}</td>
+              <td style="white-space:nowrap">
+              ${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-weight:600">▶ Video</a>`:''}
+              ${o.qr_img?` <span style="cursor:pointer" onclick="showQrModal('${o.qr_img}')">📷</span>`:''}
+              ${!o.qr_url&&!o.qr_img?'<span style="color:var(--t3)">—</span>':''}
+            </td>
             </tr>`).join('')}
           </tbody>
         </table>
@@ -3164,6 +3173,98 @@ function spelerShowDay(weekIdx, dayIdx) {
 
   container.innerHTML = content;
   container.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+
+// ── VOORBEREIDING HELPERS ────────────────────────────────────
+
+function buildDayCompletion(weekIdx, dayIdx) {
+  const key = 'schema_done_w' + weekIdx + '_d' + dayIdx;
+  const doneData = JSON.parse(localStorage.getItem(key) || '{}');
+  const day = VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx];
+  const allDone = PLAYERS.length > 0 && PLAYERS.every(p => doneData[p.id]);
+  return '<div style="margin-top:14px;padding:12px 14px;background:#fff;border:1px solid var(--brd);border-radius:8px">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--t2)">✅ Strava controle — ' + day.name + '</div>' +
+      '<button class="btn ' + (allDone ? 'btnG' : 'btnP') + ' sm" onclick="toggleAllSchemaDone(' + weekIdx + ',' + dayIdx + ',' + (!allDone) + ')">' +
+        (allDone ? '✓ Allen afgevinkt — ongedaan maken' : 'Alles afvinken') +
+      '</button>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px">' +
+    PLAYERS.map(function(p) {
+      const done = doneData[p.id];
+      return '<div style="display:flex;align-items:center;gap:7px;padding:6px 10px;background:' + (done ? '#F0FDF4' : 'var(--bg)') + ';border:1px solid ' + (done ? '#2EAA6A' : 'var(--brd)') + ';border-radius:7px;cursor:pointer;user-select:none" onclick="toggleSchemaDone(' + weekIdx + ',' + dayIdx + ',\'' + p.id + '\')">' +
+        '<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ' + (done ? '#2EAA6A' : 'var(--brd)') + ';background:' + (done ? '#2EAA6A' : '#fff') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (done ? '<span style="color:#fff;font-size:10px">✓</span>' : '') + '</div>' +
+        '<div style="width:22px;height:22px;border-radius:50%;background:' + (p.color || '#4FA8D1') + ';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0">' + ini(p.name) + '</div>' +
+        '<div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + '</div>' +
+      '</div>';
+    }).join('') +
+    '</div>' +
+  '</div>';
+}
+
+function toggleAllSchemaDone(weekIdx, dayIdx, setDone) {
+  const key = 'schema_done_w' + weekIdx + '_d' + dayIdx;
+  const data = {};
+  PLAYERS.forEach(function(p) { data[p.id] = setDone; });
+  localStorage.setItem(key, JSON.stringify(data));
+  showDayDetail(weekIdx, dayIdx);
+}
+
+function editOefMedia(weekIdx, dayIdx, oefIdx) {
+  const oef = VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx].oefeningen[oefIdx];
+  const modal = document.createElement('div');
+  modal.className = 'modal open';
+  modal.innerHTML =
+    '<div class="modalBox" style="width:460px;max-width:97vw">' +
+      '<div class="modalTitle">✏ Media — ' + oef.naam + '</div>' +
+      '<div class="ff"><label>Video link (YouTube, HUDL, ...)</label>' +
+        '<input id="mediaUrl_' + oefIdx + '" value="' + (oef.qr_url || '') + '" placeholder="https://youtube.com/..." style="font-family:var(--f)"></div>' +
+      '<div class="ff"><label>QR code afbeelding uploaden</label>' +
+        (oef.qr_img ? '<div style="margin-bottom:8px"><img src="' + oef.qr_img + '" style="width:90px;height:90px;border-radius:6px;border:1px solid var(--brd);object-fit:contain"></div>' : '') +
+        '<label class="btn btnG sm" style="cursor:pointer;display:inline-block">📷 QR uploaden' +
+          '<input type="file" accept="image/*" style="display:none" onchange="handleQrUpload(' + weekIdx + ',' + dayIdx + ',' + oefIdx + ',this)"></label>' +
+      '</div>' +
+      '<div class="modalFoot">' +
+        '<button class="btn btnG" onclick="this.closest(\'.modal\').remove()">Annuleer</button>' +
+        '<button class="btn btnP" onclick="saveOefMedia(' + weekIdx + ',' + dayIdx + ',' + oefIdx + ')">Opslaan</button>' +
+      '</div>' +
+    '</div>';
+  modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+function handleQrUpload(weekIdx, dayIdx, oefIdx, input) {
+  if (!input.files[0]) return;
+  var r = new FileReader();
+  r.onload = function(e) {
+    VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx].oefeningen[oefIdx].qr_img = e.target.result;
+    notify('QR geladen — klik Opslaan');
+  };
+  r.readAsDataURL(input.files[0]);
+}
+
+function saveOefMedia(weekIdx, dayIdx, oefIdx) {
+  var url = document.getElementById('mediaUrl_' + oefIdx)?.value?.trim() || '';
+  if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+  VOORBEREIDINGSSCHEMA[weekIdx].days[dayIdx].oefeningen[oefIdx].qr_url = url;
+  saveSchemaUrls();
+  document.querySelector('.modal.open')?.remove();
+  showDayDetail(weekIdx, dayIdx);
+  notify('Media opgeslagen');
+}
+
+function showQrModal(imgSrc) {
+  var modal = document.createElement('div');
+  modal.className = 'modal open';
+  modal.innerHTML =
+    '<div class="modalBox" style="width:320px;text-align:center">' +
+      '<div class="modalTitle">QR Code</div>' +
+      '<img src="' + imgSrc + '" style="width:240px;height:240px;object-fit:contain;border-radius:8px;border:1px solid var(--brd)">' +
+      '<div class="modalFoot"><button class="btn btnG" onclick="this.closest(\'.modal\').remove()">Sluiten</button></div>' +
+    '</div>';
+  modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
 }
 
 restoreSchemaUrls();
