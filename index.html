@@ -273,6 +273,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
     <div class="ff"><label>Speler</label><select id="wpSpeler" style="width:100%"></select></div>
     <div class="ff"><label>Werkpunt</label><input id="wpText" placeholder="bv. Timing dieptepass"></div>
     <div class="ff"><label>Categorie</label><select id="wpCat"><option>Passing & Receiving</option><option>Finishing</option><option>Positiespel</option><option>Pressing</option><option>Fysiek</option><option>Mentaal</option></select></div>
+    <div class="ff">
+      <label>Principes <span style="font-size:11px;color:var(--t3)">(klik om toe te voegen)</span></label>
+      <div id="wpModalPrincipes" style="display:flex;flex-wrap:wrap;gap:5px;padding:8px;background:var(--bg);border-radius:7px;margin-bottom:6px"></div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:4px">Geselecteerd:</div>
+      <div id="wpModalSelected" style="min-height:28px;padding:5px 8px;background:#fff;border:1px dashed var(--brd);border-radius:7px;display:flex;flex-wrap:wrap;gap:5px;font-size:11px;color:var(--t3);font-style:italic">Nog niets geselecteerd...</div>
+    </div>
     <div class="modalFoot"><button class="btn btnG" onclick="closeModal('addWpModal')">Annuleer</button><button class="btn btnP" onclick="saveWerkpunt()">Toevoegen</button></div>
   </div>
 </div>
@@ -505,8 +511,9 @@ function savePRINCIPES() { localStorage.setItem('custom_principes', JSON.stringi
 function addPrincipe() {
   const label = prompt('Naam van het nieuwe principe:');
   if (!label || !label.trim()) return;
-  const colors = ['chip-blue','chip-green','chip-amber'];
-  const color = colors[PRINCIPES.length % colors.length];
+  const colorChoice = prompt('Kleur kiezen:\n1 = Blauw\n2 = Groen\n3 = Geel/Amber\n4 = Rood\n\nTyp 1, 2, 3 of 4:', '1');
+  const colorMap = {'1':'chip-blue','2':'chip-green','3':'chip-amber','4':'chip-red'};
+  const color = colorMap[colorChoice] || 'chip-blue';
   PRINCIPES.push({id: Date.now(), label: label.trim(), color});
   savePRINCIPES();
   // Re-render the principes bank if visible
@@ -1235,8 +1242,9 @@ async function addClipLink(type, itemId, playerId) {
   const inp = document.getElementById(`${type==='pop'?'pop':'hudl'}HudlInput_${itemId}`) || 
               document.getElementById(`hudlInput_${itemId}`) ||
               document.getElementById(`popHudl_${itemId}`);
-  const url = inp?.value?.trim();
+  let url = inp?.value?.trim();
   if (!url) { notify('Vul een link in'); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
   await saveClip(type, itemId, playerId, {url, name: url.includes('hudl')?'HUDL clip':'Video link'});
   if (inp) inp.value = '';
   notify('Clip toegevoegd');
@@ -2142,7 +2150,48 @@ function populateSelects() {
     });
     const pd=document.getElementById('popDate');
     if(pd&&!pd.value) pd.value=new Date().toISOString().split('T')[0];
+    // Fill principe bank in werkpunt modal
+    const bank = document.getElementById('wpModalPrincipes');
+    if (bank) {
+      window._wpModalSel = [];
+      bank.innerHTML = PRINCIPES.map((pr,i) =>
+        `<span class="${pr.color} chip" style="cursor:pointer;transition:opacity .15s" data-pi="${i}" onclick="toggleWpPrincipeIdx(${i})">${pr.label}</span>`
+      ).join('');
+      const sel = document.getElementById('wpModalSelected');
+      if (sel) { sel.style.fontStyle='italic'; sel.style.color='var(--t3)'; sel.innerHTML='Nog niets geselecteerd...'; }
+    }
   },50);
+}
+
+function toggleWpPrincipeIdx(pi) {
+  const pr = PRINCIPES[pi];
+  if (!pr) return;
+  toggleWpLabel(pr.label);
+}
+function toggleWpLabel(label) {
+  if (!window._wpModalSel) window._wpModalSel = [];
+  const idx = window._wpModalSel.indexOf(label);
+  if (idx >= 0) window._wpModalSel.splice(idx, 1);
+  else window._wpModalSel.push(label);
+  // Update highlights
+  document.querySelectorAll('#wpModalPrincipes .chip').forEach(el => {
+    const lbl = el.textContent.trim();
+    el.style.opacity = window._wpModalSel.includes(lbl) ? '1' : '0.45';
+    el.style.outline = window._wpModalSel.includes(lbl) ? '2px solid #4FA8D1' : 'none';
+  });
+  // Update selected
+  const sel = document.getElementById('wpModalSelected');
+  if (!sel) return;
+  if (!window._wpModalSel.length) {
+    sel.style.fontStyle='italic'; sel.style.color='var(--t3)';
+    sel.innerHTML = 'Nog niets geselecteerd...';
+  } else {
+    sel.style.fontStyle='normal'; sel.style.color='';
+    sel.innerHTML = window._wpModalSel.map((l,i) => {
+      const p = PRINCIPES.find(x=>x.label===l)||{color:'chip-blue'};
+      return `<span class="${p.color} chip">${l}<span data-lbl="${i}" onclick="toggleWpLabel(window._wpModalSel[this.dataset.lbl])" style="margin-left:3px;opacity:.5;cursor:pointer">×</span></span>`;
+    }).join('');
+  }
 }
 
 function openWpForPlayer(pid) { document.getElementById('wpSpeler').value=pid; openModal('addWpModal'); }
@@ -2163,10 +2212,12 @@ async function saveWerkpunt() {
   if (!pid||!text) return;
   const p = PLAYERS.find(x=>x.id==pid);
   if (!p) return;
-  const wp = {text, cat:document.getElementById('wpCat').value, principes:[], acties:[], feedback:''};
-  const d = await sbInsert('werkpunten', {player_id:pid, ...wp});
+  const principes = window._wpModalSel||[];
+  const wp = {text, cat:document.getElementById('wpCat').value, principes, acties:[], feedback:'', clips:[], spelerFeedback:''};
+  const d = await sbInsert('werkpunten', {player_id:pid, text:wp.text, cat:wp.cat, principes, acties:[], feedback:'', speler_feedback:'', clips:[]});
   if (d) { wp.id=d.id; p.werkpunten=[...(p.werkpunten||[]),wp]; }
   document.getElementById('wpText').value='';
+  window._wpModalSel=[];
   closeModal('addWpModal'); renderWerkpunten(); notify('Werkpunt toegevoegd aan '+p.name);
 }
 
