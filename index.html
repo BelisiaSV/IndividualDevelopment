@@ -818,6 +818,8 @@ function buildSidebar() {
 }
 
 function goPage(title, pageId, renderFn) {
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebarOverlay')?.classList.remove('open');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sbItem').forEach(i=>i.classList.remove('active'));
   document.getElementById(pageId)?.classList.add('active');
@@ -2728,6 +2730,12 @@ async function delRef(i, id) {
 // UTILITIES
 // ============================================================
 function openModal(id) { document.getElementById(id)?.classList.add('open'); }
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  if(sb) sb.classList.toggle('open');
+  if(ov) ov.classList.toggle('open');
+}
 function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 function showSpinner(v) { document.getElementById('spinner').style.display=v?'flex':'none'; }
@@ -2848,26 +2856,7 @@ function buildVoorbereidingView(week, weekIdx) {
   }).join('');
 
   // Completion tracking (coach only)
-  const completionKey = 'schema_done_w' + weekIdx;
-  const doneData = JSON.parse(localStorage.getItem(completionKey)||'{}');
-  const playerChecks = isCoach() ? `
-    <div class="card" style="margin-top:16px">
-      <div class="cardTitle">✅ Voltooiing – Week ${week.week}</div>
-      <div style="font-size:12px;color:var(--t3);margin-bottom:10px">Afvinken als je op Strava hebt gecontroleerd wie gepost heeft.</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
-        ${PLAYERS.map(p=>{
-          const done = doneData[p.id];
-          return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${done?'#F0FDF4':'var(--bg)'};border:1px solid ${done?'#2EAA6A':'var(--brd)'};border-radius:7px;cursor:pointer"
-            onclick="toggleSchemaDone(${weekIdx},'${p.id}')">
-            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${done?'#2EAA6A':'var(--brd)'};background:${done?'#2EAA6A':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              ${done?'<span style="color:#fff;font-size:10px">✓</span>':''}
-            </div>
-            <div style="width:24px;height:24px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0">${ini(p.name)}</div>
-            <div style="font-size:12px;font-weight:500;flex:1">${p.name}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>` : '';
+  const playerChecks = ''; // Per-day checks now in showDayDetail
 
   return `
     <div style="background:var(--txt);border-radius:10px;padding:16px 20px;margin-bottom:16px">
@@ -2929,7 +2918,8 @@ function showDayDetail(weekIdx, dayIdx) {
             <a href="${STRAVA_URL}" target="_blank" style="font-size:11px;color:#FC4C02">→ ${STRAVA_URL}</a>
           </div>
         </div>
-      </div>`;
+      </div>
+      ${isCoach()?buildDayCompletion(weekIdx,dayIdx):''}`;
 
   } else if (day.type === 'exercise') {
     content = `
@@ -2951,7 +2941,7 @@ function showDayDetail(weekIdx, dayIdx) {
                 <td>${o.rust_sets||''}</td>
                 <td style="font-weight:600">${o.reps||''}</td>
                 <td>${o.gewicht||'nvt'}</td>
-                <td>${o.qr_url?`<a href="${o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px">▶ Bekijk</a>`:(isCoach()?`<button class="btn btnG sm" style="font-size:10px" onclick="editOefUrl(${weekIdx},${dayIdx},${o.nr-1})">+ Link</button>`:'<span style="color:var(--t3);font-size:11px">—</span>')}</td>
+                <td>${o.qr_url?`<a href="${o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px">▶ Bekijk</a>`:(isCoach()?`<button class="btn btnG sm" style="font-size:10px" onclick="editOefMedia(${weekIdx},${dayIdx},${o.nr-1})">+ Link</button>`:'<span style="color:var(--t3);font-size:11px">—</span>')}</td>
               </tr>`).join('')}
             </tbody>
           </table>
@@ -2963,11 +2953,12 @@ function showDayDetail(weekIdx, dayIdx) {
   container.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
-function toggleSchemaDone(weekIdx, playerId) {
-  const key = 'schema_done_w' + weekIdx;
+function toggleSchemaDone(weekIdx, dayIdx, playerId) {
+  const key = 'schema_done_w' + weekIdx + '_d' + dayIdx;
   const data = JSON.parse(localStorage.getItem(key)||'{}');
   data[playerId] = !data[playerId];
   localStorage.setItem(key, JSON.stringify(data));
+  showDayDetail(weekIdx, dayIdx);
   renderVoorbereiding();
 }
 
