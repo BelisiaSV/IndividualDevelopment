@@ -294,7 +294,22 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
       <div class="ff"><label>Leeftijd</label><input type="number" id="nsAge" placeholder="24"></div>
     </div>
     <div class="ff"><label>Gewicht (kg)</label><input type="number" id="nsWt" placeholder="75"></div>
+    <div class="ff"><label>Geboortedatum</label><input type="date" id="nsBirth" placeholder="2000-01-15"></div>
     <div class="modalFoot"><button class="btn btnG" onclick="closeModal('addSpelerModal')">Annuleer</button><button class="btn btnP" onclick="saveNewSpeler()">Toevoegen</button></div>
+  </div>
+</div>
+
+<!-- EDIT SPELER MODAL -->
+<div class="modal" id="editSpelerModal">
+  <div class="modalBox">
+    <div class="modalTitle">Speler bewerken</div>
+    <div class="ff"><label>Naam</label><input id="esName" placeholder="Voornaam Achternaam"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="ff"><label>Positie</label><select id="esPos"><option>GK</option><option>CB</option><option>LB</option><option>RB</option><option>CDM</option><option>CM</option><option>CAM</option><option>LW</option><option>RW</option><option>ST</option></select></div>
+      <div class="ff"><label>Geboortedatum</label><input type="date" id="esBirth"></div>
+    </div>
+    <div class="ff"><label>Gewicht (kg)</label><input type="number" id="esWt" placeholder="75"></div>
+    <div class="modalFoot"><button class="btn btnG" onclick="closeModal('editSpelerModal')">Annuleer</button><button class="btn btnP" onclick="saveEditSpeler()">Opslaan</button></div>
   </div>
 </div>
 
@@ -753,6 +768,16 @@ async function startApp() {
   showSpinner(false);
 }
 
+function calcAge(birthdate, fallbackAge) {
+  if (!birthdate) return fallbackAge || '—';
+  const birth = new Date(birthdate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
 async function loadPlayers() {
   const players = await sbGet('players', '&order=name.asc');
   for (const p of players) {
@@ -777,6 +802,9 @@ async function loadPlayers() {
     if (!p.weight.length) p.weight = [{d:'Start', w:p.weight_kg||75}];
     p.kpis = p.kpis||{};
     p.presenceLog = p.presence_log||[];
+    p.birthdate = p.birthdate || null;
+    // Recalculate age from birthdate if available
+    if (p.birthdate) p.age = calcAge(p.birthdate);
     // Parse match_kpis: stored as jsonb array or JSON string
     try {
       const raw = p.match_kpis;
@@ -1424,10 +1452,14 @@ function filterKern() {
     const aanw = (p.presenceLog||[]).filter(e=>e.status==='aanwezig').length;
     const tot = (p.presenceLog||[]).length;
     const pct = tot ? Math.round(aanw/tot*100) : 0;
-    return `<div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:15px;cursor:pointer" onclick="openSpeler(${p.id})" onmouseenter="this.style.borderColor='#4FA8D1'" onmouseleave="this.style.borderColor='var(--brd)'">
+    return `<div style="background:#fff;border:1px solid var(--brd);border-radius:10px;padding:15px;cursor:pointer;position:relative" onclick="openSpeler(${p.id})" onmouseenter="this.style.borderColor='#4FA8D1'" onmouseleave="this.style.borderColor='var(--brd)'">
       <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
         <div style="width:38px;height:38px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff">${ini(p.name)}</div>
-        <div><div style="font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--t3)">${p.pos||'—'} · ${p.age||'—'} jr</div></div>
+        <div style="flex:1"><div style="font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--t3)">${p.pos||'—'} · ${calcAge(p.birthdate, p.age)} jr</div></div>
+        <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
+          <button class="btn btnG sm" style="font-size:10px;padding:3px 7px" onclick="openEditSpeler(${p.id})" title="Bewerken">✏</button>
+          <button class="btn btnD sm" style="font-size:10px;padding:3px 7px" onclick="deleteSpeler(${p.id},'${p.name}')" title="Verwijderen">✕</button>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
         ${[['Gewicht',(p.weight||[])[(p.weight||[]).length-1]?.w+' kg'],['Aanw.',pct+'%'],['Werkpunten',(p.werkpunten||[]).length],["POP's",(p.popHistory||[]).length]].map(([l,v])=>`<div style="background:var(--bg);border-radius:5px;padding:5px 7px"><div style="font-size:10px;color:var(--t3)">${l}</div><div style="font-size:13px;font-weight:600">${v}</div></div>`).join('')}
@@ -2269,14 +2301,62 @@ function toggleWpLabel(label) {
 
 function openWpForPlayer(pid) { document.getElementById('wpSpeler').value=pid; openModal('addWpModal'); }
 
+
 async function saveNewSpeler() {
   const name = document.getElementById('nsName').value.trim();
   if (!name) return;
-  const d = await sbInsert('players', {name, pos:document.getElementById('nsPos').value, age:parseInt(document.getElementById('nsAge').value)||22, weight_kg:parseInt(document.getElementById('nsWt').value)||75, color:COLORS[PLAYERS.length%COLORS.length], kpis:{}, presence:[], presence_log:[], injury:false});
+  const birth = document.getElementById('nsBirth')?.value || '';
+  const age = birth ? calcAge(birth) : (parseInt(document.getElementById('nsAge')?.value)||22);
+  const d = await sbInsert('players', {name, pos:document.getElementById('nsPos').value, age, birthdate:birth||null, weight_kg:parseInt(document.getElementById('nsWt').value)||75, color:COLORS[PLAYERS.length%COLORS.length], kpis:{}, presence:[], presence_log:[], injury:false});
   if (d) {
-    PLAYERS.push({...d, werkpunten:[], popHistory:[], weight:[{d:'Start',w:d.weight_kg}], presenceLog:[]});
+    PLAYERS.push({...d, werkpunten:[], popHistory:[], weight:[{d:'Start',w:d.weight_kg}], presenceLog:[], birthdate:birth||null});
     closeModal('addSpelerModal'); renderKern(); buildSidebar(); notify('Speler toegevoegd');
   }
+}
+
+let _editSpelerId = null;
+function openEditSpeler(pid) {
+  const p = PLAYERS.find(x=>x.id==pid);
+  if (!p) return;
+  _editSpelerId = pid;
+  document.getElementById('esName').value = p.name || '';
+  document.getElementById('esPos').value = p.pos || 'CM';
+  document.getElementById('esBirth').value = p.birthdate || '';
+  document.getElementById('esWt').value = (p.weight||[])[(p.weight||[]).length-1]?.w || p.weight_kg || '';
+  openModal('editSpelerModal');
+}
+
+async function saveEditSpeler() {
+  const p = PLAYERS.find(x=>x.id==_editSpelerId);
+  if (!p) return;
+  const name = document.getElementById('esName').value.trim();
+  const birth = document.getElementById('esBirth').value;
+  const age = birth ? calcAge(birth) : p.age;
+  const wt = parseFloat(document.getElementById('esWt').value) || p.weight_kg;
+  const updates = {name, pos:document.getElementById('esPos').value, age, birthdate:birth||null, weight_kg:wt};
+  await sbUpdate('players', _editSpelerId, updates);
+  Object.assign(p, updates);
+  if (birth) p.birthdate = birth;
+  closeModal('editSpelerModal');
+  renderKern();
+  notify(name + ' bijgewerkt');
+}
+
+async function deleteSpeler(pid, name) {
+  if (!confirm('Speler "' + name + '" verwijderen? Dit verwijdert ook alle werkpunten en POP-gesprekken.')) return;
+  showSpinner(true);
+  try {
+    // Delete related records
+    await sbDelete('werkpunten', null, '&player_id=eq.' + pid);
+    await sbDelete('pop_history', null, '&player_id=eq.' + pid);
+    await sbDelete('weight_history', null, '&player_id=eq.' + pid);
+    await sbDelete('players', pid);
+  } catch(e) {}
+  PLAYERS = PLAYERS.filter(x=>x.id!=pid);
+  showSpinner(false);
+  renderKern();
+  buildSidebar();
+  notify(name + ' verwijderd');
 }
 
 async function saveWerkpunt() {
@@ -3049,14 +3129,37 @@ function openSchemaEditor(weekIdx) {
 }
 
 // Restore saved URLs on init
+function saveSchemaUrls() {
+  try {
+    const data = VOORBEREIDINGSSCHEMA.map(w => w.days.map(d => d.oefeningen.map(o => ({
+      url: o.qr_url || '',
+      qr: o.qr_img || ''
+    }))));
+    localStorage.setItem('schema_urls_v2', JSON.stringify(data));
+  } catch(e) {}
+}
+
 function restoreSchemaUrls() {
   try {
-    const saved = JSON.parse(localStorage.getItem('schema_urls')||'null');
+    // Try v2 format first (url + qr_img), fall back to v1 (url only)
+    const saved = JSON.parse(localStorage.getItem('schema_urls_v2') || localStorage.getItem('schema_urls') || 'null');
     if (saved) {
-      saved.forEach((wDays,wi) => wDays.forEach((dOef,di) => dOef.forEach((url,oi) => {
-        if (VOORBEREIDINGSSCHEMA[wi]?.days[di]?.oefeningen[oi])
-          VOORBEREIDINGSSCHEMA[wi].days[di].oefeningen[oi].qr_url = url;
-      })));
+      saved.forEach((wDays, wi) => {
+        if (!wDays) return;
+        wDays.forEach((dOef, di) => {
+          if (!dOef) return;
+          dOef.forEach((item, oi) => {
+            const oef = VOORBEREIDINGSSCHEMA[wi]?.days[di]?.oefeningen[oi];
+            if (!oef) return;
+            if (typeof item === 'string') {
+              oef.qr_url = item;
+            } else if (item && typeof item === 'object') {
+              oef.qr_url = item.url || '';
+              oef.qr_img = item.qr || '';
+            }
+          });
+        });
+      });
     }
   } catch(e) {}
 }
