@@ -29,11 +29,39 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
 /* APP */
 #app{display:none;min-height:100vh;display:none;}
 .layout{display:flex;min-height:100vh;}
-#sidebar{width:230px;background:var(--txt);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;}
-.main{margin-left:230px;flex:1;display:flex;flex-direction:column;}
-.topbar{background:#fff;border-bottom:1px solid var(--brd);height:54px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:50;}
+#sidebar{width:230px;background:var(--txt);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;transition:width .22s ease;overflow-x:hidden;}
+#sidebar.collapsed{width:52px;}
+#sidebar.collapsed .sbLabel,#sidebar.collapsed .sbTitle,#sidebar.collapsed .sbSub,#sidebar.collapsed .sbUser>div,#sidebar.collapsed .sbLogout{display:none;}
+#sidebar.collapsed .sbHead{justify-content:center;padding:10px 0;}
+#sidebar.collapsed .sbItem{justify-content:center;padding:10px 0;font-size:18px;}
+#sidebar.collapsed .sbItem .sbItemText{display:none;}
+#sidebar.collapsed .sbFoot{padding:6px 0;}
+#sidebar.collapsed .sbUser{justify-content:center;}
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column;transition:margin-left .22s ease;}
+.main.wide{margin-left:52px;}
+.topbar{background:#fff;border-bottom:1px solid var(--brd);height:54px;display:flex;align-items:center;padding:0 16px;gap:10px;position:sticky;top:0;z-index:50;}
 .topbar h2{font-family:var(--fc);font-size:19px;font-weight:700;flex:1;}
 .content{padding:20px;flex:1;}
+#menuToggle{background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:6px 8px;flex-shrink:0;border-radius:6px;line-height:1;}
+#menuToggle:hover{background:var(--bg);}
+#sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;}
+@media(max-width:700px){
+  #sidebar{transform:translateX(-100%);width:240px;}
+  #sidebar.open{transform:translateX(0);}
+  #sidebar.collapsed{width:240px;}
+  #sidebar.collapsed .sbLabel,#sidebar.collapsed .sbTitle,#sidebar.collapsed .sbSub,#sidebar.collapsed .sbUser>div,#sidebar.collapsed .sbLogout{display:flex;}
+  #sidebar.collapsed .sbHead{justify-content:flex-start;padding:12px 16px;}
+  #sidebar.collapsed .sbItem{justify-content:flex-start;padding:10px 18px;font-size:13px;}
+  #sidebar.collapsed .sbItem .sbItemText{display:inline;}
+  #sidebar.collapsed .sbFoot{padding:8px 0;}
+  #sidebar.collapsed .sbUser{justify-content:flex-start;}
+  #sidebarOverlay.open{display:block;}
+  .main,.main.wide{margin-left:0!important;}
+  .content{padding:12px;}
+  .topbar h2{font-size:16px;}
+  .statsRow{grid-template-columns:repeat(2,1fr)!important;}
+  .grid2{grid-template-columns:1fr!important;}
+}
 
 /* SIDEBAR */
 .sbHead{padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
@@ -229,8 +257,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
 <div id="app" style="display:none">
   <div class="layout">
     <div id="sidebar"></div>
+<div id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <div class="main">
       <div class="topbar">
+        <button id="menuToggle" onclick="toggleSidebar()" title="Menu in-/uitklappen">☰</button>
         <h2 id="pageTitle">Dashboard</h2>
         <div id="topActions"></div>
         <button onclick="openModal('logoModal')" style="padding:4px 9px;background:transparent;border:1px solid var(--brd);border-radius:6px;font-size:12px;cursor:pointer;color:var(--t2)">🏟 Logo</button>
@@ -816,6 +846,8 @@ function buildSidebar() {
       </div>`;
   }
 }
+  // Restore collapse state after re-render
+  setTimeout(restoreSidebarState, 0);
 
 function goPage(title, pageId, renderFn) {
   document.getElementById('sidebar')?.classList.remove('open');
@@ -1247,7 +1279,7 @@ function buildClipsSection(clips, type, itemId, playerId) {
   return clips.map((c,ci)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg);border-radius:6px;margin-bottom:4px">
     <span style="font-size:13px">🎬</span>
     <div style="flex:1;overflow:hidden">
-      ${c.url ? `<a href="${c.url}" target="_blank" style="font-size:12px;color:var(--blue);font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.url.length>50?c.url.slice(0,50)+'...':c.url}</a>` : `<span style="font-size:12px;font-weight:600;color:var(--t2)">${c.name||'Video bestand'}</span>`}
+      ${c.url ? `<a href="${/^https?:\/\//i.test(c.url)?c.url:'https://'+c.url}" target="_blank" style="font-size:12px;color:var(--blue);font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.url.length>50?c.url.slice(0,50)+'...':c.url}</a>` : `<span style="font-size:12px;font-weight:600;color:var(--t2)">${c.name||'Video bestand'}</span>`}
     </div>
     <button style="background:none;border:none;cursor:pointer;color:var(--red);font-size:14px" onclick="removeClip('${type}','${itemId}','${playerId}',${ci})">×</button>
   </div>`).join('');
@@ -1517,7 +1549,7 @@ function renderSpelerDetail(p) {
           <div style="margin-top:8px">
             <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:5px">🎬 Clips van speler</div>
             ${(w.clips||[]).map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg);border-radius:5px;margin-bottom:3px;font-size:12px">
-              ${c.url&&!c.isFile?`<a href="${c.url}" target="_blank" style="color:var(--blue)">🎬 ${c.name||c.url.slice(0,45)}</a>`:`<span>🎬 ${c.name||'Video bestand'}</span>`}
+              ${c.url&&!c.isFile?`<a href="${/^https?:\/\//i.test(c.url)?c.url:'https://'+c.url}" target="_blank" style="color:var(--blue)">🎬 ${c.name||c.url.slice(0,45)}</a>`:`<span>🎬 ${c.name||'Video bestand'}</span>`}
             </div>`).join('')}
           </div>`:''}
         `:`${w.feedback?`<div style="margin-top:8px;background:#E6F4FB;border-radius:6px;padding:8px;font-size:12px;color:#2B7FA8"><strong>Coach:</strong> ${w.feedback}</div>`:''}` }
@@ -1538,7 +1570,7 @@ function renderSpelerDetail(p) {
           ${h.acties?`<div><strong>Afspraken:</strong> ${h.acties}</div>`:''}
         </div>
         ${isCoach()&&h.spelerReactie?`<div style="margin-top:8px;background:#F0FDF4;border-radius:6px;padding:8px 10px;font-size:12px"><strong style="color:#065F46">💬 Speler reactie:</strong> <span style="color:var(--t2)">${h.spelerReactie}</span></div>`:''}
-        ${isCoach()&&(h.clips||[]).length?`<div style="margin-top:6px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">🎬 Clips speler</div>${(h.clips||[]).map(c=>`<div style="font-size:12px;padding:3px 8px;background:var(--bg);border-radius:5px;margin-bottom:2px">${c.url&&!c.isFile?`<a href="${c.url}" target="_blank" style="color:var(--blue)">🎬 ${c.name||c.url.slice(0,40)}</a>`:`<span>🎬 ${c.name||'Video'}</span>`}</div>`).join('')}</div>`:''}
+        ${isCoach()&&(h.clips||[]).length?`<div style="margin-top:6px"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;margin-bottom:4px">🎬 Clips speler</div>${(h.clips||[]).map(c=>`<div style="font-size:12px;padding:3px 8px;background:var(--bg);border-radius:5px;margin-bottom:2px">${c.url&&!c.isFile?`<a href="${/^https?:\/\//i.test(c.url)?c.url:'https://'+c.url}" target="_blank" style="color:var(--blue)">🎬 ${c.name||c.url.slice(0,40)}</a>`:`<span>🎬 ${c.name||'Video'}</span>`}</div>`).join('')}</div>`:''}
       </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Geen gesprekken.</p></div>'}
     </div>
     <div id="stabContent3" class="stabContent" style="display:none">
@@ -2509,7 +2541,7 @@ async function renderLicentie() {
                 <span style="font-size:13px">▶</span>
                 <div style="flex:1">
                   <div style="font-size:12px;font-weight:600">${v.title}</div>
-                  ${v.url ? `<a href="${v.url}" target="_blank" style="font-size:11px;color:var(--blue)">${v.url.length>50?v.url.slice(0,50)+'...':v.url}</a>` : ''}
+                  ${v.url ? `<a href="${/^https?:\/\//i.test(v.url)?v.url:'https://'+v.url}" target="_blank" style="font-size:11px;color:var(--blue)">${v.url.length>50?v.url.slice(0,50)+'...':v.url}</a>` : ''}
                 </div>
                 <button class="btn btnD sm" onclick="delVid(${realIdx},${vi},'${v.id||''}')">✕</button>
               </div>`).join('')}
@@ -2733,8 +2765,29 @@ function openModal(id) { document.getElementById(id)?.classList.add('open'); }
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('sidebarOverlay');
-  if(sb) sb.classList.toggle('open');
-  if(ov) ov.classList.toggle('open');
+  const main = document.querySelector('.main');
+  const isMobile = window.innerWidth <= 700;
+  if (isMobile) {
+    // Mobile: slide in/out as overlay
+    const isOpen = sb.classList.contains('open');
+    sb.classList.toggle('open', !isOpen);
+    if (ov) ov.classList.toggle('open', !isOpen);
+  } else {
+    // Desktop: collapse to icon strip
+    const isCollapsed = sb.classList.contains('collapsed');
+    sb.classList.toggle('collapsed', !isCollapsed);
+    if (main) main.classList.toggle('wide', !isCollapsed);
+    // Store preference
+    localStorage.setItem('sidebarCollapsed', !isCollapsed ? '1' : '0');
+  }
+}
+
+// Restore sidebar state on load
+function restoreSidebarState() {
+  if (window.innerWidth > 700 && localStorage.getItem('sidebarCollapsed') === '1') {
+    document.getElementById('sidebar')?.classList.add('collapsed');
+    document.querySelector('.main')?.classList.add('wide');
+  }
 }
 function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
@@ -2832,7 +2885,7 @@ function buildVoorbereidingView(week, weekIdx) {
         <button class="btn btnG sm" onclick="SCHEMA_WEEK_VIEW=null;renderVoorbereiding()">Vandaag</button>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a href="${STRAVA_URL}" target="_blank" class="btn btnP sm" style="text-decoration:none">🏃 Strava Club</a>
+        <a href="${/^https?:\/\//i.test(STRAVA_URL)?STRAVA_URL:'https://'+STRAVA_URL}" target="_blank" class="btn btnP sm" style="text-decoration:none">🏃 Strava Club</a>
         ${VOORBEREIDINGSSCHEMA.map((_,i)=>`<button class="btn ${i===weekIdx?'btnP':'btnG'} sm" onclick="SCHEMA_WEEK_VIEW=${i};renderVoorbereiding()">W${i+1}</button>`).join('')}
       </div>
     </div>`;
@@ -2865,7 +2918,7 @@ function buildVoorbereidingView(week, weekIdx) {
           <div style="font-family:var(--fc);font-size:18px;font-weight:700;color:#fff">🏋️ Voorbereidingsschema</div>
           <div style="font-size:13px;color:rgba(255,255,255,.5)">SV Belisia · ${VOORBEREIDINGSSCHEMA.length} weken · Start 25/5</div>
         </div>
-        <a href="${STRAVA_URL}" target="_blank" style="background:#FC4C02;color:#fff;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none">🏃 Strava</a>
+        <a href="${/^https?:\/\//i.test(STRAVA_URL)?STRAVA_URL:'https://'+STRAVA_URL}" target="_blank" style="background:#FC4C02;color:#fff;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none">🏃 Strava</a>
       </div>
     </div>
     ${nav}
@@ -2915,7 +2968,7 @@ function showDayDetail(weekIdx, dayIdx) {
           <span style="font-size:20px">📱</span>
           <div>
             <div style="font-size:12px;font-weight:700;color:#2B7FA8">Vergeet niet te posten op Strava!</div>
-            <a href="${STRAVA_URL}" target="_blank" style="font-size:11px;color:#FC4C02">→ ${STRAVA_URL}</a>
+            <a href="${/^https?:\/\//i.test(STRAVA_URL)?STRAVA_URL:'https://'+STRAVA_URL}" target="_blank" style="font-size:11px;color:#FC4C02">→ ${STRAVA_URL}</a>
           </div>
         </div>
       </div>
@@ -2941,7 +2994,7 @@ function showDayDetail(weekIdx, dayIdx) {
                 <td>${o.rust_sets||''}</td>
                 <td style="font-weight:600">${o.reps||''}</td>
                 <td>${o.gewicht||'nvt'}</td>
-                <td>${o.qr_url?`<a href="${o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px">▶ Bekijk</a>`:(isCoach()?`<button class="btn btnG sm" style="font-size:10px" onclick="editOefMedia(${weekIdx},${dayIdx},${o.nr-1})">+ Link</button>`:'<span style="color:var(--t3);font-size:11px">—</span>')}</td>
+                <td>${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-size:12px">▶ Bekijk</a>`:(isCoach()?`<button class="btn btnG sm" style="font-size:10px" onclick="editOefMedia(${weekIdx},${dayIdx},${o.nr-1})">+ Link</button>`:'<span style="color:var(--t3);font-size:11px">—</span>')}</td>
               </tr>`).join('')}
             </tbody>
           </table>
@@ -3040,7 +3093,7 @@ function buildSpelerVoorbereiding() {
         <div style="font-family:var(--fc);font-size:18px;font-weight:700;color:#fff">🏋️ Voorbereidingsschema</div>
         <div style="font-size:13px;color:rgba(255,255,255,.5)">Week ${week.week} · ${fmt(weekStart)} – ${fmt(weekEnd)}</div>
       </div>
-      <a href="${STRAVA_URL}" target="_blank" style="background:#FC4C02;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">🏃 Post op Strava</a>
+      <a href="${/^https?:\/\//i.test(STRAVA_URL)?STRAVA_URL:'https://'+STRAVA_URL}" target="_blank" style="background:#FC4C02;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px">🏃 Post op Strava</a>
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <button class="btn btnG sm" onclick="SCHEMA_WEEK_VIEW=Math.max(0,${weekIdx}-1);refreshSpelerDashboard('${PLAYERS.find(p=>p.profile_id===USER_ID)?.id}')" ${weekIdx===0?'disabled':''}>◀</button>
@@ -3080,7 +3133,7 @@ function spelerShowDay(weekIdx, dayIdx) {
       </table>
       <div style="margin-top:12px;padding:12px;background:#FFF7ED;border-radius:8px;border:1px solid #FC4C02">
         <div style="font-size:13px;font-weight:700;color:#FC4C02;margin-bottom:4px">📱 Vergeet niet te posten op Strava!</div>
-        <a href="${STRAVA_URL}" target="_blank" style="font-size:12px;color:#FC4C02;font-weight:600">${STRAVA_URL}</a>
+        <a href="${/^https?:\/\//i.test(STRAVA_URL)?STRAVA_URL:'https://'+STRAVA_URL}" target="_blank" style="font-size:12px;color:#FC4C02;font-weight:600">${STRAVA_URL}</a>
       </div>
     </div>`;
 
@@ -3101,7 +3154,7 @@ function spelerShowDay(weekIdx, dayIdx) {
               <td>${o.sets||''}</td><td>${o.rust_sets?o.rust_sets+'s':''}</td>
               <td style="font-weight:600">${o.reps||''}</td>
               <td>${o.gewicht||'nvt'}</td>
-              <td>${o.qr_url?`<a href="${o.qr_url}" target="_blank" style="color:var(--blue);font-weight:600">▶ Video</a>`:'—'}</td>
+              <td>${o.qr_url?`<a href="${/^https?:\/\//i.test(o.qr_url)?o.qr_url:'https://'+o.qr_url}" target="_blank" style="color:var(--blue);font-weight:600">▶ Video</a>`:'—'}</td>
             </tr>`).join('')}
           </tbody>
         </table>
@@ -3114,6 +3167,7 @@ function spelerShowDay(weekIdx, dayIdx) {
 }
 
 restoreSchemaUrls();
+restoreSidebarState();
 showSpinner(true);
 init();
 </script>
