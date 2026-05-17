@@ -277,6 +277,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
         <div class="page" id="pgPop"></div>
         <div class="page" id="pgAnalyse"></div>
         <div class="page" id="pgVoorbereiding"></div>
+        <div class="page" id="pgMas"></div>
         <div class="page" id="pgFysiek"></div>
         <div class="page" id="pgTraining"></div>
         <div class="page" id="pgOefenvormen"></div>
@@ -844,6 +845,7 @@ function buildSidebar() {
         <div class="sbLabel">Meer</div>
         <div class="sbItem" onclick="goPage('Export','pgExport',renderExport)">📥 Export</div>
         <div class="sbItem" onclick="goPage('Voorbereiding','pgVoorbereiding',renderVoorbereiding)">🏃 Voorbereiding</div>
+        <div class="sbItem" onclick="goPage('MAS Test','pgMas',renderMas)">📈 MAS Test</div>
         <div class="sbItem" onclick="goPage('Portfolio','pgPortfolio',renderPortfolio)">🏅 Portfolio</div>
         <div class="sbItem" onclick="goPage('Pro License','pgLicentie',renderLicentie)">🎓 Pro License</div>
       </div>
@@ -3464,6 +3466,355 @@ function showQrModal(imgSrc) {
     '</div>';
   modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
+}
+
+
+// ============================================================
+// MAS MODULE — Vameval Protocol
+// ============================================================
+
+// Referentietabel: tijd-range -> MAS (km/h)
+// Range: [minuten_van, minuten_tot) -> MAS
+const MAS_REF = [
+  [0,2,8],[2,3,8.5],[3,4,9],[4,5,9.5],[5,6,10],[6,7,10.5],[7,8,11],[8,9,11.5],
+  [9,10,12],[10,11,12.5],[11,12,13],[12,13,13.5],[13,14,14],[14,15,14.5],[15,16,15],
+  [16,17,15.5],[17,18,16],[18,19,16.5],[19,20,17],[20,21,17.5],[21,22,18],[22,23,18.5],
+  [23,24,19],[24,25,19.5],[25,26,20],[26,27,20.5],[27,28,21],[28,29,21.5],[29,30,22],
+  [30,31,22.5],[31,32,23],[32,33,23.5],[33,34,24],[34,35,24.5],[35,36,25]
+];
+
+// MAS percentages en seconden voor praktijktabel
+const MAS_PCTS = [0.8, 0.9, 1.0, 1.1, 1.2];
+const MAS_SECS = [5, 10, 15, 20, 25, 30];
+
+// State
+let MAS_DATA = null; // loaded from Supabase/localStorage
+let MAS_ACTIVE_TEST = 1; // 1, 2, or 3
+let MAS_ACTIVE_VIEW = 'invoer'; // 'invoer' | 'overzicht' | 'praktijk'
+
+function parseMasTime(str) {
+  if (!str) return null;
+  str = str.trim().replace(',',':').replace('.',':');
+  const parts = str.split(':');
+  if (parts.length === 2) {
+    const min = parseInt(parts[0]);
+    const sec = parseInt(parts[1]);
+    if (!isNaN(min) && !isNaN(sec)) return min + sec/60;
+  }
+  // Try plain number as minutes
+  const n = parseFloat(str);
+  if (!isNaN(n)) return n;
+  return null;
+}
+
+function formatMasTime(decMinutes) {
+  if (decMinutes === null || decMinutes === undefined) return '—';
+  const min = Math.floor(decMinutes);
+  const sec = Math.round((decMinutes - min) * 60);
+  return String(min).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+
+function timeToMAS(decMinutes) {
+  if (decMinutes === null) return null;
+  for (const [from, to, mas] of MAS_REF) {
+    if (decMinutes >= from && decMinutes < to) return mas;
+  }
+  if (decMinutes >= 35) return 25; // max
+  return null;
+}
+
+function calcMasDistance(mas, pct, secs) {
+  // distance (m) = (mas km/h / 3.6) * secs * pct
+  return +((mas / 3.6) * secs * pct).toFixed(2);
+}
+
+function calcRecupPct(hf, hf1) {
+  if (!hf || !hf1) return null;
+  return +(((hf - hf1) / hf) * 100).toFixed(1);
+}
+
+async function loadMasData() {
+  // Try Supabase first
+  try {
+    const coaches = await sbGet('profiles', '&role=eq.coach&limit=1&select=id,mas_data');
+    if (coaches && coaches[0]?.mas_data) {
+      MAS_DATA = coaches[0].mas_data;
+      try { localStorage.setItem('mas_data_v1', JSON.stringify(MAS_DATA)); } catch(e) {}
+      return;
+    }
+  } catch(e) {}
+  // Fallback to localStorage
+  try {
+    const local = JSON.parse(localStorage.getItem('mas_data_v1') || 'null');
+    if (local) { MAS_DATA = local; return; }
+  } catch(e) {}
+  // Init empty
+  MAS_DATA = { players: {} };
+}
+
+async function saveMasData() {
+  try { localStorage.setItem('mas_data_v1', JSON.stringify(MAS_DATA)); } catch(e) {}
+  try {
+    await fetch(SB_URL + '/rest/v1/profiles?role=eq.coach', {
+      method: 'PATCH',
+      headers: hdrs({'Prefer':'return=minimal'}),
+      body: JSON.stringify({mas_data: MAS_DATA})
+    });
+  } catch(e) { console.warn('MAS save failed:', e); }
+}
+
+async function renderMas() {
+  document.getElementById('topActions').innerHTML = '';
+  if (!MAS_DATA) await loadMasData();
+  
+  const pg = document.getElementById('pgMas');
+  if (!pg) return;
+
+  const views = ['invoer','overzicht','praktijk'];
+  const vLabels = ['✏ Invoer','📊 Overzicht','⚽ Praktijktabel'];
+
+  pg.innerHTML = `
+    <div style="background:var(--txt);border-radius:10px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-family:var(--fc);font-size:18px;font-weight:700;color:#fff;margin-bottom:4px">🏃 MAS Test — Vameval Protocol</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5)">Maximale Aerobe Snelheid · 3 testen per jaar</div>
+    </div>
+    
+    <!-- View tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+      ${views.map((v,i)=>`<button class="btn ${MAS_ACTIVE_VIEW===v?'btnP':'btnG'} sm" onclick="MAS_ACTIVE_VIEW='${v}';renderMas()">${vLabels[i]}</button>`).join('')}
+    </div>
+
+    <div id="masViewContent">
+      ${MAS_ACTIVE_VIEW==='invoer' ? buildMasInvoer() : MAS_ACTIVE_VIEW==='overzicht' ? buildMasOverzicht() : buildMasPraktijk()}
+    </div>`;
+}
+
+// ── INVOER ──────────────────────────────────────────────────
+function buildMasInvoer() {
+  const testTabs = [1,2,3].map(t=>
+    `<button class="btn ${MAS_ACTIVE_TEST===t?'btnP':'btnG'} sm" onclick="MAS_ACTIVE_TEST=${t};renderMas()">Test ${t}</button>`
+  ).join('');
+
+  const rows = PLAYERS.map(p => {
+    const pd = MAS_DATA.players[p.id] || {};
+    const td = pd[`test${MAS_ACTIVE_TEST}`] || {};
+    const mas = td.time ? timeToMAS(parseMasTime(td.time)) : null;
+    const recup = calcRecupPct(td.hf, td.hf1);
+    return `<tr>
+      <td style="font-weight:600">${p.name}</td>
+      <td><input id="mt_${p.id}" value="${td.time||''}" placeholder="mm:ss" 
+        style="width:70px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:5px;background:var(--bg);text-align:center;font-family:var(--f)"
+        onblur="autoFormatMasTime(this)"></td>
+      <td style="font-weight:700;color:#2B7FA8;text-align:center">${mas !== null ? mas + ' km/h' : '—'}</td>
+      <td><input id="mhf_${p.id}" type="number" value="${td.hf||''}" placeholder="bv. 180"
+        style="width:65px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:5px;background:var(--bg);font-family:var(--f)"></td>
+      <td><input id="mhf1_${p.id}" type="number" value="${td.hf1||''}" placeholder="bv. 150"
+        style="width:65px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:5px;background:var(--bg);font-family:var(--f)"></td>
+      <td style="text-align:center;color:${recup!==null?(recup>=20?'#2EAA6A':recup>=10?'#D4860A':'#E05252'):'var(--t3)'}">
+        ${recup !== null ? recup + '%' : '—'}
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <strong>Selecteer test:</strong> ${testTabs}
+    </div>
+    <div class="card">
+      <div class="cardTitle">Test ${MAS_ACTIVE_TEST} — Tijden & Hartslag invoeren</div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr style="background:#1E3A5F;color:#fff">
+            <th style="color:#fff">Speler</th>
+            <th style="color:#fff">Tijd (mm:ss)</th>
+            <th style="color:#fff">MAS</th>
+            <th style="color:#fff">HF max</th>
+            <th style="color:#fff">HF+1 min</th>
+            <th style="color:#fff">Recuperatie %</th>
+          </tr></thead>
+          <tbody>${rows||'<tr><td colspan="6" style="color:var(--t3);text-align:center">Geen spelers in kern.</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn btnP" onclick="saveMasInvoer()">💾 Opslaan & berekenen</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;background:#EDF6FB">
+      <div style="font-size:12px;color:#2B7FA8"><strong>Tijdtabel (referentie):</strong></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px;margin-top:8px">
+        ${MAS_REF.filter((_,i)=>i<24).map(([f,t,m])=>`<div style="font-size:11px;padding:3px 6px;background:#fff;border-radius:4px;border:1px solid var(--brd)">
+          ${String(Math.floor(f)).padStart(2,'0')}:00 – ${String(Math.floor(t)).padStart(2,'0')}:00 → <strong>${m}</strong>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function autoFormatMasTime(input) {
+  const val = input.value.trim();
+  if (!val) return;
+  // If only digits without colon, treat as seconds total
+  if (/^\d+$/.test(val)) {
+    const total = parseInt(val);
+    const min = Math.floor(total / 60);
+    const sec = total % 60;
+    input.value = String(min).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+    return;
+  }
+  // Has colon - just pad
+  const parts = val.split(':');
+  if (parts.length === 2) {
+    input.value = String(parseInt(parts[0])||0).padStart(2,'0') + ':' + String(parseInt(parts[1])||0).padStart(2,'0');
+  }
+}
+
+async function saveMasInvoer() {
+  if (!MAS_DATA.players) MAS_DATA.players = {};
+  PLAYERS.forEach(p => {
+    const timeEl = document.getElementById('mt_' + p.id);
+    const hfEl = document.getElementById('mhf_' + p.id);
+    const hf1El = document.getElementById('mhf1_' + p.id);
+    if (!timeEl) return;
+    
+    autoFormatMasTime(timeEl);
+    const time = timeEl.value.trim();
+    const hf = parseInt(hfEl?.value) || null;
+    const hf1 = parseInt(hf1El?.value) || null;
+    const decMin = parseMasTime(time);
+    const mas = timeToMAS(decMin);
+
+    if (!MAS_DATA.players[p.id]) MAS_DATA.players[p.id] = {};
+    MAS_DATA.players[p.id][`test${MAS_ACTIVE_TEST}`] = { time, hf, hf1, mas };
+  });
+  await saveMasData();
+  notify('MAS Test ' + MAS_ACTIVE_TEST + ' opgeslagen');
+  renderMas();
+}
+
+// ── OVERZICHT ───────────────────────────────────────────────
+function buildMasOverzicht() {
+  // Sort players by best MAS desc
+  const playerData = PLAYERS.map(p => {
+    const pd = MAS_DATA.players[p.id] || {};
+    const tests = [1,2,3].map(t => {
+      const td = pd[`test${t}`] || {};
+      const mas = td.mas || (td.time ? timeToMAS(parseMasTime(td.time)) : null);
+      const recup = calcRecupPct(td.hf, td.hf1);
+      return { time: td.time||'', mas, hf: td.hf, hf1: td.hf1, recup };
+    });
+    const masValues = tests.map(t=>t.mas).filter(v=>v!==null);
+    const avgMas = masValues.length ? +(masValues.reduce((a,b)=>a+b,0)/masValues.length).toFixed(2) : null;
+    return { p, tests, avgMas };
+  }).sort((a,b) => (b.avgMas||0) - (a.avgMas||0));
+
+  // Group averages per test
+  const testAvgs = [1,2,3].map(t => {
+    const vals = PLAYERS.map(p => MAS_DATA.players[p.id]?.[`test${t}`]?.mas).filter(v=>v);
+    return vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2) : null;
+  });
+
+  return `
+    <div class="statsRow" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+      ${[1,2,3].map(t=>`<div class="statCard">
+        <div class="statLbl">Test ${t} — Gem. MAS</div>
+        <div class="statVal" style="color:#2B7FA8">${testAvgs[t-1]!==null?testAvgs[t-1]+' km/h':'—'}</div>
+      </div>`).join('')}
+      <div class="statCard">
+        <div class="statLbl">Seizoensgemiddelde</div>
+        <div class="statVal" style="color:#2EAA6A">${(()=>{const v=testAvgs.filter(x=>x!==null);return v.length?+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2)+' km/h':'—'})()}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="cardTitle">Overzicht alle spelers — MAS & Hartslag</div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead>
+            <tr style="background:#1E3A5F">
+              <th style="color:#fff">Speler</th>
+              ${[1,2,3].map(t=>`<th style="color:#fff;text-align:center" colspan="3">Test ${t}</th>`).join('')}
+              <th style="color:#fff;text-align:center">Gem. MAS</th>
+            </tr>
+            <tr style="background:#2B4A7F">
+              <th style="color:rgba(255,255,255,.6)"></th>
+              ${[1,2,3].map(()=>`<th style="color:rgba(255,255,255,.7);font-size:10px">MAS</th><th style="color:rgba(255,255,255,.7);font-size:10px">HF max</th><th style="color:rgba(255,255,255,.7);font-size:10px">Recup%</th>`).join('')}
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${playerData.map(({p, tests, avgMas}, ri) => {
+              const bg = ri%2===0?'#fff':'var(--bg)';
+              return `<tr style="background:${bg}">
+                <td style="font-weight:600">${p.name}</td>
+                ${tests.map(t=>`
+                  <td style="text-align:center;color:#2B7FA8;font-weight:700">${t.mas !== null ? t.mas : '—'}</td>
+                  <td style="text-align:center">${t.hf||'—'}</td>
+                  <td style="text-align:center;color:${t.recup!==null?(t.recup>=20?'#2EAA6A':t.recup>=10?'#D4860A':'#E05252'):'var(--t3)'};font-weight:600">${t.recup!==null?t.recup+'%':'—'}</td>
+                `).join('')}
+                <td style="text-align:center;font-weight:700;color:#2EAA6A;font-size:15px">${avgMas !== null ? avgMas : '—'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── PRAKTIJKTABEL ────────────────────────────────────────────
+function buildMasPraktijk() {
+  const testTabs = [1,2,3].map(t=>
+    `<button class="btn ${MAS_ACTIVE_TEST===t?'btnP':'btnG'} sm" onclick="MAS_ACTIVE_TEST=${t};renderMas()">Test ${t}</button>`
+  ).join('');
+
+  const pctColors = {0.8:'#DBEAFE',0.9:'#D1FAE5',1.0:'#FEF3C7',1.1:'#FDE8D8',1.2:'#FEE2E2'};
+  const pctTextColors = {0.8:'#1D4ED8',0.9:'#065F46',1.0:'#92400E',1.1:'#C2410C',1.2:'#B91C1C'};
+
+  const playerRows = PLAYERS.map(p => {
+    const pd = MAS_DATA.players[p.id] || {};
+    const td = pd[`test${MAS_ACTIVE_TEST}`] || {};
+    const mas = td.mas || (td.time ? timeToMAS(parseMasTime(td.time)) : null);
+    if (!mas) return `<tr><td style="font-weight:600">${p.name}</td><td colspan="${MAS_PCTS.length * MAS_SECS.length + 1}" style="color:var(--t3);text-align:center;font-style:italic">Geen MAS data voor Test ${MAS_ACTIVE_TEST}</td></tr>`;
+    
+    const cells = MAS_PCTS.map(pct => 
+      MAS_SECS.map(s => {
+        const dist = calcMasDistance(mas, pct, s);
+        return `<td style="text-align:center;font-size:11px;background:${pctColors[pct]};color:${pctTextColors[pct]};font-weight:600">${dist}</td>`;
+      }).join('')
+    ).join('');
+    
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap">${p.name}</td>
+      <td style="text-align:center;font-weight:700;color:#2B7FA8;white-space:nowrap">${mas} km/h</td>
+      ${cells}
+    </tr>`;
+  }).join('');
+
+  return `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <strong>Selecteer test:</strong> ${testTabs}
+    </div>
+    <div class="card">
+      <div class="cardTitle">Praktijktabel Test ${MAS_ACTIVE_TEST} — Afstanden per seconde & percentage</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        ${MAS_PCTS.map(pct=>`<span style="padding:3px 10px;background:${pctColors[pct]};color:${pctTextColors[pct]};border-radius:20px;font-size:11px;font-weight:700">${pct*100}%</span>`).join('')}
+        <span style="font-size:11px;color:var(--t3);align-self:center">Afstand in meters · Formule: (MAS/3.6) × seconden × %</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl" style="min-width:900px">
+          <thead>
+            <tr style="background:#1E3A5F">
+              <th style="color:#fff" rowspan="2">Naam</th>
+              <th style="color:#fff" rowspan="2">MAS</th>
+              ${MAS_PCTS.map(pct=>`<th style="color:#fff;text-align:center;background:${pctTextColors[pct]}" colspan="${MAS_SECS.length}">${pct*100}%</th>`).join('')}
+            </tr>
+            <tr style="background:#2B4A7F">
+              ${MAS_PCTS.map(pct=>MAS_SECS.map(s=>`<th style="color:rgba(255,255,255,.8);font-size:10px;background:${pctTextColors[pct]};opacity:.9;text-align:center">${s}"</th>`).join('')).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${playerRows||'<tr><td colspan="32" style="color:var(--t3);text-align:center">Geen spelers.</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
 restoreSchemaUrls();
