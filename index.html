@@ -605,7 +605,9 @@ let CLUB_LOGO = localStorage.getItem('clubLogo') || null;
 let CLUB_NAME = localStorage.getItem('clubName') || 'Belisia SV';
 let COLORS = ['#4FA8D1','#2EAA6A','#D4860A','#7C5CBF','#E05252','#16A085','#E67E22','#2980B9'];
 
-const isCoach = () => PROFILE?.role === 'coach';
+const isAdmin  = () => PROFILE?.role === 'coach';   // only original coach/admin
+const isCoach  = () => PROFILE?.role === 'coach' || PROFILE?.role === 'staff'; // coach + staff
+const isStaff  = () => PROFILE?.role === 'staff';  // staff only (not admin)
 const ini = n => (n||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
 
 // ============================================================
@@ -753,9 +755,15 @@ async function startApp() {
     // Load profile
     const profs = await sbGet('profiles', `&id=eq.${USER_ID}`);
     PROFILE = profs[0] || null;
+    // Get email from auth user
+    const authUser = await fetch(SB_URL+'/auth/v1/user',{headers:hdrs()}).then(r=>r.json()).catch(()=>null);
+    const userEmail = authUser?.email || '';
     if (!PROFILE) {
-      // Create profile
-      PROFILE = await sbInsert('profiles', {id: USER_ID, name:'Gebruiker', role:'player'}) || {id:USER_ID,name:'Gebruiker',role:'player'};
+      PROFILE = await sbInsert('profiles', {id: USER_ID, name: userEmail.split('@')[0]||'Gebruiker', role:'player', email: userEmail}) || {id:USER_ID,name:'Gebruiker',role:'player'};
+    } else if (userEmail && !PROFILE.email) {
+      // Save email if not stored yet
+      await fetch(SB_URL+'/rest/v1/profiles?id=eq.'+USER_ID,{method:'PATCH',headers:hdrs({'Prefer':'return=minimal'}),body:JSON.stringify({email:userEmail})});
+      PROFILE.email = userEmail;
     }
     // Load players
     await loadPlayers();
@@ -829,7 +837,7 @@ function buildSidebar() {
   const logo = CLUB_LOGO ? `<img src="${CLUB_LOGO}" style="width:34px;height:34px;border-radius:7px;object-fit:cover">` : `<div class="sbLogo">BSV</div>`;
   
   if (isCoach()) {
-    // Coach ziet volledig menu
+    // Coach/Staff menu
     document.getElementById('sidebar').innerHTML = `
       <div class="sbHead">${logo}<div><div class="sbTitle">${CLUB_NAME}</div><div class="sbSub">Performance Platform</div></div></div>
       <div class="sbSection">
@@ -846,8 +854,9 @@ function buildSidebar() {
         <div class="sbItem" onclick="goPage('Export','pgExport',renderExport)">📥 Export</div>
         <div class="sbItem" onclick="goPage('Voorbereiding','pgVoorbereiding',renderVoorbereiding)">🏃 Voorbereiding</div>
         <div class="sbItem" onclick="goPage('MAS Test','pgMas',renderMas)">📈 MAS Test</div>
+        ${isAdmin() ? `
         <div class="sbItem" onclick="goPage('Portfolio','pgPortfolio',renderPortfolio)">🏅 Portfolio</div>
-        <div class="sbItem" onclick="goPage('Pro License','pgLicentie',renderLicentie)">🎓 Pro License</div>
+        <div class="sbItem" onclick="goPage('Pro License','pgLicentie',renderLicentie)">🎓 Pro License</div>` : ''}
       </div>
       <div class="sbFoot">
         <div class="sbUser">
@@ -909,12 +918,31 @@ function renderDashboard() {
   const el = document.getElementById('pgDashboard');
   if (isCoach()) {
     const att = PLAYERS.length ? Math.round(PLAYERS.reduce((a,p)=>a+(p.presenceLog||[]).filter(e=>e.status==='aanwezig').length/Math.max((p.presenceLog||[]).length,1),0)/PLAYERS.length*100) : 0;
+    // Staff management card (admin only)
+    const staffSection = isAdmin() ? `<div class="card" style="margin-bottom:14px">
+        <div class="cardTitle">👥 Staf beheer <span style="font-size:11px;font-weight:400;color:var(--t3)">— personen met coach-rechten</span></div>
+        <div id="staffListArea"><button class="btn btnG sm" onclick="loadStaffList()" style="margin-bottom:6px">↻ Stafleden laden</button></div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--brd)">
+          <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px">Rol instellen voor staflid:</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input id="staffEmail" placeholder="e-mail van staflid" style="flex:1;min-width:190px;padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);font-family:var(--f)">
+            <select id="staffRole" style="padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);font-family:var(--f)">
+              <option value="staff">Staf (geen Portfolio/License)</option>
+              <option value="coach">Admin (alles zichtbaar)</option>
+              <option value="player">Speler</option>
+            </select>
+            <button class="btn btnP sm" onclick="setStaffRole()">Opslaan</button>
+          </div>
+          <div style="font-size:11px;color:var(--t3);margin-top:5px">Persoon moet zich eerst eenmalig aanmelden zodat zijn profiel aangemaakt wordt.</div>
+        </div>
+      </div>` : '';
     // Spelers met nieuwe feedback van spelers (ongelezen)
     const nieuweReacties = PLAYERS.flatMap(p=>[
       ...(p.werkpunten||[]).filter(w=>w.spelerFeedback).map(w=>({name:p.name,color:p.color,pid:p.id,type:'Werkpunt feedback',tekst:w.spelerFeedback,datum:''})),
       ...(p.popHistory||[]).filter(h=>h.spelerReactie).map(h=>({name:p.name,color:p.color,pid:p.id,type:'POP reactie',tekst:h.spelerReactie,datum:h.date}))
     ]);
     el.innerHTML = `
+      ${staffSection}
       <div class="statsRow">
         <div class="statCard"><div class="statLbl">Kern</div><div class="statVal">${PLAYERS.length}</div></div>
         <div class="statCard"><div class="statLbl">Werkpunten</div><div class="statVal">${PLAYERS.reduce((a,p)=>a+(p.werkpunten||[]).length,0)}</div></div>
@@ -3877,6 +3905,74 @@ function buildMasPraktijk() {
         </table>
       </div>
     </div>`;
+}
+
+
+async function loadStaffList() {
+  const area = document.getElementById('staffListArea');
+  if (!area) return;
+  area.innerHTML = '<div style="color:var(--t3);font-size:12px">Laden...</div>';
+  try {
+    const profiles = await sbGet('profiles', '&role=in.(coach,staff)&order=name.asc');
+    if (!profiles.length) {
+      area.innerHTML = '<div style="font-size:12px;color:var(--t3)">Geen stafleden gevonden.</div>';
+      return;
+    }
+    area.innerHTML = profiles.map(p => {
+      const isMe = p.id === USER_ID;
+      const roleLabel = p.role === 'coach' ? '<span class="bdg blue">Admin</span>' : '<span class="bdg green">Staf</span>';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--brd);font-size:13px">
+        <div style="flex:1"><strong>${p.name||'—'}</strong>${isMe?' <span style="font-size:10px;color:var(--t3)">(jij)</span>':''}</div>
+        <div>${roleLabel}</div>
+        ${!isMe ? `<button class="btn btnD sm" style="font-size:10px" onclick="removeStaff('${p.id}','${p.name||''}')">Verwijder rol</button>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    area.innerHTML = '<div style="color:#E05252;font-size:12px">Fout bij laden.</div>';
+  }
+}
+
+async function setStaffRole() {
+  const email = document.getElementById('staffEmail')?.value?.trim();
+  const role = document.getElementById('staffRole')?.value;
+  if (!email) { notify('Vul een e-mailadres in', '#E05252'); return; }
+  // Find profile by email via auth - we use the profiles table name match as fallback
+  // Try to find profile where email matches (stored in auth, not profiles)
+  // We use Supabase admin approach: find profile by searching auth users
+  // Since we don't have admin key, we look up by email in profiles table
+  try {
+    const found = await sbGet('profiles', `&email=eq.${encodeURIComponent(email)}`);
+    if (found && found.length > 0) {
+      await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + found[0].id, {
+        method: 'PATCH',
+        headers: hdrs({'Prefer':'return=minimal'}),
+        body: JSON.stringify({role})
+      });
+      notify('Rol bijgewerkt voor ' + (found[0].name||email));
+      loadStaffList();
+      document.getElementById('staffEmail').value = '';
+    } else {
+      // Try by name
+      notify('Account niet gevonden. Persoon moet zich eerst aanmelden via de loginpagina.', '#D4860A');
+    }
+  } catch(e) {
+    notify('Fout: ' + e.message, '#E05252');
+  }
+}
+
+async function removeStaff(profileId, name) {
+  if (!confirm('Rol verwijderen van ' + name + '? Ze worden teruggezet naar speler-rol.')) return;
+  try {
+    await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + profileId, {
+      method: 'PATCH',
+      headers: hdrs({'Prefer':'return=minimal'}),
+      body: JSON.stringify({role: 'player'})
+    });
+    notify(name + ' teruggezet naar speler-rol');
+    loadStaffList();
+  } catch(e) {
+    notify('Fout', '#E05252');
+  }
 }
 
 restoreSchemaUrls();
