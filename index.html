@@ -278,6 +278,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
         <div class="page" id="pgAnalyse"></div>
         <div class="page" id="pgVoorbereiding"></div>
         <div class="page" id="pgMas"></div>
+        <div class="page" id="pgGebruikers"></div>
         <div class="page" id="pgFysiek"></div>
         <div class="page" id="pgTraining"></div>
         <div class="page" id="pgOefenvormen"></div>
@@ -774,8 +775,7 @@ async function startApp() {
     document.getElementById('app').style.display='block';
     buildSidebar();
     goPage('Dashboard', 'pgDashboard', renderDashboard);
-    // Auto-load user list if admin
-    if (isAdmin()) setTimeout(loadUserManagement, 300);
+
   } catch(e) {
     console.error('startApp error:', e);
     showSpinner(false);
@@ -853,6 +853,7 @@ function buildSidebar() {
         <div class="sbItem" onclick="goPage('Trainingsplan','pgTraining',renderTraining)">📅 Trainingsplan</div>
         <div class="sbItem" onclick="goPage('Oefenvormen','pgOefenvormen',renderOefenvormen)">🎬 Oefenvormen</div>
         <div class="sbLabel">Meer</div>
+        <div class="sbItem" onclick="goPage('Gebruikers','pgGebruikers',renderGebruikers)">👥 Gebruikersbeheer</div>
         <div class="sbItem" onclick="goPage('Export','pgExport',renderExport)">📥 Export</div>
         <div class="sbItem" onclick="goPage('Voorbereiding','pgVoorbereiding',renderVoorbereiding)">🏃 Voorbereiding</div>
         <div class="sbItem" onclick="goPage('MAS Test','pgMas',renderMas)">📈 MAS Test</div>
@@ -920,21 +921,13 @@ function renderDashboard() {
   const el = document.getElementById('pgDashboard');
   if (isCoach()) {
     const att = PLAYERS.length ? Math.round(PLAYERS.reduce((a,p)=>a+(p.presenceLog||[]).filter(e=>e.status==='aanwezig').length/Math.max((p.presenceLog||[]).length,1),0)/PLAYERS.length*100) : 0;
-    // User management card (admin only) - loaded dynamically
-    const staffSection = isAdmin() ? `<div class="card" style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <div class="cardTitle" style="margin:0">👥 Gebruikersbeheer</div>
-          <button class="btn btnP sm" onclick="loadUserManagement()">↻ Vernieuwen</button>
-        </div>
-        <div id="userMgmtArea"><div style="color:var(--t3);font-size:13px">Klik op Vernieuwen om alle gebruikers te laden.</div></div>
-      </div>` : '';
+    // (user management moved to sidebar)
     // Spelers met nieuwe feedback van spelers (ongelezen)
     const nieuweReacties = PLAYERS.flatMap(p=>[
       ...(p.werkpunten||[]).filter(w=>w.spelerFeedback).map(w=>({name:p.name,color:p.color,pid:p.id,type:'Werkpunt feedback',tekst:w.spelerFeedback,datum:''})),
       ...(p.popHistory||[]).filter(h=>h.spelerReactie).map(h=>({name:p.name,color:p.color,pid:p.id,type:'POP reactie',tekst:h.spelerReactie,datum:h.date}))
     ]);
     el.innerHTML = `
-      ${staffSection}
       <div class="statsRow">
         <div class="statCard"><div class="statLbl">Kern</div><div class="statVal">${PLAYERS.length}</div></div>
         <div class="statCard"><div class="statLbl">Werkpunten</div><div class="statVal">${PLAYERS.reduce((a,p)=>a+(p.werkpunten||[]).length,0)}</div></div>
@@ -3975,6 +3968,7 @@ async function updateUserRole(profileId, name) {
   const select = document.getElementById('roleSelect_' + profileId);
   if (!select) return;
   const newRole = select.value;
+  const roleLabels = {coach:'Admin',staff:'Staf',player:'Speler'};
   try {
     const resp = await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + profileId, {
       method: 'PATCH',
@@ -3982,10 +3976,18 @@ async function updateUserRole(profileId, name) {
       body: JSON.stringify({role: newRole})
     });
     if (resp.ok) {
-      notify(name + ' → ' + {coach:'Admin',staff:'Staf',player:'Speler'}[newRole]);
+      notify(name + ' is nu ' + (roleLabels[newRole]||newRole));
+      // If this user is currently logged in on another device, they need to re-login
+      // If it's the current user, update immediately
+      if (profileId === USER_ID) {
+        PROFILE.role = newRole;
+        buildSidebar();
+        renderDashboard();
+      }
       loadUserManagement();
     } else {
-      notify('Fout bij opslaan', '#E05252');
+      const errTxt = await resp.text();
+      notify('Fout bij opslaan: ' + errTxt, '#E05252');
     }
   } catch(e) {
     notify('Fout: ' + e.message, '#E05252');
@@ -4032,6 +4034,36 @@ async function register() {
     showSpinner(false);
     showErr('regErr', 'Fout: ' + e.message);
   }
+}
+
+
+function renderGebruikers() {
+  document.getElementById('topActions').innerHTML = '';
+  const pg = document.getElementById('pgGebruikers');
+  if (!pg) return;
+  pg.innerHTML = `
+    <div style="background:var(--txt);border-radius:10px;padding:16px 20px;margin-bottom:16px">
+      <div style="font-family:var(--fc);font-size:18px;font-weight:700;color:#fff">👥 Gebruikersbeheer</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5)">Beheer rollen van alle geregistreerde gebruikers</div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="cardTitle" style="margin:0">Alle gebruikers</div>
+        <button class="btn btnP sm" onclick="loadUserManagement()">↻ Vernieuwen</button>
+      </div>
+      <div id="userMgmtArea">
+        <div style="color:var(--t3);font-size:13px">Klik op Vernieuwen om alle gebruikers te laden.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;background:#EDF6FB">
+      <div style="font-size:13px;color:#2B7FA8"><strong>Rollen uitleg:</strong></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px">
+        <div style="padding:8px 12px;background:#DBEAFE;border-radius:7px"><div style="font-weight:700;color:#1D4ED8">Admin</div><div style="font-size:11px;color:#1D4ED8">Alles zichtbaar incl. Portfolio & Pro License</div></div>
+        <div style="padding:8px 12px;background:#D1FAE5;border-radius:7px"><div style="font-weight:700;color:#065F46">Staf</div><div style="font-size:11px;color:#065F46">Zelfde als Admin maar zonder Portfolio & Pro License</div></div>
+        <div style="padding:8px 12px;background:#F3F4F6;border-radius:7px"><div style="font-weight:700;color:#374151">Speler</div><div style="font-size:11px;color:#374151">Ziet enkel eigen profiel & voorbereiding</div></div>
+      </div>
+    </div>`;
+  loadUserManagement();
 }
 
 restoreSchemaUrls();
