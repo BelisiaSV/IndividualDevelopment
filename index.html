@@ -774,6 +774,8 @@ async function startApp() {
     document.getElementById('app').style.display='block';
     buildSidebar();
     goPage('Dashboard', 'pgDashboard', renderDashboard);
+    // Auto-load user list if admin
+    if (isAdmin()) setTimeout(loadUserManagement, 300);
   } catch(e) {
     console.error('startApp error:', e);
     showSpinner(false);
@@ -918,23 +920,13 @@ function renderDashboard() {
   const el = document.getElementById('pgDashboard');
   if (isCoach()) {
     const att = PLAYERS.length ? Math.round(PLAYERS.reduce((a,p)=>a+(p.presenceLog||[]).filter(e=>e.status==='aanwezig').length/Math.max((p.presenceLog||[]).length,1),0)/PLAYERS.length*100) : 0;
-    // Staff management card (admin only)
+    // User management card (admin only) - loaded dynamically
     const staffSection = isAdmin() ? `<div class="card" style="margin-bottom:14px">
-        <div class="cardTitle">👥 Staf beheer <span style="font-size:11px;font-weight:400;color:var(--t3)">— personen met coach-rechten</span></div>
-        <div id="staffListArea"><button class="btn btnG sm" onclick="loadStaffList()" style="margin-bottom:6px">↻ Stafleden laden</button></div>
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--brd)">
-          <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px">Rol instellen voor staflid:</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <input id="staffEmail" placeholder="e-mail van staflid" style="flex:1;min-width:190px;padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);font-family:var(--f)">
-            <select id="staffRole" style="padding:7px 10px;font-size:13px;border:1px solid var(--brd);border-radius:7px;background:var(--bg);font-family:var(--f)">
-              <option value="staff">Staf (geen Portfolio/License)</option>
-              <option value="coach">Admin (alles zichtbaar)</option>
-              <option value="player">Speler</option>
-            </select>
-            <button class="btn btnP sm" onclick="setStaffRole()">Opslaan</button>
-          </div>
-          <div style="font-size:11px;color:var(--t3);margin-top:5px">Persoon moet zich eerst eenmalig aanmelden zodat zijn profiel aangemaakt wordt.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div class="cardTitle" style="margin:0">👥 Gebruikersbeheer</div>
+          <button class="btn btnP sm" onclick="loadUserManagement()">↻ Vernieuwen</button>
         </div>
+        <div id="userMgmtArea"><div style="color:var(--t3);font-size:13px">Klik op Vernieuwen om alle gebruikers te laden.</div></div>
       </div>` : '';
     // Spelers met nieuwe feedback van spelers (ongelezen)
     const nieuweReacties = PLAYERS.flatMap(p=>[
@@ -3908,70 +3900,137 @@ function buildMasPraktijk() {
 }
 
 
-async function loadStaffList() {
-  const area = document.getElementById('staffListArea');
+async function loadUserManagement() {
+  const area = document.getElementById('userMgmtArea');
   if (!area) return;
-  area.innerHTML = '<div style="color:var(--t3);font-size:12px">Laden...</div>';
+  area.innerHTML = '<div style="color:var(--t3);font-size:12px;padding:8px">Laden...</div>';
   try {
-    const profiles = await sbGet('profiles', '&role=in.(coach,staff)&order=name.asc');
+    const profiles = await sbGet('profiles', '&order=role.asc,name.asc');
     if (!profiles.length) {
-      area.innerHTML = '<div style="font-size:12px;color:var(--t3)">Geen stafleden gevonden.</div>';
+      area.innerHTML = '<div style="font-size:12px;color:var(--t3)">Geen gebruikers gevonden.</div>';
       return;
     }
-    area.innerHTML = profiles.map(p => {
-      const isMe = p.id === USER_ID;
-      const roleLabel = p.role === 'coach' ? '<span class="bdg blue">Admin</span>' : '<span class="bdg green">Staf</span>';
-      return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--brd);font-size:13px">
-        <div style="flex:1"><strong>${p.name||'—'}</strong>${isMe?' <span style="font-size:10px;color:var(--t3)">(jij)</span>':''}</div>
-        <div>${roleLabel}</div>
-        ${!isMe ? `<button class="btn btnD sm" style="font-size:10px" onclick="removeStaff('${p.id}','${p.name||''}')">Verwijder rol</button>` : ''}
+
+    const roleColors = {coach:'#DBEAFE',staff:'#D1FAE5',player:'#F3F4F6'};
+    const roleTxt = {coach:'#1D4ED8',staff:'#065F46',player:'#374151'};
+    const roleLabels = {coach:'Admin',staff:'Staf',player:'Speler'};
+    const roleOptions = ['coach','staff','player'];
+
+    area.innerHTML = `
+      <div style="margin-bottom:10px;font-size:12px;color:var(--t3)">
+        ${profiles.length} gebruiker(s) gevonden · Wijzig de rol via het dropdown per persoon
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr style="background:#1E3A5F">
+            <th style="color:#fff">Naam</th>
+            <th style="color:#fff">E-mail</th>
+            <th style="color:#fff">Huidige rol</th>
+            <th style="color:#fff">Wijzig rol</th>
+          </tr></thead>
+          <tbody>
+            ${profiles.map(p => {
+              const isMe = p.id === USER_ID;
+              const rColor = roleColors[p.role]||'#F3F4F6';
+              const rTxt = roleTxt[p.role]||'#374151';
+              const rLabel = roleLabels[p.role]||p.role;
+              return `<tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:28px;height:28px;border-radius:50%;background:${rColor};color:${rTxt};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${(p.name||'?').charAt(0).toUpperCase()}</div>
+                    <div>
+                      <div style="font-weight:600">${p.name||'Onbekend'}</div>
+                      ${isMe?'<div style="font-size:10px;color:var(--blue)">← jij (admin)</div>':''}
+                    </div>
+                  </div>
+                </td>
+                <td style="color:var(--t2);font-size:12px">${p.email||'<span style="color:var(--t3);font-style:italic">niet opgeslagen</span>'}</td>
+                <td>
+                  <span style="padding:3px 10px;background:${rColor};color:${rTxt};border-radius:20px;font-size:11px;font-weight:700">${rLabel}</span>
+                </td>
+                <td>
+                  ${isMe ? '<span style="font-size:11px;color:var(--t3)">—</span>' : `
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <select id="roleSelect_${p.id}" style="padding:5px 8px;font-size:12px;border:1px solid var(--brd);border-radius:6px;background:var(--bg);font-family:var(--f)">
+                      ${roleOptions.map(r=>`<option value="${r}" ${p.role===r?'selected':''}>${roleLabels[r]}</option>`).join('')}
+                    </select>
+                    <button class="btn btnP sm" style="font-size:11px;padding:4px 10px" onclick="updateUserRole('${p.id}','${p.name||''}')">Opslaan</button>
+                  </div>`}
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:#FEF9C3;border-radius:7px;font-size:12px;color:#92400E">
+        <strong>Nieuw lid toevoegen:</strong> Stuur hen de link van de website. Ze registreren zichzelf via "Account aanmaken". 
+        Daarna verschijnen ze hier en kun je hun rol instellen.
       </div>`;
-    }).join('');
   } catch(e) {
-    area.innerHTML = '<div style="color:#E05252;font-size:12px">Fout bij laden.</div>';
+    area.innerHTML = '<div style="color:#E05252;font-size:12px">Fout bij laden: ' + e.message + '</div>';
   }
 }
 
-async function setStaffRole() {
-  const email = document.getElementById('staffEmail')?.value?.trim();
-  const role = document.getElementById('staffRole')?.value;
-  if (!email) { notify('Vul een e-mailadres in', '#E05252'); return; }
-  // Find profile by email via auth - we use the profiles table name match as fallback
-  // Try to find profile where email matches (stored in auth, not profiles)
-  // We use Supabase admin approach: find profile by searching auth users
-  // Since we don't have admin key, we look up by email in profiles table
+async function updateUserRole(profileId, name) {
+  const select = document.getElementById('roleSelect_' + profileId);
+  if (!select) return;
+  const newRole = select.value;
   try {
-    const found = await sbGet('profiles', `&email=eq.${encodeURIComponent(email)}`);
-    if (found && found.length > 0) {
-      await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + found[0].id, {
-        method: 'PATCH',
-        headers: hdrs({'Prefer':'return=minimal'}),
-        body: JSON.stringify({role})
-      });
-      notify('Rol bijgewerkt voor ' + (found[0].name||email));
-      loadStaffList();
-      document.getElementById('staffEmail').value = '';
+    const resp = await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + profileId, {
+      method: 'PATCH',
+      headers: hdrs({'Prefer':'return=minimal'}),
+      body: JSON.stringify({role: newRole})
+    });
+    if (resp.ok) {
+      notify(name + ' → ' + {coach:'Admin',staff:'Staf',player:'Speler'}[newRole]);
+      loadUserManagement();
     } else {
-      // Try by name
-      notify('Account niet gevonden. Persoon moet zich eerst aanmelden via de loginpagina.', '#D4860A');
+      notify('Fout bij opslaan', '#E05252');
     }
   } catch(e) {
     notify('Fout: ' + e.message, '#E05252');
   }
 }
 
-async function removeStaff(profileId, name) {
-  if (!confirm('Rol verwijderen van ' + name + '? Ze worden teruggezet naar speler-rol.')) return;
+
+function toggleRegister() {
+  const form = document.getElementById('registerForm');
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function register() {
+  const name  = document.getElementById('regName')?.value?.trim();
+  const email = document.getElementById('regEmail')?.value?.trim();
+  const pass  = document.getElementById('regPass')?.value;
+  const err   = document.getElementById('regErr');
+  if (!name || !email || !pass) { showErr('regErr','Vul alle velden in'); return; }
+  if (pass.length < 6) { showErr('regErr','Wachtwoord minimaal 6 tekens'); return; }
+  showSpinner(true);
   try {
-    await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + profileId, {
-      method: 'PATCH',
-      headers: hdrs({'Prefer':'return=minimal'}),
-      body: JSON.stringify({role: 'player'})
+    const r = await fetch(SB_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','apikey':SB_KEY},
+      body: JSON.stringify({email, password: pass})
     });
-    notify(name + ' teruggezet naar speler-rol');
-    loadStaffList();
+    const d = await r.json();
+    if (d.error) { showErr('regErr', d.error.message||d.error); showSpinner(false); return; }
+    // Save name + email to profile
+    const uid = d.user?.id || d.id;
+    if (uid) {
+      await fetch(SB_URL + '/rest/v1/profiles', {
+        method: 'POST',
+        headers: {...hdrs({'Prefer':'return=minimal'}), 'Authorization':'Bearer '+(d.access_token||SB_KEY)},
+        body: JSON.stringify({id: uid, name, email, role:'player'})
+      });
+    }
+    showSpinner(false);
+    if (err) { err.style.display='block'; err.style.color='#6EE7B7'; err.textContent='Account aangemaakt! Je kunt nu inloggen.'; }
+    // Auto-fill login
+    if (document.getElementById('email')) document.getElementById('email').value = email;
+    document.getElementById('registerForm').style.display = 'none';
   } catch(e) {
-    notify('Fout', '#E05252');
+    showSpinner(false);
+    showErr('regErr', 'Fout: ' + e.message);
   }
 }
 
