@@ -3485,12 +3485,15 @@ const MAS_REF = [
 
 // MAS percentages en seconden voor praktijktabel
 const MAS_PCTS = [0.8, 0.9, 1.0, 1.1, 1.2];
+const MAS_PCT_LABELS = {0.8:'80%', 0.9:'90%', 1.0:'100%', 1.1:'110%', 1.2:'120%'};
 const MAS_SECS = [5, 10, 15, 20, 25, 30];
 
 // State
 let MAS_DATA = null; // loaded from Supabase/localStorage
 let MAS_ACTIVE_TEST = 1; // 1, 2, or 3
-let MAS_ACTIVE_VIEW = 'invoer'; // 'invoer' | 'overzicht' | 'praktijk'
+let MAS_ACTIVE_VIEW = 'invoer'; // 'invoer' | 'overzicht' | 'praktijk' | 'omzet'
+window.MAS_OMZET_SECS = 10;
+window.MAS_OMZET_PCT = 1.0;
 
 function parseMasTime(str) {
   if (!str) return null;
@@ -3563,6 +3566,65 @@ async function saveMasData() {
   } catch(e) { console.warn('MAS save failed:', e); }
 }
 
+function buildMasOmzet() {
+  // State: seconden and percentage inputs
+  const secs = window.MAS_OMZET_SECS || 10;
+  const pct = window.MAS_OMZET_PCT || 1.0;
+
+  const playerRows = PLAYERS.map(p => {
+    const pd = MAS_DATA ? MAS_DATA.players[p.id] : null;
+    // Find best MAS across all tests (use test1 first, then 2, then 3)
+    let mas = null;
+    let masSource = '—';
+    for (let t = 1; t <= 3; t++) {
+      const td = pd?.[`test${t}`] || {};
+      const m = td.mas || (td.time ? timeToMAS(parseMasTime(td.time)) : null);
+      if (m !== null && m !== undefined) { mas = m; masSource = 'T'+t; break; }
+    }
+    const dist = mas !== null ? +((mas / 3.6) * secs * pct).toFixed(2) : null;
+    return `<tr>
+      <td style="font-weight:600">${p.name}</td>
+      <td style="text-align:center;font-weight:700;color:#2B7FA8">${mas !== null ? mas : '—'}</td>
+      <td style="text-align:center;font-size:10px;color:var(--t3)">${masSource}</td>
+      <td style="text-align:center;font-weight:700;font-size:15px;color:${dist!==null?'#1E3A5F':'var(--t3)'}">
+        ${dist !== null ? dist + ' m' : '—'}
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div class="card" style="margin-bottom:14px">
+      <div class="cardTitle">🔄 Omzettabel — Vrije keuze seconden & percentage</div>
+      <p style="font-size:13px;color:var(--t2);margin-bottom:14px">Geef een tijdsinterval en percentage in. De tabel toont automatisch de bijhorende afstand per speler op basis van zijn MAS.</p>
+      <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
+        <div class="ff" style="margin:0">
+          <label>Seconden</label>
+          <input type="number" id="omzetSecs" value="${secs}" min="1" max="120" step="1"
+            style="width:90px;padding:8px 10px;font-size:15px;font-weight:700;border:2px solid var(--blue);border-radius:7px;background:var(--bg);font-family:var(--f);text-align:center">
+        </div>
+        <div class="ff" style="margin:0">
+          <label>Percentage</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${[0.7,0.8,0.9,1.0,1.1,1.2,1.3].map(p=>`<button class="btn ${pct===p?'btnP':'btnG'} sm" onclick="window.MAS_OMZET_PCT=${p};window.MAS_OMZET_SECS=parseInt(document.getElementById('omzetSecs').value)||10;renderMas()">${MAS_PCT_LABELS[p]||Math.round(p*100)+'%'}</button>`).join('')}
+          </div>
+        </div>
+        <button class="btn btnP" onclick="window.MAS_OMZET_SECS=parseInt(document.getElementById('omzetSecs').value)||10;renderMas()">Berekenen</button>
+      </div>
+      <div style="background:#EDF6FB;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#2B7FA8">
+        <strong>Formule:</strong> (MAS ÷ 3.6) × ${secs}" × ${Math.round(pct*100)}% = afstand in meter
+      </div>
+      <table class="tbl">
+        <thead><tr style="background:#1E3A5F;color:#fff">
+          <th style="color:#fff">Naam</th>
+          <th style="color:#fff;text-align:center">MAS score</th>
+          <th style="color:#fff;text-align:center">Test</th>
+          <th style="color:#fff;text-align:center">Afstand @ ${secs}" × ${Math.round(pct*100)}%</th>
+        </tr></thead>
+        <tbody>${playerRows||'<tr><td colspan="4" style="color:var(--t3);text-align:center">Geen spelers of MAS data.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
 async function renderMas() {
   document.getElementById('topActions').innerHTML = '';
   if (!MAS_DATA) await loadMasData();
@@ -3570,8 +3632,8 @@ async function renderMas() {
   const pg = document.getElementById('pgMas');
   if (!pg) return;
 
-  const views = ['invoer','overzicht','praktijk'];
-  const vLabels = ['✏ Invoer','📊 Overzicht','⚽ Praktijktabel'];
+  const views = ['invoer','overzicht','praktijk','omzet'];
+  const vLabels = ['✏ Invoer','📊 Overzicht','⚽ Praktijktabel','🔄 Omzettabel'];
 
   pg.innerHTML = `
     <div style="background:var(--txt);border-radius:10px;padding:16px 20px;margin-bottom:16px">
@@ -3585,7 +3647,7 @@ async function renderMas() {
     </div>
 
     <div id="masViewContent">
-      ${MAS_ACTIVE_VIEW==='invoer' ? buildMasInvoer() : MAS_ACTIVE_VIEW==='overzicht' ? buildMasOverzicht() : buildMasPraktijk()}
+      ${MAS_ACTIVE_VIEW==='invoer' ? buildMasInvoer() : MAS_ACTIVE_VIEW==='overzicht' ? buildMasOverzicht() : MAS_ACTIVE_VIEW==='praktijk' ? buildMasPraktijk() : buildMasOmzet()}
     </div>`;
 }
 
@@ -3605,7 +3667,7 @@ function buildMasInvoer() {
       <td><input id="mt_${p.id}" value="${td.time||''}" placeholder="mm:ss" 
         style="width:70px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:5px;background:var(--bg);text-align:center;font-family:var(--f)"
         onblur="autoFormatMasTime(this)"></td>
-      <td style="font-weight:700;color:#2B7FA8;text-align:center">${mas !== null ? mas + ' km/h' : '—'}</td>
+      <td style="font-weight:700;color:#2B7FA8;text-align:center">${mas !== null ? mas : '—'}</td>
       <td><input id="mhf_${p.id}" type="number" value="${td.hf||''}" placeholder="bv. 180"
         style="width:65px;padding:5px 7px;font-size:12px;border:1px solid var(--brd);border-radius:5px;background:var(--bg);font-family:var(--f)"></td>
       <td><input id="mhf1_${p.id}" type="number" value="${td.hf1||''}" placeholder="bv. 150"
@@ -3716,11 +3778,11 @@ function buildMasOverzicht() {
     <div class="statsRow" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
       ${[1,2,3].map(t=>`<div class="statCard">
         <div class="statLbl">Test ${t} — Gem. MAS</div>
-        <div class="statVal" style="color:#2B7FA8">${testAvgs[t-1]!==null?testAvgs[t-1]+' km/h':'—'}</div>
+        <div class="statVal" style="color:#2B7FA8">${testAvgs[t-1]!==null?testAvgs[t-1]:'—'}</div>
       </div>`).join('')}
       <div class="statCard">
         <div class="statLbl">Seizoensgemiddelde</div>
-        <div class="statVal" style="color:#2EAA6A">${(()=>{const v=testAvgs.filter(x=>x!==null);return v.length?+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2)+' km/h':'—'})()}</div>
+        <div class="statVal" style="color:#2EAA6A">${(()=>{const v=testAvgs.filter(x=>x!==null);return v.length?+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2):'—'})()}</div>
       </div>
     </div>
     <div class="card">
@@ -3782,7 +3844,7 @@ function buildMasPraktijk() {
     
     return `<tr>
       <td style="font-weight:600;white-space:nowrap">${p.name}</td>
-      <td style="text-align:center;font-weight:700;color:#2B7FA8;white-space:nowrap">${mas} km/h</td>
+      <td style="text-align:center;font-weight:700;color:#2B7FA8;white-space:nowrap">${mas}</td>
       ${cells}
     </tr>`;
   }).join('');
@@ -3794,7 +3856,7 @@ function buildMasPraktijk() {
     <div class="card">
       <div class="cardTitle">Praktijktabel Test ${MAS_ACTIVE_TEST} — Afstanden per seconde & percentage</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-        ${MAS_PCTS.map(pct=>`<span style="padding:3px 10px;background:${pctColors[pct]};color:${pctTextColors[pct]};border-radius:20px;font-size:11px;font-weight:700">${pct*100}%</span>`).join('')}
+        ${MAS_PCTS.map(pct=>`<span style="padding:3px 10px;background:${pctColors[pct]};color:${pctTextColors[pct]};border-radius:20px;font-size:11px;font-weight:700">${MAS_PCT_LABELS[pct]}</span>`).join('')}
         <span style="font-size:11px;color:var(--t3);align-self:center">Afstand in meters · Formule: (MAS/3.6) × seconden × %</span>
       </div>
       <div style="overflow-x:auto">
@@ -3803,7 +3865,7 @@ function buildMasPraktijk() {
             <tr style="background:#1E3A5F">
               <th style="color:#fff" rowspan="2">Naam</th>
               <th style="color:#fff" rowspan="2">MAS</th>
-              ${MAS_PCTS.map(pct=>`<th style="color:#fff;text-align:center;background:${pctTextColors[pct]}" colspan="${MAS_SECS.length}">${pct*100}%</th>`).join('')}
+              ${MAS_PCTS.map(pct=>`<th style="color:#fff;text-align:center;background:${pctTextColors[pct]}" colspan="${MAS_SECS.length}">${MAS_PCT_LABELS[pct]}</th>`).join('')}
             </tr>
             <tr style="background:#2B4A7F">
               ${MAS_PCTS.map(pct=>MAS_SECS.map(s=>`<th style="color:rgba(255,255,255,.8);font-size:10px;background:${pctTextColors[pct]};opacity:.9;text-align:center">${s}"</th>`).join('')).join('')}
