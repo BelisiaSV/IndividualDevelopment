@@ -1768,9 +1768,7 @@ function deleteKPI(id) {
 
 function renderTraining() {
   document.getElementById('topActions').innerHTML = `<button class="btn btnP sm" onclick="openModal('addSessionModal');populateSelects()">+ Sessie</button>`;
-  if (!window.TRAINING_VIEW) window.TRAINING_VIEW = 'week';
-  if (window.TRAINING_VIEW === 'week') renderTrainingWeek();
-  else renderTrainingMonth();
+  renderTrainingMonth();
 }
 
 function renderTrainingWeek() {
@@ -1875,13 +1873,17 @@ function renderTrainingMonth() {
           const isWeekend = d.getDay()===0||d.getDay()===6;
           return `<div style="border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);min-height:90px;padding:6px;background:${isToday?'#EDF6FB':isWeekend?'#FAFAFA':'#fff'};position:relative" onclick="openAddSessionForMonth(${year},${month},${dayNum})">
             <div style="font-size:12px;font-weight:${isToday?700:500};color:${isToday?'#fff':'var(--txt)'};background:${isToday?'var(--blue)':'transparent'};width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:4px">${dayNum}</div>
-            ${sessions.slice(0,3).map(s=>{
+            ${sessions.slice(0,3).map((s,si)=>{
               const tc=s.type==='match'?'#FEF3C7':s.type==='indiv'?'#D1FAE5':s.type==='rest'?'var(--bg)':'#E6F4FB';
               const c=s.type==='match'?'#92400E':s.type==='indiv'?'#065F46':s.type==='rest'?'var(--t3)':'#2B7FA8';
-              return `<div style="background:${tc};color:${c};font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:2px" onclick="event.stopPropagation()">
-              <span style="overflow:hidden;text-overflow:ellipsis;flex:1">${s.title}</span>
-              <span onclick="event.stopPropagation();delSession(${s.wk},${s.di},'${s.id||''}');window.MONTH_OFFSET=window.MONTH_OFFSET||0;renderTraining()" style="opacity:.6;cursor:pointer;flex-shrink:0;font-size:11px;font-weight:700" title="Verwijder">×</span>
-            </div>`;
+              const sid = s.id||('local_'+s.wk+'_'+s.di+'_'+si);
+              return `<div style="background:${tc};color:${c};font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:2px"
+                onclick="event.stopPropagation();openSessieAanwezigheid('${s.id||''}',${s.wk},${s.di},'${s.title}')">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${s.title}</span>
+                <span onclick="event.stopPropagation();deleteSessieFromMonth('${s.id||''}',${s.wk},${s.di})" 
+                  style="flex-shrink:0;opacity:.6;cursor:pointer;font-size:12px;font-weight:700;padding:0 2px" 
+                  title="Verwijder sessie">×</span>
+              </div>`;
             }).join('')}
             ${sessions.length>3?`<div style="font-size:10px;color:var(--t3)">+${sessions.length-3} meer</div>`:''}
             <div style="position:absolute;bottom:4px;right:4px;width:16px;height:16px;border-radius:50%;border:1px dashed var(--brd);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--t3);cursor:pointer" onmouseenter="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseleave="this.style.borderColor='var(--brd)';this.style.color='var(--t3)'" onclick="event.stopPropagation();openAddSessionForMonth(${year},${month},${dayNum})">+</div>
@@ -1900,6 +1902,13 @@ function getWeekDatesFor(weekOffset) {
 function openAddSessionForDay(wk, di) {
   WEEK_OFFSET = wk;
   document.getElementById('sesDay').value = di;
+  // Show date in modal title
+  const dateStr = new Date(year, month, day).toLocaleDateString('nl-BE', {weekday:'long', day:'numeric', month:'long'});
+  const titleEl = document.querySelector('#addSessionModal .modalTitle');
+  if (titleEl) titleEl.textContent = 'Sessie toevoegen — ' + dateStr;
+  // Clear title input
+  const titleInput = document.getElementById('sesTitle');
+  if (titleInput) titleInput.value = '';
   openModal('addSessionModal');
   populateSelects();
 }
@@ -1915,6 +1924,13 @@ function openAddSessionForMonth(year, month, day) {
   if (di > 5) { notify('Zondag is geen trainingsdag'); return; }
   WEEK_OFFSET = wk;
   document.getElementById('sesDay').value = di;
+  // Show date in modal title
+  const dateStr = new Date(year, month, day).toLocaleDateString('nl-BE', {weekday:'long', day:'numeric', month:'long'});
+  const titleEl = document.querySelector('#addSessionModal .modalTitle');
+  if (titleEl) titleEl.textContent = 'Sessie toevoegen — ' + dateStr;
+  // Clear title input
+  const titleInput = document.getElementById('sesTitle');
+  if (titleInput) titleInput.value = '';
   openModal('addSessionModal');
   populateSelects();
 }
@@ -2452,7 +2468,8 @@ async function saveSession() {
   const type = document.getElementById('sesType').value;
   const pid = document.getElementById('sesSpeler')?.value;
   const playerName = pid ? PLAYERS.find(x=>x.id==pid)?.name : '';
-  const title = type==='indiv'&&playerName ? `Individueel: ${playerName}` : document.getElementById('sesTitle').value||'Sessie';
+  const titleInput = document.getElementById('sesTitle')?.value?.trim();
+  const title = type==='indiv'&&playerName ? `Individueel: ${playerName}` : (titleInput || (type==='training'?'Training':type==='match'?'Wedstrijd':type==='rest'?'Herstel':'Sessie'));
   const sess = {week_offset:key, day_index:day, type, title, time:document.getElementById('sesTime').value, note:document.getElementById('sesNote').value};
   const d = await sbInsert('week_sessions', sess);
   if (!WEEK_SESSIONS[key]) WEEK_SESSIONS[key]={};
@@ -4064,6 +4081,78 @@ function renderGebruikers() {
       </div>
     </div>`;
   loadUserManagement();
+}
+
+
+async function deleteSessieFromMonth(sessId, wk, di) {
+  if (!confirm('Sessie verwijderen?')) return;
+  await delSession(wk, di, sessId);
+  renderTraining();
+}
+
+function openSessieAanwezigheid(sessId, wk, di, title) {
+  // Build attendance modal for this session
+  const modal = document.createElement('div');
+  modal.className = 'modal open';
+  modal.id = 'sessAanwModal';
+  
+  // Get date of this session
+  const dates = getWeekDatesFor(wk);
+  const date = dates[di] ? dates[di].toISOString().split('T')[0] : '';
+  
+  const statusOpts = ['aanwezig','afwezig','blessure','rtp','herstel','wedstrijd'];
+  const statusColors = {aanwezig:'#2EAA6A',afwezig:'#E05252',blessure:'#D4860A',rtp:'#7C3AED',herstel:'#2B7FA8',wedstrijd:'#1D4ED8'};
+
+  modal.innerHTML = `<div class="modalBox" style="width:600px;max-width:97vw">
+    <div class="modalTitle">📋 Aanwezigheid — ${title} (${date})</div>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:12px">Klik op de status per speler om te registreren.</p>
+    <div style="overflow-y:auto;max-height:60vh">
+      ${PLAYERS.map(p => {
+        const existing = (p.presenceLog||[]).find(e => e.date === date);
+        const curStatus = existing?.status || '';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--brd)">
+          <div style="width:28px;height:28px;border-radius:50%;background:${p.color||'#4FA8D1'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${ini(p.name)}</div>
+          <div style="font-weight:500;min-width:100px;flex-shrink:0">${p.name}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">
+            ${statusOpts.map(st => `<button 
+              style="padding:4px 8px;font-size:11px;font-weight:600;border-radius:20px;border:2px solid ${st===curStatus?statusColors[st]:'var(--brd)'};background:${st===curStatus?statusColors[st]+'22':'transparent'};color:${st===curStatus?statusColors[st]:'var(--t2)'};cursor:pointer;font-family:var(--f)"
+              onclick="setSessieAanw('${p.id}','${date}','training','${st}',this.parentElement)"
+              data-status="${st}">${st}</button>`).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="modalFoot">
+      <button class="btn btnG" onclick="document.getElementById('sessAanwModal').remove()">Sluiten</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+async function setSessieAanw(pid, date, type, status, btnContainer) {
+  const p = PLAYERS.find(x => x.id == pid);
+  if (!p) return;
+  const dayNames = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+  const day = dayNames[new Date(date).getDay()];
+  
+  // Remove existing entry for this date
+  p.presenceLog = (p.presenceLog||[]).filter(e => e.date !== date);
+  // Add new entry
+  const entry = {date, day, type, status, note:''};
+  p.presenceLog = [...p.presenceLog, entry].sort((a,b) => a.date.localeCompare(b.date));
+  await sbUpdate('players', pid, {presence_log: p.presenceLog});
+  
+  // Update button styles
+  const statusColors = {aanwezig:'#2EAA6A',afwezig:'#E05252',blessure:'#D4860A',rtp:'#7C3AED',herstel:'#2B7FA8',wedstrijd:'#1D4ED8'};
+  btnContainer.querySelectorAll('button').forEach(btn => {
+    const st = btn.dataset.status;
+    const isActive = st === status;
+    btn.style.border = `2px solid ${isActive ? statusColors[st] : 'var(--brd)'}`;
+    btn.style.background = isActive ? statusColors[st]+'22' : 'transparent';
+    btn.style.color = isActive ? statusColors[st] : 'var(--t2)';
+  });
+  notify(p.name + ' → ' + status);
 }
 
 restoreSchemaUrls();
