@@ -1655,13 +1655,17 @@ function renderSpelerDetail(p) {
     <div id="stabContent3" class="stabContent" style="display:none">
       ${isCoach()?`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
         <div style="display:flex;gap:5px;flex-wrap:wrap">
-          ${[...new Set((p.presenceLog||[]).map(e=>e.date.slice(0,7)))].sort((a,b)=>b.localeCompare(a)).map(m=>{
-            const [yr,mo]=m.split('-');
+          ${(()=>{
             const mNames={'01':'Jan','02':'Feb','03':'Mrt','04':'Apr','05':'Mei','06':'Jun','07':'Jul','08':'Aug','09':'Sep','10':'Okt','11':'Nov','12':'Dec'};
-            const active=(window['aanwFilter_'+p.id]||'')=== m;
-            return '<button class="btn '+(active?'btnP':'btnG')+' sm" onclick="window[\'aanwFilter_'+p.id+'\']='+(active?"''":'\'')+m+(active?'':'\'')+'\';showSpelerTab(3);renderSpelerDetail(PLAYERS.find(x=>x.id=='+p.id+'))">'+mNames[mo]+' '+yr+'</button>';
-          }).join('')}
-          <button class="btn ${!window['aanwFilter_'+p.id]?'btnP':'btnG'} sm" onclick="window['aanwFilter_'+p.id]='';showSpelerTab(3);renderSpelerDetail(PLAYERS.find(x=>x.id==${p.id}))">Alle</button>
+            const months=[...new Set((p.presenceLog||[]).map(e=>e.date.slice(0,7)))].sort((a,b)=>b.localeCompare(a));
+            const cur=window['aanwFilter_'+p.id]||'';
+            const btns=months.map(m=>{
+              const [yr,mo]=m.split('-');
+              return '<button class="btn '+(cur===m?'btnP':'btnG')+' sm" onclick="setAanwFilter('+p.id+',\''+m+'\')">'+mNames[mo]+' '+yr+'</button>';
+            });
+            btns.push('<button class="btn '+(cur===''?'btnP':'btnG')+' sm" onclick="setAanwFilter('+p.id+',\'\')">Alle</button>');
+            return btns.join('');
+          })()}
         </div>
         <button class="btn btnP sm" onclick="openAanwModal(${p.id})">+ Dag registreren</button>
       </div>`:''}
@@ -4190,6 +4194,13 @@ async function setSessieAanw(pid, date, type, status, btnContainer) {
     btn.style.color = isActive ? statusColors[st] : 'var(--t2)';
   });
   notify(p.name + ' → ' + status);
+}
+
+
+function setAanwFilter(pid, month) {
+  window['aanwFilter_' + pid] = month;
+  const p = PLAYERS.find(x => x.id == pid);
+  if (p) { renderSpelerDetail(p); showSpelerTab(3); }
 }
 
 restoreSchemaUrls();
