@@ -1085,33 +1085,59 @@ function buildSpelerOverzicht(p, pct, aanw, totaal) {
 
 // ── AANWEZIGHEID ───────────────────────────────────────────
 function buildSpelerAanwezigheid(p) {
-  const log = [...(p.presenceLog||[])].sort((a,b)=>b.date.localeCompare(a.date));
-  const counts = {aanwezig:0,afwezig:0,blessure:0,rtp:0,wedstrijd:0};
-  log.forEach(e=>{ if(counts[e.status]!==undefined) counts[e.status]++; });
-  const totaal = log.length;
+  const allLog = [...(p.presenceLog||[])].sort((a,b)=>b.date.localeCompare(a.date));
+  
+  // Get available months
+  const months = [...new Set(allLog.map(e => e.date.slice(0,7)))].sort((a,b)=>b.localeCompare(a));
+  const selectedMonth = window.AANW_MONTH_FILTER || (months[0] || '');
+  if (!window.AANW_MONTH_FILTER && months[0]) window.AANW_MONTH_FILTER = months[0];
+  
+  const log = selectedMonth ? allLog.filter(e => e.date.startsWith(selectedMonth)) : allLog;
+  
+  const counts = {aanwezig:0,afwezig:0,blessure:0,rtp:0,wedstrijd:0,herstel:0};
+  allLog.forEach(e=>{ if(counts[e.status]!==undefined) counts[e.status]++; });
+  const totaal = allLog.length;
   const pct = totaal ? Math.round(counts.aanwezig/totaal*100) : 0;
+  
+  const monthNames = {
+    '01':'Januari','02':'Februari','03':'Maart','04':'April','05':'Mei','06':'Juni',
+    '07':'Juli','08':'Augustus','09':'September','10':'Oktober','11':'November','12':'December'
+  };
 
   return `
-    <div class="statsRow" style="grid-template-columns:repeat(5,1fr)">
+    <div class="statsRow" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:16px">
       <div class="statCard"><div class="statLbl">Aanwezig</div><div class="statVal" style="color:#2EAA6A">${counts.aanwezig}</div></div>
       <div class="statCard"><div class="statLbl">Afwezig</div><div class="statVal" style="color:#E05252">${counts.afwezig}</div></div>
       <div class="statCard"><div class="statLbl">Blessure</div><div class="statVal" style="color:#D4860A">${counts.blessure}</div></div>
-      <div class="statCard"><div class="statLbl">Herstel / RTP</div><div class="statVal" style="color:#7C3AED">${counts.rtp}</div></div>
+      <div class="statCard"><div class="statLbl">Herstel/RTP</div><div class="statVal" style="color:#7C3AED">${counts.rtp+counts.herstel}</div></div>
       <div class="statCard"><div class="statLbl">% aanwezig</div><div class="statVal" style="color:${pct>=75?'#2EAA6A':pct>=60?'#D4860A':'#E05252'}">${pct}%</div></div>
     </div>
+    
+    <!-- Maandfilter -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:13px;font-weight:600;color:var(--t2)">Maand:</span>
+      <button class="btn ${!selectedMonth?'btnP':'btnG'} sm" onclick="window.AANW_MONTH_FILTER='';refreshSpelerDashboard('${p.id}')">Alle</button>
+      ${months.map(m => {
+        const [yr,mo] = m.split('-');
+        return `<button class="btn ${m===selectedMonth?'btnP':'btnG'} sm" 
+          onclick="window.AANW_MONTH_FILTER='${m}';refreshSpelerDashboard('${p.id}')">${monthNames[mo]||mo} ${yr}</button>`;
+      }).join('')}
+    </div>
+    
     <div class="card">
-      <div class="cardTitle">Alle registraties (${totaal})</div>
+      <div class="cardTitle">Registraties ${selectedMonth ? '— '+(monthNames[selectedMonth.split('-')[1]]||'')+' '+selectedMonth.split('-')[0] : '— Alle'} (${log.length})</div>
       <table class="tbl">
         <thead><tr><th>Datum</th><th>Dag</th><th>Type</th><th>Status</th><th>Notitie</th></tr></thead>
         <tbody>${log.map(e=>{
           const bg=e.status==='aanwezig'?'#D1FAE5':e.status==='afwezig'?'#FEE2E2':e.status==='blessure'?'#FEF3C7':e.status==='wedstrijd'?'#E6F4FB':'#E9D5FF';
           const c=e.status==='aanwezig'?'#065F46':e.status==='afwezig'?'#991B1B':e.status==='blessure'?'#92400E':e.status==='wedstrijd'?'#2B7FA8':'#6B21A8';
           return`<tr><td style="font-weight:500">${e.date}</td><td style="color:var(--t3)">${e.day||'—'}</td><td style="color:var(--t3)">${e.type||'—'}</td><td><span style="background:${bg};color:${c};font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600">${e.status}</span></td><td style="color:var(--t3)">${e.note||'—'}</td></tr>`;
-        }).join('')||'<tr><td colspan="5" style="color:var(--t3);text-align:center;padding:16px">Nog geen aanwezigheid geregistreerd.</td></tr>'}
+        }).join('')||'<tr><td colspan="5" style="color:var(--t3);text-align:center;padding:16px">Geen registraties${selectedMonth?" voor deze maand":""}</td></tr>'}
         </tbody>
       </table>
     </div>`;
 }
+
 
 // ── WERKPUNTEN ──────────────────────────────────────────────
 function buildSpelerWerkpunten(p) {
@@ -1627,10 +1653,21 @@ function renderSpelerDetail(p) {
       </div>`).join('')||'<div class="card"><p style="color:var(--t3)">Geen gesprekken.</p></div>'}
     </div>
     <div id="stabContent3" class="stabContent" style="display:none">
-      ${isCoach()?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btnP sm" onclick="openAanwModal(${p.id})">+ Dag registreren</button></div>`:''}
+      ${isCoach()?`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${[...new Set((p.presenceLog||[]).map(e=>e.date.slice(0,7)))].sort((a,b)=>b.localeCompare(a)).map(m=>{
+            const [yr,mo]=m.split('-');
+            const mNames={'01':'Jan','02':'Feb','03':'Mrt','04':'Apr','05':'Mei','06':'Jun','07':'Jul','08':'Aug','09':'Sep','10':'Okt','11':'Nov','12':'Dec'};
+            const active=(window['aanwFilter_'+p.id]||'')=== m;
+            return '<button class="btn '+(active?'btnP':'btnG')+' sm" onclick="window[\'aanwFilter_'+p.id+'\']='+(active?"''":'\'')+m+(active?'':'\'')+'\';showSpelerTab(3);renderSpelerDetail(PLAYERS.find(x=>x.id=='+p.id+'))">'+mNames[mo]+' '+yr+'</button>';
+          }).join('')}
+          <button class="btn ${!window['aanwFilter_'+p.id]?'btnP':'btnG'} sm" onclick="window['aanwFilter_'+p.id]='';showSpelerTab(3);renderSpelerDetail(PLAYERS.find(x=>x.id==${p.id}))">Alle</button>
+        </div>
+        <button class="btn btnP sm" onclick="openAanwModal(${p.id})">+ Dag registreren</button>
+      </div>`:''}
       <div class="card">
         <table class="tbl"><thead><tr><th>Datum</th><th>Type</th><th>Status</th><th>Notitie</th>${isCoach()?'<th></th>':''}</tr></thead>
-        <tbody>${(p.presenceLog||[]).slice().reverse().map((e,ri)=>{
+        <tbody>${((p.presenceLog||[]).slice().reverse().filter(e=>!window['aanwFilter_'+p.id]||e.date.startsWith(window['aanwFilter_'+p.id]))).map((e,ri)=>{
           const i=(p.presenceLog||[]).length-1-ri;
           const bg=e.status==='aanwezig'?'#D1FAE5':e.status==='afwezig'?'#FEE2E2':e.status==='blessure'?'#FEF3C7':e.status==='wedstrijd'?'#E6F4FB':'#E9D5FF';
           const c=e.status==='aanwezig'?'#065F46':e.status==='afwezig'?'#991B1B':e.status==='blessure'?'#92400E':e.status==='wedstrijd'?'#2B7FA8':'#6B21A8';
@@ -4094,7 +4131,11 @@ function openSessieAanwezigheid(sessId, wk, di, title) {
   
   // Get date of this session
   const dates = getWeekDatesFor(wk);
-  const date = dates[di] ? dates[di].toISOString().split('T')[0] : '';
+  // Use local date to avoid timezone shift (toISOString gives UTC)
+  const date = dates[di] ? (() => {
+    const d = dates[di];
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  })() : '';
   
   const statusOpts = ['aanwezig','afwezig','blessure','rtp','herstel','wedstrijd'];
   const statusColors = {aanwezig:'#2EAA6A',afwezig:'#E05252',blessure:'#D4860A',rtp:'#7C3AED',herstel:'#2B7FA8',wedstrijd:'#1D4ED8'};
