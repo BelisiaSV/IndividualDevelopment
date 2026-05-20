@@ -368,7 +368,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--txt);font-size:14px;}
   <div class="modalBox">
     <div class="modalTitle">Sessie toevoegen</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="ff"><label>Dag</label><select id="sesDay"><option value="0">Maandag</option><option value="1">Dinsdag</option><option value="2">Woensdag</option><option value="3">Donderdag</option><option value="4">Vrijdag</option><option value="5">Zaterdag</option></select></div>
+      <div class="ff"><label>Dag</label><select id="sesDay"><option value="0">Maandag</option><option value="1">Dinsdag</option><option value="2">Woensdag</option><option value="3">Donderdag</option><option value="4">Vrijdag</option><option value="5">Zaterdag</option><option value="6">Zondag</option></select></div>
       <div class="ff"><label>Type</label><select id="sesType" onchange="this.value==='indiv'?document.getElementById('sesSpelerRow').style.display='block':document.getElementById('sesSpelerRow').style.display='none'"><option value="training">Training</option><option value="match">Wedstrijd</option><option value="indiv">Individuele sessie</option><option value="rest">Herstel</option></select></div>
     </div>
     <div class="ff" id="sesSpelerRow" style="display:none"><label>Speler</label><select id="sesSpeler" style="width:100%"></select></div>
@@ -1855,10 +1855,7 @@ function renderTrainingMonth() {
         <button class="btn btnG sm" onclick="window.MONTH_OFFSET++;renderTraining()">&#9654;</button>
         <button class="btn btnG sm" onclick="window.MONTH_OFFSET=0;renderTraining()">Vandaag</button>
       </div>
-      <div style="display:flex;background:var(--bg);border:1px solid var(--brd);border-radius:7px;overflow:hidden">
-        <button onclick="window.TRAINING_VIEW='week';renderTraining()" style="padding:5px 12px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--t2);font-family:var(--f)">Week</button>
-        <button onclick="window.TRAINING_VIEW='month';renderTraining()" style="padding:5px 12px;font-size:12px;font-weight:700;border:none;cursor:pointer;background:var(--blue);color:#fff;font-family:var(--f)">Maand</button>
-      </div>
+
     </div>
     <div style="background:#fff;border:1px solid var(--brd);border-radius:10px;overflow:hidden">
       <div style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid var(--brd)">
@@ -1896,7 +1893,7 @@ function renderTrainingMonth() {
 function getWeekDatesFor(weekOffset) {
   const b = new Date(2025,6,7);
   b.setDate(b.getDate()+weekOffset*7);
-  return Array(6).fill(0).map((_,i)=>{const d=new Date(b);d.setDate(d.getDate()+i);return d;});
+  return Array(7).fill(0).map((_,i)=>{const d=new Date(b);d.setDate(d.getDate()+i);return d;});
 }
 
 function openAddSessionForDay(wk, di) {
@@ -1920,8 +1917,7 @@ function openAddSessionForMonth(year, month, day) {
   const wk = Math.floor(diffDays / 7);
   let di = diffDays % 7;
   if (di < 0) di += 7;
-  // Clamp to 0-5 (Ma-Za), skip Sunday (6)
-  if (di > 5) { notify('Zondag is geen trainingsdag'); return; }
+  if (di < 0 || di > 6) return; // Alleen geldige dag indices (0=Ma t/m 6=Zo)
   WEEK_OFFSET = wk;
   document.getElementById('sesDay').value = di;
   // Show date in modal title
